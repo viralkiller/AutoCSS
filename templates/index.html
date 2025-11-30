@@ -346,6 +346,9 @@
             font-weight: 700;
             letter-spacing: 1px;
             cursor: pointer; box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+
+            /* Add explicit font-size so JS match isn't jumping too much */
+            font-size: 14px;
         }
         .tile button:active { transform: translateY(4px); box-shadow: 0 4px 0 rgba(0,0,0,0.1); }
 
@@ -439,12 +442,47 @@
             min-height: 100vh;
             border: none;
             box-shadow: none;
-            resize: none;               /* Disable CSS resize handle */
+            resize: none;                /* Disable CSS resize handle */
         }
 
         /* Show Exit Button */
         body.view-live #exit-live-btn {
             display: block;
+        }
+
+        /* --- 7. HACKED FILE UPLOAD STYLES --- */
+        .file-upload-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: var(--q-16);
+            background-color: var(--text-main);
+            color: white;
+            text-align: center;
+            font-weight: 700;
+            letter-spacing: 1px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+            border-radius: var(--radius);
+            margin: 0;
+
+            /* Initial CSS baseline, will be overridden by JS if mismatch occurs */
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        .file-upload-label:active {
+            transform: translateY(4px);
+            box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+        }
+        .file-name-display {
+            font-size: 13px;
+            color: #888;
+            font-family: monospace;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
         }
     </style>
 </head>
@@ -484,8 +522,9 @@
                         </div>
                         <a class="nav-link active">Home</a>
                         <a class="nav-link">About</a>
-                        <a class="nav-link">Contact</a>
                         <a class="nav-link">Shop</a>
+                        <a class="nav-link">Contact</a>
+
                     </div>
                     <button class="hamburger-btn" onclick="toggleMenu()">
                         <span class="hamburger-icon"></span>
@@ -508,15 +547,25 @@
                 <div class="tile tile-std">
                     <h3>Welcome</h3>
                     <input type="text" placeholder="Username">
-                    <button>ENTER</button>
+                    <button id="refButton" class="btn-ref">ENTER</button>
                 </div>
 
                  <div class="tile tile-ghost"></div>
 
-                 <div class="tile tile-std" data-label="2-Cluster">
+                 <div class="tile tile-std">
                     <h3>Settings</h3>
                     <input type="range">
+                 </div>
+
+                 <div class="tile tile-std">
+                    <h3>Upload File</h3>
+                    <label id="matchLabel" class="file-upload-label btn-match">
+                        CHOOSE FILE
+                        <input type="file" id="fileInput" style="display:none;" onchange="document.getElementById('fileName').textContent = this.files[0] ? this.files[0].name : '...'">
+                    </label>
+                    <span id="fileName" class="file-name-display">...</span>
                 </div>
+
 
             </div>
         </div>
@@ -548,9 +597,34 @@
 
         function toggleLiveMode() {
             document.body.classList.toggle('view-live');
-            // When entering live mode, the browser width takes over.
-            // When exiting, the previous simulator state remains.
         }
+
+        // --- POST PAGE LOAD FONT SYNC SCRIPT ---
+        // Reads the computed style of the Reference Button (ENTER) and forces the Label to match.
+        function syncButtonStyles() {
+            const ref = document.getElementById('refButton');
+            const target = document.getElementById('matchLabel');
+
+            if(ref && target) {
+                const computed = window.getComputedStyle(ref);
+
+                // Copy key font metrics
+                target.style.fontSize = computed.fontSize;
+                target.style.fontFamily = computed.fontFamily;
+                target.style.fontWeight = computed.fontWeight;
+                target.style.lineHeight = computed.lineHeight;
+                target.style.letterSpacing = computed.letterSpacing;
+
+                // Copy Box Model Height to be safe
+                // (We exclude padding if we want to rely on flex centering,
+                // but setting explicit height ensures visual parity)
+                target.style.height = computed.height;
+            }
+        }
+
+        // Run on load and resize to catch any responsive changes
+        window.addEventListener('load', syncButtonStyles);
+        window.addEventListener('resize', syncButtonStyles);
 
         updateView(512);
     </script>
