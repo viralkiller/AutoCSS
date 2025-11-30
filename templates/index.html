@@ -116,12 +116,15 @@
             align-items: center;
             justify-content: space-between;
             padding: 0 var(--padding);
-            font-size: 14px;
+            font-size: 16px;
             letter-spacing: 0.48px;
         }
 
-        .meta-left { font-weight: 700; color: var(--accent); }
-        .meta-right { display: flex; gap: var(--q-16); align-items: center; }
+        .meta-left {font-weight: 400; color: var(--accent); }
+        .meta-left a {  text-decoration: none; cursor: pointer; }
+        .meta-left a:hover {  text-decoration: underline; }
+
+        .meta-right {font-weight: 600;  display: flex; gap: var(--q-16); align-items: center; }
         .meta-right a { color: #eee; text-decoration: none; cursor: pointer; }
         .meta-right a:hover { color: white; text-decoration: underline; }
 
@@ -152,7 +155,7 @@
             font-size: 16px;
             line-height: var(--q-48);
         }
-        .nav-link:hover, .nav-link.active { color: var(--text-main); }
+        .nav-link:hover, .nav-link.active { color: var(--text-main);text-decoration: underline; }
 
         /* Mobile Meta Group Container (Hidden on Desktop) */
         .mobile-meta-group { display: none; }
@@ -189,7 +192,7 @@
                 display: none;
                 flex-direction: column;
                 width: 100%;
-                padding-bottom: var(--q-16);
+
                 margin-top: var(--q-48);
                 border-top: none;
                 gap: 0;
@@ -227,6 +230,11 @@
             .nav-link:last-child {
                 border-bottom: none;
             }
+
+            /* [NEW] Remove light separator from the last meta item (Login) */
+.mobile-meta-group a:last-child {
+    border-bottom: none;
+}
 
             .nav-link:hover, .mobile-meta-group a:hover {
                 background-color: #fafafa;
@@ -570,7 +578,7 @@
                     <div class="nav-links">
 
                         <div class="mobile-meta-group">
-                            <a class="is-credits" >100 Credits</a>
+                            <a class="is-credits">100 Credits</a>
                             <a>Login</a>
 
                         </div>
