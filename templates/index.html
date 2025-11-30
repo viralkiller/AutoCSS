@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quantized CSS System</title>
+    <title>Demeza Quantized CSS System - Automatic CSS for Mobile and Desktop</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -333,7 +333,8 @@
             -webkit-appearance: none;
             height: 16px; width: 16px;
             background: var(--accent);
-            margin-top: -8px;
+            /* CALCULATION: (TrackHeight 4px - ThumbHeight 16px) / 2 = -6px */
+            margin-top: -6px;
             /* Square Thumb */
             border-radius: 0;
         }
