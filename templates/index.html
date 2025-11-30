@@ -21,8 +21,8 @@
             --text-main: #2EC4B6;
             --text-dark: #333;
             --nav-dark: #222;
-            --border-light: #f0f0f0;
-            --border-med: #ddd;
+            --border-light: #ebeff5;
+            --border-med: #a3adbf;
 
             /* Spacing Scale (Powers of 2 / Multiples of 8) */
             --q-4: 4px;
@@ -155,7 +155,16 @@
             font-size: 16px;
             line-height: var(--q-48);
         }
-        .nav-link:hover, .nav-link.active { color: var(--text-main);text-decoration: underline; }
+        .nav-link:hover{
+            text-decoration: underline;
+        }
+
+
+         .nav-link.active {
+             color: var(--text-main);
+             text-decoration: underline;
+
+         }
 
         /* Mobile Meta Group Container (Hidden on Desktop) */
         .mobile-meta-group { display: none; }
@@ -238,7 +247,8 @@
 
             .nav-link:hover, .mobile-meta-group a:hover {
                 background-color: #fafafa;
-                color: var(--text-main);
+
+                text-decoration: none;
             }
 
             .mobile-meta-group a.is-credits {
