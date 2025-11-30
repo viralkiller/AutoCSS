@@ -352,21 +352,77 @@
         }
         .tile button:active { transform: translateY(4px); box-shadow: 0 4px 0 rgba(0,0,0,0.1); }
 
-        /* Quantized Slider Track */
+        /* --- 5.1 ADVANCED SLIDER STYLES --- */
+        .slider-wrapper {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: var(--q-8);
+        }
+
+        .range-container {
+            position: relative;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+        }
+
+        .slider-label {
+            font-family: monospace;
+            font-size: 14px;
+            color: var(--text-dark);
+            font-weight: 700;
+        }
+
+        /* Value Bubble */
+        .slider-value {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            /* Start hidden and slightly lower */
+            transform: translateX(-50%) translateY(10px);
+            background: var(--accent);
+            color: white;
+            padding: 2px 8px;
+            font-size: 12px;
+            font-weight: bold;
+            font-family: monospace;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            border-radius: var(--radius);
+            border: 2px solid #333;
+            z-index: 10;
+        }
+
+        /* Active State for Bubble */
+        .slider-value.active {
+            opacity: 1;
+            /* Pop up animation */
+            transform: translateX(-50%) translateY(-14px);
+        }
+
+        /* Base Slider Track */
         input[type="range"] {
-            width: 80% !important; margin: 0 auto;
+            width: 100% !important; margin: 0;
             -webkit-appearance: none;
             background: transparent;
+            cursor: grab;
         }
+        input[type="range"]:active { cursor: grabbing; }
+
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
             height: 16px; width: 16px;
             background: var(--accent);
-            /* CALCULATION: (TrackHeight 4px - ThumbHeight 16px) / 2 = -6px */
             margin-top: -6px;
-            /* Square Thumb */
             border-radius: 0;
+            transition: transform 0.1s;
         }
+        input[type="range"]:active::-webkit-slider-thumb {
+            transform: scale(1.2);
+        }
+
         input[type="range"]::-webkit-slider-runnable-track {
             width: 100%; height: 4px; background: #ddd;
         }
@@ -382,23 +438,6 @@
         }
         .controls button:hover { background: #666; }
 
-        /* [UPDATED] Floating Label */
-        .debug-info {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-
-            background: rgba(0,0,0,0.8);
-            color: white;
-            padding: 4px 8px;
-            font-size: 12px;
-            border-radius: var(--radius);
-            pointer-events: none;
-            z-index: 200; /* Higher than header (100) */
-            font-family: monospace;
-            opacity:0.4;
-        }
 
         /* --- 6. LIVE VIEW TOGGLE OVERRIDES --- */
 
@@ -532,7 +571,7 @@
                 </nav>
             </div>
 
-            <div class="debug-info" id="viewModeLabel">Mobile View</div>
+
 
             <div class="tile-grid">
 
@@ -546,7 +585,7 @@
 
                 <div class="tile tile-std">
                     <h3>Join Mailing List</h3>
-                    <input type="text" placeholder="Your Email">
+                    <input type="text" placeholder="Enter your email">
                     <button id="refButton" class="btn-ref">SUBMIT</button>
                 </div>
 
@@ -554,7 +593,14 @@
 
                  <div class="tile tile-std">
                     <h3>Settings</h3>
-                    <input type="range">
+                    <div class="slider-wrapper">
+                        <span class="slider-label">0</span>
+                        <div class="range-container">
+                            <input type="range" id="advSlider" min="0" max="100" value="50">
+                            <div class="slider-value" id="sliderValue">50</div>
+                        </div>
+                        <span class="slider-label">100</span>
+                    </div>
                  </div>
 
                  <div class="tile tile-std">
@@ -575,13 +621,13 @@
         const slider = document.getElementById('widthSlider');
         const frame = document.getElementById('device-frame');
         const pxDisplay = document.getElementById('pxDisplay');
-        const label = document.getElementById('viewModeLabel');
+
 
         function updateView(width) {
             frame.style.width = width + 'px';
-            let mode = width >= 640 ? "DESKTOP (3-COL)" : "MOBILE (STACK)";
+
             pxDisplay.innerText = `${width}px`;
-            label.innerText = mode;
+
         }
 
         slider.addEventListener('input', (e) => { updateView(e.target.value); });
@@ -600,26 +646,59 @@
         }
 
         // --- POST PAGE LOAD FONT SYNC SCRIPT ---
-        // Reads the computed style of the Reference Button (ENTER) and forces the Label to match.
         function syncButtonStyles() {
             const ref = document.getElementById('refButton');
             const target = document.getElementById('matchLabel');
 
             if(ref && target) {
                 const computed = window.getComputedStyle(ref);
-
-                // Copy key font metrics
                 target.style.fontSize = computed.fontSize;
                 target.style.fontFamily = computed.fontFamily;
                 target.style.fontWeight = computed.fontWeight;
                 target.style.lineHeight = computed.lineHeight;
                 target.style.letterSpacing = computed.letterSpacing;
-
-                // Copy Box Model Height to be safe
-                // (We exclude padding if we want to rely on flex centering,
-                // but setting explicit height ensures visual parity)
                 target.style.height = computed.height;
             }
+        }
+
+        // --- ADVANCED SLIDER LOGIC ---
+        const advSlider = document.getElementById('advSlider');
+        const sliderValBubble = document.getElementById('sliderValue');
+
+        function updateSliderBubble(val) {
+             const min = advSlider.min ? advSlider.min : 0;
+             const max = advSlider.max ? advSlider.max : 100;
+             const percentage = ((val - min) * 100) / (max - min);
+
+             // Update text
+             sliderValBubble.textContent = val;
+
+             // Move Bubble: offset calculation centers it over thumb (16px wide)
+             // Formula: calc(Percent% + (8px - Percent * 0.15))
+             // This adjusts for the fact that 100% left is the edge, but the thumb center is inside.
+             const pixelOffset = 8 - (percentage * 0.15);
+             sliderValBubble.style.left = `calc(${percentage}% + ${pixelOffset}px)`;
+        }
+
+        if(advSlider && sliderValBubble) {
+            // Init
+            updateSliderBubble(advSlider.value);
+
+            advSlider.addEventListener('input', (e) => {
+                updateSliderBubble(e.target.value);
+                sliderValBubble.classList.add('active');
+                console.log(`[UI] Slider Drag: ${e.target.value}`);
+            });
+
+            // Cleanup Active State
+            const removeActive = () => {
+                sliderValBubble.classList.remove('active');
+                console.log(`[UI] Slider Set: ${advSlider.value}`);
+            }
+
+            advSlider.addEventListener('change', removeActive);
+            advSlider.addEventListener('mouseup', removeActive);
+            advSlider.addEventListener('touchend', removeActive);
         }
 
         // Run on load and resize to catch any responsive changes
