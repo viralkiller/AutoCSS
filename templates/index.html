@@ -329,14 +329,22 @@
         @container (min-width: 600px) { .tile-ghost { display: flex; } }
 
         /* UI Elements */
+
         .tile h3 { margin: 0; font-weight: 700; }
-        .tile input[type="text"] {
+        .tile input[type="text"], .tile textarea {
             width: 100%; padding: var(--q-16);
             border: 4px solid #ddd;
             /* Enforce Square */
             border-radius: var(--radius);
             background: #fafafa;
         }
+        /* Specific textarea styling to match inputs */
+        .tile textarea {
+            resize: none;
+            font-family: 'Nunito', sans-serif;
+            height: auto; /* Handled by Flexbox in JS */
+        }
+
         .tile button {
             width: 100%; padding: var(--q-16);
             background-color: var(--text-main); color: white;
@@ -612,100 +620,165 @@
                     <span id="fileName" class="file-name-display">...</span>
                 </div>
 
+                 <div class="tile tile-stretch">
+                    <h3>Paste text here</h3>
+                    <textarea></textarea>
+
+                </div>
+
 
             </div>
         </div>
     </div>
 
-    <script>
-        const slider = document.getElementById('widthSlider');
-        const frame = document.getElementById('device-frame');
-        const pxDisplay = document.getElementById('pxDisplay');
+<script>
+    /**
+     * ==========================================
+     * GROUP 1: SIMULATOR & VIEWPORT CONTROL
+     * ==========================================
+     */
+    const Simulator = {
+        slider: document.getElementById('widthSlider'),
+        frame: document.getElementById('device-frame'),
+        display: document.getElementById('pxDisplay'),
 
+        init() {
+            if (this.slider) {
+                this.slider.addEventListener('input', (e) => this.setWidth(e.target.value));
+            }
+            this.setWidth(512); // Default load width
+        },
 
-        function updateView(width) {
-            frame.style.width = width + 'px';
+        setWidth(width) {
+            this.frame.style.width = width + 'px';
+            this.display.innerText = `${width}px`;
+            this.slider.value = width; // Sync slider
+        },
 
-            pxDisplay.innerText = `${width}px`;
+        setMode(mode) {
+            const width = (mode === 'mobile') ? 512 : 1024;
+            this.setWidth(width);
+        },
 
-        }
-
-        slider.addEventListener('input', (e) => { updateView(e.target.value); });
-
-        function setMode(mode) {
-            if(mode === 'mobile') { slider.value = 512; updateView(512); }
-            else { slider.value = 1024; updateView(1024); }
-        }
-
-        function toggleMenu() {
-            document.getElementById('mainNav').classList.toggle('mobile-open');
-        }
-
-        function toggleLiveMode() {
+        toggleLive() {
             document.body.classList.toggle('view-live');
         }
+    };
 
-        // --- POST PAGE LOAD FONT SYNC SCRIPT ---
-        function syncButtonStyles() {
+    /**
+     * ==========================================
+     * GROUP 2: UI COMPONENTS & INTERACTION
+     * ==========================================
+     */
+    const UI = {
+        toggleMenu() {
+            const nav = document.getElementById('mainNav');
+            if (nav) nav.classList.toggle('mobile-open');
+        },
+
+        initSlider() {
+            const slider = document.getElementById('advSlider');
+            const bubble = document.getElementById('sliderValue');
+
+            if (slider && bubble) {
+                const updateBubble = (val) => {
+                    const min = slider.min || 0;
+                    const max = slider.max || 100;
+                    const percent = ((val - min) * 100) / (max - min);
+
+                    // Center bubble over 16px thumb
+                    const offset = 8 - (percent * 0.15);
+
+                    bubble.textContent = val;
+                    bubble.style.left = `calc(${percent}% + ${offset}px)`;
+                };
+
+                updateBubble(slider.value); // Init
+
+                slider.addEventListener('input', (e) => {
+                    updateBubble(e.target.value);
+                    bubble.classList.add('active');
+                    console.log(`[UI] Drag: ${e.target.value}`);
+                });
+
+                const hideBubble = () => bubble.classList.remove('active');
+
+                ['change', 'mouseup', 'touchend'].forEach(evt =>
+                    slider.addEventListener(evt, hideBubble)
+                );
+            }
+        }
+    };
+
+    /**
+     * ==========================================
+     * GROUP 3: LAYOUT ENGINE & PATCHES
+     * ==========================================
+     */
+    const Layout = {
+        // Match file upload button to standard button
+        syncButtonStyles() {
             const ref = document.getElementById('refButton');
             const target = document.getElementById('matchLabel');
 
-            if(ref && target) {
+            if (ref && target) {
                 const computed = window.getComputedStyle(ref);
-                target.style.fontSize = computed.fontSize;
-                target.style.fontFamily = computed.fontFamily;
-                target.style.fontWeight = computed.fontWeight;
-                target.style.lineHeight = computed.lineHeight;
-                target.style.letterSpacing = computed.letterSpacing;
-                target.style.height = computed.height;
+                ['fontSize', 'fontFamily', 'fontWeight', 'lineHeight', 'height']
+                    .forEach(prop => target.style[prop] = computed[prop]);
             }
-        }
+        },
 
-        // --- ADVANCED SLIDER LOGIC ---
-        const advSlider = document.getElementById('advSlider');
-        const sliderValBubble = document.getElementById('sliderValue');
+        // Force textarea tile to flex layout
+        optimizeTextarea() {
+            const txtArea = document.querySelector('.tile textarea');
+            if (!txtArea) return;
 
-        function updateSliderBubble(val) {
-             const min = advSlider.min ? advSlider.min : 0;
-             const max = advSlider.max ? advSlider.max : 100;
-             const percentage = ((val - min) * 100) / (max - min);
+            const tile = txtArea.closest('.tile');
+            const header = tile.querySelector('h3');
 
-             // Update text
-             sliderValBubble.textContent = val;
+            // Override Grid with Flex
+            tile.style.display = 'flex';
+            tile.style.flexDirection = 'column';
+            tile.style.alignItems = 'flex-start';
+            tile.style.textAlign = 'left';
 
-             // Move Bubble: offset calculation centers it over thumb (16px wide)
-             // Formula: calc(Percent% + (8px - Percent * 0.15))
-             // This adjusts for the fact that 100% left is the edge, but the thumb center is inside.
-             const pixelOffset = 8 - (percentage * 0.15);
-             sliderValBubble.style.left = `calc(${percentage}% + ${pixelOffset}px)`;
-        }
+            // Stretch input to fill space
+            txtArea.style.flexGrow = '1';
+            txtArea.style.width = '100%';
 
-        if(advSlider && sliderValBubble) {
-            // Init
-            updateSliderBubble(advSlider.value);
-
-            advSlider.addEventListener('input', (e) => {
-                updateSliderBubble(e.target.value);
-                sliderValBubble.classList.add('active');
-                console.log(`[UI] Slider Drag: ${e.target.value}`);
-            });
-
-            // Cleanup Active State
-            const removeActive = () => {
-                sliderValBubble.classList.remove('active');
-                console.log(`[UI] Slider Set: ${advSlider.value}`);
+            if (header) {
+                header.style.marginBottom = 'var(--q-16)';
+                header.style.width = '100%';
             }
+        },
 
-            advSlider.addEventListener('change', removeActive);
-            advSlider.addEventListener('mouseup', removeActive);
-            advSlider.addEventListener('touchend', removeActive);
+        refresh() {
+            this.syncButtonStyles();
+            this.optimizeTextarea();
         }
+    };
 
-        // Run on load and resize to catch any responsive changes
-        window.addEventListener('load', syncButtonStyles);
-        window.addEventListener('resize', syncButtonStyles);
+    /**
+     * ==========================================
+     * INIT & EXPORTS
+     * ==========================================
+     */
+    // Expose functions for HTML onclick attributes
+    window.setMode = (m) => Simulator.setMode(m);
+    window.toggleLiveMode = () => Simulator.toggleLive();
+    window.toggleMenu = () => UI.toggleMenu();
 
-        updateView(512);
-    </script>
+    // DOM Ready
+    window.addEventListener('load', () => {
+        Simulator.init();
+        UI.initSlider();
+        Layout.refresh();
+    });
+
+    // Resize Observer
+    window.addEventListener('resize', () => {
+        Layout.refresh();
+    });
+</script>
 </body>
 </html>
