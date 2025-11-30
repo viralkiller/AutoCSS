@@ -238,7 +238,7 @@
         }
 
 
-        /* --- 4. TILE GRID SYSTEM --- */
+/* --- 4. TILE GRID SYSTEM --- */
 
         .tile-grid {
             display: grid;
@@ -276,11 +276,39 @@
 
         .tile > :only-child { margin: auto; }
 
-        .tile:has(> :last-child:nth-child(2)) {
-            justify-content: center; gap: var(--q-16);
-        }
+        /* --- [UPDATED] 9-ROW GRID SYSTEM FOR 2 & 3 ITEMS --- */
 
+        /* 2 Items: Placed at Rows 4 and 6 */
+        .tile:has(> :last-child:nth-child(2)) {
+            display: grid;
+            grid-template-columns: 1fr;
+            grid-template-rows: repeat(9, 1fr); /* 9 Equal Rows */
+            gap: 0;
+            justify-items: center;
+            align-items: center;
+        }
+        .tile:has(> :last-child:nth-child(2)) > * { margin: 0; width: 100%; }
+        /* Grid rows are 1-based */
+        .tile:has(> :last-child:nth-child(2)) > :nth-child(1) { grid-row: 4; }
+        .tile:has(> :last-child:nth-child(2)) > :nth-child(2) { grid-row: 6; }
+
+
+        /* 3 Items: Placed at Rows 3, 5, and 7 */
         .tile:has(> :last-child:nth-child(3)) {
+            display: grid;
+            grid-template-columns: 1fr;
+            grid-template-rows: repeat(9, 1fr); /* 9 Equal Rows */
+            gap: 0;
+            justify-items: center;
+            align-items: center;
+        }
+        .tile:has(> :last-child:nth-child(3)) > * { margin: 0; width: 100%; }
+        .tile:has(> :last-child:nth-child(3)) > :nth-child(1) { grid-row: 3; }
+        .tile:has(> :last-child:nth-child(3)) > :nth-child(2) { grid-row: 5; }
+        .tile:has(> :last-child:nth-child(3)) > :nth-child(3) { grid-row: 7; }
+
+        /* 4+ Items: Evenly Spread Logic (Fallback for complex tiles) */
+        .tile:has(> :nth-child(4)) {
             justify-content: space-evenly;
             gap: 0;
         }
@@ -439,7 +467,7 @@
 
             <div class="header-group">
                 <div class="meta-bar">
-                    <div class="meta-left">100 Credits</div>
+                    <div class="meta-left"><a style="text-decoration:underline;">100 Credits</a></div>
                     <div class="meta-right">
                         <a>Login</a>
                         <a>Register</a>
@@ -450,7 +478,7 @@
                     <div class="nav-links">
 
                         <div class="mobile-meta-group">
-                            <a class="is-credits">100 Credits</a>
+                            <a class="is-credits" >100 Credits</a>
                             <a>Login</a>
                             <a>Register</a>
                         </div>
