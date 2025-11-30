@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantized CSS System</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- 1. QUANTIZED TOKENS --- */
+        :root {
+            /* Palette */
+            --bg-color: #f4f4f9;
+            --tile-bg: #ffffff;
+            --accent: #FF9F1C;
+            --text-main: #2EC4B6;
+            --text-dark: #333;
+            --nav-dark: #222;
+            --border-light: #f0f0f0;
+            --border-med: #ddd;
+
+            /* Spacing Scale (Powers of 2 / Multiples of 8) */
+            --q-4: 4px;
+            --q-8: 8px;
+            --q-16: 16px;
+            --q-24: 24px;
+            --q-32: 32px;
+            --q-48: 48px;
+
+            /* Mappings */
+            --gap: var(--q-16);
+            --padding: var(--q-16);
+
+            /* [2] Square Aesthetic enforced */
+            --radius: 0px;
+        }
+
+        /* Apply Nunito Globally */
+        * { margin:0; padding:0; box-sizing: border-box; font-family: 'Nunito', sans-serif; }
+
+        body {
+            background-color: #1a1a1a;
+            color: #eee;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* --- 2. SIMULATOR FRAME --- */
+        .simulator-wrapper {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            align-content: center;
+            padding-top: var(--q-24);
+        }
+
+        .controls {
+            margin-bottom: var(--q-16);
+            background: #333;
+            padding: var(--q-16);
+            /* Square corners */
+            border-radius: var(--radius);
+            display: flex;
+            gap: var(--q-16);
+            align-items: center;
+            flex-wrap: wrap;
+            border: 1px solid #444;
+        }
+
+        #device-frame {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            width: 512px;
+            min-height: 768px;
+            transition: width 0.256s ease;
+            position: relative;
+            overflow-y: auto;
+            overflow-x: hidden;
+            box-shadow: 0 0 48px rgba(0,0,0,0.48);
+            resize: horizontal;
+            container-type: inline-size;
+            /* Explicit square borders for frame */
+            border: 4px solid #111;
+        }
+
+        /* --- 3. HEADER GROUPS --- */
+
+        .header-group {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: var(--tile-bg);
+            border-bottom: 4px solid var(--accent);
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        /* ROW 1: Meta Bar (Desktop Only) */
+        .meta-bar {
+            height: 32px;
+            background-color: var(--nav-dark);
+            color: #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 var(--padding);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.48px;
+        }
+
+        .meta-left { font-weight: 700; color: var(--accent); }
+        .meta-right { display: flex; gap: var(--q-16); align-items: center; }
+        .meta-right a { color: #eee; text-decoration: none; cursor: pointer; }
+        .meta-right a:hover { color: white; text-decoration: underline; }
+
+        /* ROW 2: Nav Bar */
+        .nav-bar {
+            min-height: var(--q-48);
+            padding: 0 var(--padding);
+            background-color: var(--tile-bg);
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            position: relative;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: var(--q-24);
+            width: 100%;
+            align-items: center;
+        }
+
+        /* Base Desktop Styling for Links */
+        .nav-link {
+            font-weight: 600;
+            color: var(--text-dark);
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 14px;
+            line-height: var(--q-48);
+        }
+        .nav-link:hover, .nav-link.active { color: var(--text-main); }
+
+        /* Mobile Meta Group Container (Hidden on Desktop) */
+        .mobile-meta-group { display: none; }
+
+        .hamburger-btn {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: var(--q-8);
+            position: absolute;
+            top: 0;
+            right: var(--q-8);
+            height: var(--q-48);
+            z-index: 101;
+            /* Square focus ring style if needed, default is fine */
+        }
+        .hamburger-icon {
+            width: 24px; height: 4px; background: #333; position: relative; display: block;
+        }
+        .hamburger-icon::before, .hamburger-icon::after {
+            content: ''; position: absolute; left: 0; width: 24px; height: 4px; background: #333;
+        }
+        .hamburger-icon::before { top: -8px; }
+        .hamburger-icon::after { top: 8px; }
+
+        /* --- MOBILE LOGIC --- */
+        @container (max-width: 599px) {
+            /* Hide the Desktop Meta Bar */
+            .meta-bar { display: none; }
+
+            /* Re-orient Nav Links */
+            .nav-links {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                padding-bottom: var(--q-16);
+                margin-top: var(--q-48);
+                border-top: none;
+                gap: 0;
+                align-items: flex-start;
+            }
+
+            .hamburger-btn { display: flex; align-items: center; }
+            .nav-bar.mobile-open .nav-links { display: flex; }
+            .nav-bar.mobile-open { flex-wrap: wrap; }
+
+            /* Show Mobile Meta Group */
+            .mobile-meta-group {
+                display: flex;
+                flex-direction: column;
+                width: 100%;
+                border-bottom: 4px solid var(--border-med);
+            }
+
+            /* UNIFIED LINK STYLING */
+            .nav-link,
+            .mobile-meta-group a {
+                width: 100%;
+                padding: var(--q-16) var(--q-4);
+                border-bottom: 4px solid var(--border-light);
+                font-family: inherit;
+                font-size: 16px;
+                font-weight: 400;
+                color: var(--text-dark);
+                line-height: 1.2;
+                text-decoration: none;
+                cursor: pointer;
+                display: block;
+            }
+
+            .nav-link:last-child {
+                border-bottom: none;
+            }
+
+            .nav-link:hover, .mobile-meta-group a:hover {
+                background-color: #fafafa;
+                color: var(--text-main);
+            }
+
+            .mobile-meta-group a.is-credits {
+                color: var(--accent);
+                font-weight: 700;
+            }
+        }
+
+
+        /* --- 4. TILE GRID SYSTEM --- */
+
+        .tile-grid {
+            display: grid;
+            padding: var(--padding);
+            gap: var(--gap);
+            grid-template-columns: 1fr;
+            width: 100%;
+        }
+
+        @container (min-width: 600px) {
+            .tile-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        /* --- 5. TILE LOGIC --- */
+
+        .tile {
+            background-color: var(--tile-bg);
+            /* Enforce Square */
+            border-radius: var(--radius);
+            padding: var(--q-24);
+            border: 4px solid var(--accent);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            text-align: center;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            transition: all 0.256s ease;
+            position: relative;
+            gap: var(--q-4);
+        }
+
+        .tile-std { aspect-ratio: 1 / 1; }
+
+        .tile > :only-child { margin: auto; }
+
+        .tile:has(> :last-child:nth-child(2)) {
+            justify-content: center; gap: var(--q-16);
+        }
+
+        .tile:has(> :last-child:nth-child(3)) {
+            justify-content: space-evenly;
+            gap: 0;
+        }
+
+        .tile-stretch { aspect-ratio: 1 / 1; border-color: var(--text-main); }
+        @container (min-width: 600px) {
+            .tile-stretch { grid-column: 1 / -1; aspect-ratio: 3 / 1; }
+        }
+        .tile-stretch img { height: 100%; width: auto; object-fit: contain; }
+
+        .tile-ghost {
+            display: none;
+            border: 4px dashed #ccc;
+            background: transparent;
+            opacity: 0.256;
+            aspect-ratio: 1 / 1;
+        }
+        @container (min-width: 600px) { .tile-ghost { display: flex; } }
+
+        /* UI Elements */
+        .tile h3 { margin: 0; font-weight: 700; }
+        .tile input[type="text"] {
+            width: 100%; padding: var(--q-16);
+            border: 4px solid #ddd;
+            /* Enforce Square */
+            border-radius: var(--radius);
+            background: #fafafa;
+        }
+        .tile button {
+            width: 100%; padding: var(--q-16);
+            background-color: var(--text-main); color: white;
+            border: none;
+            /* Enforce Square */
+            border-radius: var(--radius);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer; box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+        }
+        .tile button:active { transform: translateY(4px); box-shadow: 0 4px 0 rgba(0,0,0,0.1); }
+
+        /* Quantized Slider Track */
+        input[type="range"] {
+            width: 80% !important; margin: 0 auto;
+            -webkit-appearance: none;
+            background: transparent;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px; width: 16px;
+            background: var(--accent);
+            margin-top: -8px;
+            /* Square Thumb */
+            border-radius: 0;
+        }
+        input[type="range"]::-webkit-slider-runnable-track {
+            width: 100%; height: 4px; background: #ddd;
+        }
+
+        /* Simulator UI Controls Buttons */
+        .controls button {
+            border: none;
+            background: #555;
+            color: white;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-family: monospace;
+            text-transform: uppercase;
+        }
+        .controls button:hover { background: #666; }
+
+        .debug-info {
+            position: absolute; top: 128px; right: var(--q-16);
+            background: rgba(0,0,0,0.8); color: white; padding: 4px 8px;
+            font-size: 12px;
+            border-radius: var(--radius); /* Square */
+            pointer-events: none; z-index: 10;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="simulator-wrapper">
+        <div class="controls">
+            <span style="color:white; font-size: 12px; font-weight: 512;">DEVICE WIDTH:</span>
+            <input type="range" id="widthSlider" min="320" max="1280" value="400" style="width: 200px !important;">
+            <span id="pxDisplay" style="color:white; font-family: monospace; font-size: 12px;">400px</span>
+            <button onclick="setMode('mobile')" style="padding: 5px 15px;">Mobile</button>
+            <button onclick="setMode('desktop')" style="padding: 5px 15px;">Desktop</button>
+        </div>
+
+        <div id="device-frame">
+
+            <div class="header-group">
+                <div class="meta-bar">
+                    <div class="meta-left">100 Credits</div>
+                    <div class="meta-right">
+                        <a>Login</a>
+                        <a>Register</a>
+                    </div>
+                </div>
+
+                <nav class="nav-bar" id="mainNav">
+                    <div class="nav-links">
+
+                        <div class="mobile-meta-group">
+                            <a class="is-credits">100 Credits</a>
+                            <a>Login</a>
+                            <a>Register</a>
+                        </div>
+                        <a class="nav-link active">Home</a>
+                        <a class="nav-link">About</a>
+                        <a class="nav-link">Contact</a>
+                        <a class="nav-link">Shop</a>
+                    </div>
+                    <button class="hamburger-btn" onclick="toggleMenu()">
+                        <span class="hamburger-icon"></span>
+                    </button>
+                </nav>
+            </div>
+
+            <div class="debug-info" id="viewModeLabel">Mobile View</div>
+
+            <div class="tile-grid">
+
+                <div class="tile tile-stretch">
+                    <div style="height:100%; display:flex; align-items:center;">
+                         <h1 style="margin:0; color: var(--text-main); font-weight: 768; letter-spacing: -2px;">LOGO</h1>
+                    </div>
+                </div>
+
+                <div class="tile tile-ghost"></div>
+
+                <div class="tile tile-std">
+                    <h3>WELCOME</h3>
+                    <input type="text" placeholder="Username">
+                    <button>ENTER</button>
+                </div>
+
+                 <div class="tile tile-ghost"></div>
+
+                 <div class="tile tile-std" data-label="2-Cluster">
+                    <h3>SETTINGS</h3>
+                    <input type="range">
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const slider = document.getElementById('widthSlider');
+        const frame = document.getElementById('device-frame');
+        const pxDisplay = document.getElementById('pxDisplay');
+        const label = document.getElementById('viewModeLabel');
+
+        function updateView(width) {
+            frame.style.width = width + 'px';
+            let mode = width >= 640 ? "DESKTOP (3-COL)" : "MOBILE (STACK)";
+            pxDisplay.innerText = `${width}px`;
+            label.innerText = mode;
+        }
+
+        slider.addEventListener('input', (e) => { updateView(e.target.value); });
+
+        function setMode(mode) {
+            if(mode === 'mobile') { slider.value = 512; updateView(512); }
+            else { slider.value = 1024; updateView(1024); }
+        }
+
+        function toggleMenu() {
+            document.getElementById('mainNav').classList.toggle('mobile-open');
+        }
+
+        updateView(512);
+    </script>
+</body>
+</html>
