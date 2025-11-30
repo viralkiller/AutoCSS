@@ -362,9 +362,63 @@
             pointer-events: none; z-index: 10;
             font-family: monospace;
         }
+
+        /* --- 6. LIVE VIEW TOGGLE OVERRIDES --- */
+
+        /* Style for the floating exit button */
+        #exit-live-btn {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            padding: 12px 24px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            border-radius: var(--radius);
+        }
+
+        /* When Body has 'view-live' class... */
+        body.view-live {
+            background-color: var(--bg-color); /* Match internal bg */
+            display: block; /* Reset flex center */
+        }
+
+        /* Hide Simulator UI and Wrapper constraints */
+        body.view-live .controls { display: none; }
+
+        body.view-live .simulator-wrapper {
+            padding: 0;
+            max-width: none;
+            width: 100%;
+            display: block;
+        }
+
+        /* Force Device Frame to be full Browser Window */
+        body.view-live #device-frame {
+            width: 100% !important;     /* Override inline JS width */
+            height: auto;
+            min-height: 100vh;
+            border: none;
+            box-shadow: none;
+            resize: none;               /* Disable CSS resize handle */
+        }
+
+        /* Show Exit Button */
+        body.view-live #exit-live-btn {
+            display: block;
+        }
     </style>
 </head>
 <body>
+
+    <button id="exit-live-btn" onclick="toggleLiveMode()">
+        EXIT LIVE VIEW
+    </button>
 
     <div class="simulator-wrapper">
         <div class="controls">
@@ -373,6 +427,10 @@
             <span id="pxDisplay" style="color:white; font-family: monospace; font-size: 12px;">400px</span>
             <button onclick="setMode('mobile')" style="padding: 5px 15px;">Mobile</button>
             <button onclick="setMode('desktop')" style="padding: 5px 15px;">Desktop</button>
+
+            <button onclick="toggleLiveMode()" style="background: var(--text-main); margin-left: auto;">
+                🔴 Live View
+            </button>
         </div>
 
         <div id="device-frame">
@@ -456,6 +514,13 @@
 
         function toggleMenu() {
             document.getElementById('mainNav').classList.toggle('mobile-open');
+        }
+
+        /* [NEW] Live Mode Toggle */
+        function toggleLiveMode() {
+            document.body.classList.toggle('view-live');
+            // When entering live mode, the browser width takes over.
+            // When exiting, the previous simulator state remains.
         }
 
         updateView(512);
