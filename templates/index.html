@@ -114,8 +114,8 @@
             align-items: center;
             justify-content: space-between;
             padding: 0 var(--padding);
-            font-size: 12px;
-            text-transform: uppercase;
+            font-size: 14px;
+            /* [REMOVED] text-transform: uppercase; */
             letter-spacing: 0.48px;
         }
 
@@ -317,7 +317,7 @@
             /* Enforce Square */
             border-radius: var(--radius);
             font-weight: 700;
-            text-transform: uppercase;
+            /* [REMOVED] text-transform: uppercase; */
             letter-spacing: 1px;
             cursor: pointer; box-shadow: 0 4px 0 rgba(0,0,0,0.1);
         }
@@ -350,7 +350,7 @@
             border-radius: var(--radius);
             cursor: pointer;
             font-family: monospace;
-            text-transform: uppercase;
+            /* [REMOVED] text-transform: uppercase; */
         }
         .controls button:hover { background: #666; }
 
@@ -428,9 +428,7 @@
             <button onclick="setMode('mobile')" style="padding: 5px 15px;">Mobile</button>
             <button onclick="setMode('desktop')" style="padding: 5px 15px;">Desktop</button>
 
-            <button onclick="toggleLiveMode()" style="background: var(--text-main); margin-left: auto;">
-                🔴 Live View
-            </button>
+            <button onclick="toggleLiveMode()" style="background: var(--text-main); margin-left: auto; padding: 5px 15px;">Live View</button>
         </div>
 
         <div id="device-frame">
@@ -516,7 +514,6 @@
             document.getElementById('mainNav').classList.toggle('mobile-open');
         }
 
-        /* [NEW] Live Mode Toggle */
         function toggleLiveMode() {
             document.body.classList.toggle('view-live');
             // When entering live mode, the browser width takes over.
