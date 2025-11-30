@@ -9,6 +9,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/UAParser.js/1.0.35/ua-parser.min.js"></script>
+
     <style>
         /* --- 1. QUANTIZED TOKENS --- */
         :root {
@@ -497,6 +499,11 @@
             display: block;
         }
 
+        /* [NEW] Override for Actual Mobile Devices detected by JS */
+        body.is-native-mobile #exit-live-btn {
+            display: none !important;
+        }
+
         /* --- 7. HACKED FILE UPLOAD STYLES --- */
         .file-upload-label {
             display: flex;
@@ -773,6 +780,22 @@
         Simulator.init();
         UI.initSlider();
         Layout.refresh();
+
+        // [NEW] DEVICE DETECTION LOGIC using UAParser
+        if (typeof UAParser !== 'undefined') {
+            var parser = new UAParser();
+            var result = parser.getResult();
+            var deviceType = result.device.type; // 'mobile', 'tablet', 'console', etc.
+
+            // If actual mobile device, force Live Mode and hide Exit Button
+            if (deviceType === 'mobile' || deviceType === 'tablet') {
+                console.log("[Device] Mobile detected. Forcing Live View.");
+                document.body.classList.add('is-native-mobile');
+                Simulator.toggleLive();
+            } else {
+                console.log("[Device] Desktop detected. Using Simulator.");
+            }
+        }
     });
 
     // Resize Observer
