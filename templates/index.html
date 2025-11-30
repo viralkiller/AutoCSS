@@ -115,7 +115,6 @@
             justify-content: space-between;
             padding: 0 var(--padding);
             font-size: 14px;
-            /* [REMOVED] text-transform: uppercase; */
             letter-spacing: 0.48px;
         }
 
@@ -317,7 +316,6 @@
             /* Enforce Square */
             border-radius: var(--radius);
             font-weight: 700;
-            /* [REMOVED] text-transform: uppercase; */
             letter-spacing: 1px;
             cursor: pointer; box-shadow: 0 4px 0 rgba(0,0,0,0.1);
         }
@@ -350,17 +348,25 @@
             border-radius: var(--radius);
             cursor: pointer;
             font-family: monospace;
-            /* [REMOVED] text-transform: uppercase; */
         }
         .controls button:hover { background: #666; }
 
+        /* [UPDATED] Floating Label */
         .debug-info {
-            position: absolute; top: 128px; right: var(--q-16);
-            background: rgba(0,0,0,0.8); color: white; padding: 4px 8px;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 4px 8px;
             font-size: 12px;
-            border-radius: var(--radius); /* Square */
-            pointer-events: none; z-index: 10;
+            border-radius: var(--radius);
+            pointer-events: none;
+            z-index: 200; /* Higher than header (100) */
             font-family: monospace;
+            opacity:0.4;
         }
 
         /* --- 6. LIVE VIEW TOGGLE OVERRIDES --- */
@@ -416,19 +422,17 @@
 </head>
 <body>
 
-    <button id="exit-live-btn" onclick="toggleLiveMode()">
-        EXIT LIVE VIEW
-    </button>
+    <button id="exit-live-btn" onclick="toggleLiveMode()">EXIT LIVE VIEW</button>
 
     <div class="simulator-wrapper">
         <div class="controls">
             <span style="color:white; font-size: 12px; font-weight: 512;">DEVICE WIDTH:</span>
             <input type="range" id="widthSlider" min="320" max="1280" value="400" style="width: 200px !important;">
             <span id="pxDisplay" style="color:white; font-family: monospace; font-size: 12px;">400px</span>
-            <button onclick="setMode('mobile')" style="padding: 5px 15px;">Mobile</button>
-            <button onclick="setMode('desktop')" style="padding: 5px 15px;">Desktop</button>
+            <button onclick="setMode('mobile')" style="padding: 5px 15px;">MOBILE</button>
+            <button onclick="setMode('desktop')" style="padding: 5px 15px;">DESKTOP</button>
 
-            <button onclick="toggleLiveMode()" style="background: var(--text-main); margin-left: auto; padding: 5px 15px;">Live View</button>
+            <button onclick="toggleLiveMode()" style="background: var(--text-main); margin-left: auto; padding: 5px 15px;">LIVE VIEW</button>
         </div>
 
         <div id="device-frame">
@@ -474,7 +478,7 @@
                 <div class="tile tile-ghost"></div>
 
                 <div class="tile tile-std">
-                    <h3>WELCOME</h3>
+                    <h3>Welcome</h3>
                     <input type="text" placeholder="Username">
                     <button>ENTER</button>
                 </div>
@@ -482,7 +486,7 @@
                  <div class="tile tile-ghost"></div>
 
                  <div class="tile tile-std" data-label="2-Cluster">
-                    <h3>SETTINGS</h3>
+                    <h3>Settings</h3>
                     <input type="range">
                 </div>
 
