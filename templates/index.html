@@ -191,7 +191,7 @@
         .hamburger-icon::before { top: -8px; }
         .hamburger-icon::after { top: 8px; }
 
-        /* --- MOBILE LOGIC --- */
+/* --- MOBILE LOGIC --- */
         @container (max-width: 599px) {
             /* Hide the Desktop Meta Bar */
             .meta-bar { display: none; }
@@ -241,13 +241,21 @@
             }
 
             /* [NEW] Remove light separator from the last meta item (Login) */
-.mobile-meta-group a:last-child {
-    border-bottom: none;
-}
+            .mobile-meta-group a:last-child {
+                border-bottom: none;
+            }
 
             .nav-link:hover, .mobile-meta-group a:hover {
                 background-color: #fafafa;
+                text-decoration: none;
+            }
 
+            /* [FIX] Explicitly remove underline for active state in mobile */
+            .nav-link.active {
+                text-decoration: none;
+            }
+
+            .nav-link:active {
                 text-decoration: none;
             }
 
