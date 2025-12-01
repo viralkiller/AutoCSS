@@ -274,6 +274,8 @@
             gap: var(--gap);
             grid-template-columns: 1fr;
             width: 100%;
+            /* [NEW] Relative positioning for absolute arrows */
+            position: relative;
         }
 
         @container (min-width: 600px) {
@@ -564,6 +566,28 @@
             text-overflow: ellipsis;
             max-width: 100%;
         }
+
+        /* --- 8. FLOATING ARROWS --- */
+        .floating-arrow {
+            position: absolute;
+            width: 48px;
+            height: 48px;
+            pointer-events: none;
+            z-index: 50;
+            color: var(--accent);
+            /* Centering transform handled by JS */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+            transition: top 0.2s ease, left 0.2s ease, transform 0.2s ease;
+        }
+        .floating-arrow svg {
+            width: 100%;
+            height: 100%;
+            fill: currentColor;
+        }
+
     </style>
 </head>
 <body>
@@ -614,7 +638,7 @@
 
 
 
-            <div class="tile-grid">
+            <div class="tile-grid" id="mainGrid">
 
                 <div class="tile tile-stretch">
                     <div style="height:100%; display:flex; align-items:center;">
@@ -672,21 +696,15 @@
                     <textarea></textarea>
                 </div>
 
-                <!-- Tiles with arrows -->
-                <div class="tile tile-std">
+                <div class="tile tile-std" id="step1">
                     <h3>Your file is ready!</h3>
                 </div>
 
-                <!-- arrow will go here in between the padding > for desktop and v for mobile (pointing right or down) -->
-
-                <div class="tile tile-std">
+                <div class="tile tile-std" id="step2">
                     <button id="viewButton" class="btn-ref">View File</button>
                 </div>
 
-                <!-- arrow will go here in between the padding > for desktop and v for mobile (pointing right or down) -->
-
-                <div class="tile tile-std">
-
+                <div class="tile tile-std" id="step3">
                     <button id="againButton" class="btn-ref">Generate Another</button>
                 </div>
 
@@ -716,6 +734,11 @@
             this.frame.style.width = width + 'px';
             this.display.innerText = `${width}px`;
             this.slider.value = width; // Sync slider
+
+            // [Fix] Force arrow update immediately when slider moves
+            if (typeof ArrowSystem !== 'undefined') {
+                ArrowSystem.update();
+            }
         },
 
         setMode(mode) {
@@ -725,6 +748,8 @@
 
         toggleLive() {
             document.body.classList.toggle('view-live');
+            // [Fix] Update arrows after layout shift
+            setTimeout(() => ArrowSystem.update(), 50);
         }
     };
 
@@ -739,11 +764,8 @@
             if (nav) nav.classList.toggle('mobile-open');
         },
 
-        // Generalized Slider Init for all .range-container inputs
         initSliders() {
-            // Find all range containers
             const containers = document.querySelectorAll('.range-container');
-
             containers.forEach(container => {
                 const slider = container.querySelector('input[type="range"]');
                 const bubble = container.querySelector('.slider-value');
@@ -753,23 +775,16 @@
                         const min = parseFloat(slider.min) || 0;
                         const max = parseFloat(slider.max) || 100;
                         const percent = ((val - min) * 100) / (max - min);
-
-                        // Center bubble over 16px thumb
                         const offset = 8 - (percent * 0.15);
-
                         bubble.textContent = val;
                         bubble.style.left = `calc(${percent}% + ${offset}px)`;
                     };
-
-                    updateBubble(slider.value); // Init
-
+                    updateBubble(slider.value);
                     slider.addEventListener('input', (e) => {
                         updateBubble(e.target.value);
                         bubble.classList.add('active');
                     });
-
                     const hideBubble = () => bubble.classList.remove('active');
-
                     ['change', 'mouseup', 'touchend'].forEach(evt =>
                         slider.addEventListener(evt, hideBubble)
                     );
@@ -777,24 +792,18 @@
             });
         },
 
-        // Specific Logic for the Settings 2 Image Snap
         initSnapSlider() {
             const snapSlider = document.getElementById('snapSlider');
             const snapImage = document.getElementById('snapImage');
-
-            // Image URLs for 0, 1, 2
             const images = {
-                '0': 'https://placehold.co/64x64/2EC4B6/ffffff?text=0', // Teal
-                '1': 'https://placehold.co/64x64/FF9F1C/ffffff?text=1', // Orange
-                '2': 'https://placehold.co/64x64/333333/ffffff?text=2'  // Dark
+                '0': 'https://placehold.co/64x64/2EC4B6/ffffff?text=0',
+                '1': 'https://placehold.co/64x64/FF9F1C/ffffff?text=1',
+                '2': 'https://placehold.co/64x64/333333/ffffff?text=2'
             };
-
             if (snapSlider && snapImage) {
                 snapSlider.addEventListener('input', (e) => {
                     const val = e.target.value;
-                    if (images[val]) {
-                        snapImage.src = images[val];
-                    }
+                    if (images[val]) snapImage.src = images[val];
                 });
             }
         }
@@ -802,46 +811,35 @@
 
     /**
      * ==========================================
-     * GROUP 3: LAYOUT ENGINE & PATCHES
+     * GROUP 3: LAYOUT ENGINE
      * ==========================================
      */
     const Layout = {
-        // Match file upload button to standard button
         syncButtonStyles() {
             const ref = document.getElementById('refButton');
             const target = document.getElementById('matchLabel');
-
             if (ref && target) {
                 const computed = window.getComputedStyle(ref);
                 ['fontSize', 'fontFamily', 'fontWeight', 'lineHeight', 'height']
                     .forEach(prop => target.style[prop] = computed[prop]);
             }
         },
-
-        // Force textarea tile to flex layout
         optimizeTextarea() {
             const txtArea = document.querySelector('.tile textarea');
             if (!txtArea) return;
-
             const tile = txtArea.closest('.tile');
             const header = tile.querySelector('h3');
-
-            // Override Grid with Flex
             tile.style.display = 'flex';
             tile.style.flexDirection = 'column';
             tile.style.alignItems = 'flex-start';
             tile.style.textAlign = 'left';
-
-            // Stretch input to fill space
             txtArea.style.flexGrow = '1';
             txtArea.style.width = '100%';
-
             if (header) {
                 header.style.marginBottom = 'var(--q-16)';
                 header.style.width = '100%';
             }
         },
-
         refresh() {
             this.syncButtonStyles();
             this.optimizeTextarea();
@@ -850,41 +848,129 @@
 
     /**
      * ==========================================
+     * GROUP 4: ARROW SYSTEM (FIXED)
+     * ==========================================
+     */
+    const ArrowSystem = {
+        grid: document.getElementById('mainGrid'),
+        arrows: [],
+
+        init() {
+            if (!this.grid) return;
+
+            const connections = [
+                { from: 'step1', to: 'step2' },
+                { from: 'step2', to: 'step3' }
+            ];
+
+            const arrowSVG = `
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 4 L12 20 M12 20 L5 13 M12 20 L19 13" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            `;
+
+            connections.forEach(conn => {
+                const elFrom = document.getElementById(conn.from);
+                const elTo = document.getElementById(conn.to);
+
+                if (elFrom && elTo) {
+                    const arrowEl = document.createElement('div');
+                    arrowEl.className = 'floating-arrow';
+                    arrowEl.innerHTML = arrowSVG;
+                    // Ensure grid is relative so absolute positioning works inside it
+                    this.grid.style.position = 'relative';
+                    this.grid.appendChild(arrowEl);
+
+                    this.arrows.push({
+                        element: arrowEl,
+                        from: elFrom,
+                        to: elTo
+                    });
+                }
+            });
+
+            // [CRITICAL FIX]: Use ResizeObserver to watch the GRID, not just the window.
+            // This detects when the slider changes the grid width.
+            const resizeObserver = new ResizeObserver(() => {
+                this.update();
+            });
+            resizeObserver.observe(this.grid);
+
+            // Initial calculation
+            setTimeout(() => this.update(), 100);
+        },
+
+        update() {
+            if (!this.grid) return;
+            const gridRect = this.grid.getBoundingClientRect();
+
+            this.arrows.forEach(arrow => {
+                const r1 = arrow.from.getBoundingClientRect();
+                const r2 = arrow.to.getBoundingClientRect();
+
+                // Calculate Centers
+                const c1 = { x: r1.left + r1.width/2, y: r1.top + r1.height/2 };
+
+                // Determine Orientation:
+                // If r2 is logically "below" r1, we are in vertical mode.
+                // We use a threshold of 10px to account for sub-pixel rendering.
+                const isVertical = (r2.top > (r1.bottom - 10));
+
+                let x, y, rotation;
+
+                if (isVertical) {
+                    // Vertical Stack: Arrow between bottom of 1 and top of 2
+                    x = c1.x;
+                    y = (r1.bottom + r2.top) / 2;
+                    rotation = 0; // Point Down
+                } else {
+                    // Horizontal Row: Arrow between right of 1 and left of 2
+                    x = (r1.right + r2.left) / 2;
+                    y = c1.y;
+                    rotation = -90; // Point Right
+                }
+
+                // Convert to relative coordinates inside the grid
+                const finalLeft = x - gridRect.left;
+                const finalTop = y - gridRect.top;
+
+                arrow.element.style.left = `${finalLeft - 24}px`; // -24 to center 48px icon
+                arrow.element.style.top = `${finalTop - 24}px`;
+                arrow.element.style.transform = `rotate(${rotation}deg)`;
+            });
+        }
+    };
+
+    /**
+     * ==========================================
      * INIT & EXPORTS
      * ==========================================
      */
-    // Expose functions for HTML onclick attributes
     window.setMode = (m) => Simulator.setMode(m);
     window.toggleLiveMode = () => Simulator.toggleLive();
     window.toggleMenu = () => UI.toggleMenu();
 
-    // DOM Ready
     window.addEventListener('load', () => {
         Simulator.init();
-        UI.initSliders();     // Changed from initSlider to general initSliders
-        UI.initSnapSlider();  // New logic for Settings 2
+        UI.initSliders();
+        UI.initSnapSlider();
         Layout.refresh();
+        ArrowSystem.init();
 
-        // [NEW] DEVICE DETECTION LOGIC using UAParser
         if (typeof UAParser !== 'undefined') {
             var parser = new UAParser();
             var result = parser.getResult();
-            var deviceType = result.device.type; // 'mobile', 'tablet', 'console', etc.
-
-            // If actual mobile device, force Live Mode and hide Exit Button
-            if (deviceType === 'mobile' || deviceType === 'tablet') {
-                console.log("[Device] Mobile detected. Forcing Live View.");
+            if (result.device.type === 'mobile' || result.device.type === 'tablet') {
+                console.log("[Device] Mobile detected.");
                 document.body.classList.add('is-native-mobile');
                 Simulator.toggleLive();
-            } else {
-                console.log("[Device] Desktop detected. Using Simulator.");
             }
         }
     });
 
-    // Resize Observer
     window.addEventListener('resize', () => {
         Layout.refresh();
+        ArrowSystem.update();
     });
 </script>
 </body>
