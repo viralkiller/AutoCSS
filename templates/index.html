@@ -633,7 +633,7 @@
                  <div class="tile tile-ghost"></div>
 
                  <div class="tile tile-std">
-                    <h3>Settings</h3>
+                    <h3>Settings Smooth</h3>
                     <div class="slider-wrapper">
                         <span class="slider-label">0</span>
                         <div class="range-container">
@@ -653,12 +653,42 @@
                     <span id="fileName" class="file-name-display">...</span>
                 </div>
 
+
+                <div class="tile tile-std">
+                    <h3>Settings Snap + Image</h3>
+                    <img id="snapImage" src="https://placehold.co/64x64/2EC4B6/ffffff?text=0" style="width:64px; height:64px; border-radius: 0; object-fit:cover;">
+                    <div class="slider-wrapper">
+                        <span class="slider-label">0</span>
+                        <div class="range-container">
+                            <input type="range" id="snapSlider" min="0" max="2" step="1" value="0">
+                            <div class="slider-value">0</div>
+                        </div>
+                        <span class="slider-label">2</span>
+                    </div>
+                 </div>
+
                  <div class="tile tile-stretch">
                     <h3>Paste text here</h3>
                     <textarea></textarea>
-
                 </div>
 
+                <!-- Tiles with arrows -->
+                <div class="tile tile-std">
+                    <h3>Your file is ready!</h3>
+                </div>
+
+                <!-- arrow will go here in between the padding > for desktop and v for mobile (pointing right or down) -->
+
+                <div class="tile tile-std">
+                    <button id="viewButton" class="btn-ref">View File</button>
+                </div>
+
+                <!-- arrow will go here in between the padding > for desktop and v for mobile (pointing right or down) -->
+
+                <div class="tile tile-std">
+
+                    <button id="againButton" class="btn-ref">Generate Another</button>
+                </div>
 
             </div>
         </div>
@@ -709,36 +739,63 @@
             if (nav) nav.classList.toggle('mobile-open');
         },
 
-        initSlider() {
-            const slider = document.getElementById('advSlider');
-            const bubble = document.getElementById('sliderValue');
+        // Generalized Slider Init for all .range-container inputs
+        initSliders() {
+            // Find all range containers
+            const containers = document.querySelectorAll('.range-container');
 
-            if (slider && bubble) {
-                const updateBubble = (val) => {
-                    const min = slider.min || 0;
-                    const max = slider.max || 100;
-                    const percent = ((val - min) * 100) / (max - min);
+            containers.forEach(container => {
+                const slider = container.querySelector('input[type="range"]');
+                const bubble = container.querySelector('.slider-value');
 
-                    // Center bubble over 16px thumb
-                    const offset = 8 - (percent * 0.15);
+                if (slider && bubble) {
+                    const updateBubble = (val) => {
+                        const min = parseFloat(slider.min) || 0;
+                        const max = parseFloat(slider.max) || 100;
+                        const percent = ((val - min) * 100) / (max - min);
 
-                    bubble.textContent = val;
-                    bubble.style.left = `calc(${percent}% + ${offset}px)`;
-                };
+                        // Center bubble over 16px thumb
+                        const offset = 8 - (percent * 0.15);
 
-                updateBubble(slider.value); // Init
+                        bubble.textContent = val;
+                        bubble.style.left = `calc(${percent}% + ${offset}px)`;
+                    };
 
-                slider.addEventListener('input', (e) => {
-                    updateBubble(e.target.value);
-                    bubble.classList.add('active');
-                    console.log(`[UI] Drag: ${e.target.value}`);
+                    updateBubble(slider.value); // Init
+
+                    slider.addEventListener('input', (e) => {
+                        updateBubble(e.target.value);
+                        bubble.classList.add('active');
+                    });
+
+                    const hideBubble = () => bubble.classList.remove('active');
+
+                    ['change', 'mouseup', 'touchend'].forEach(evt =>
+                        slider.addEventListener(evt, hideBubble)
+                    );
+                }
+            });
+        },
+
+        // Specific Logic for the Settings 2 Image Snap
+        initSnapSlider() {
+            const snapSlider = document.getElementById('snapSlider');
+            const snapImage = document.getElementById('snapImage');
+
+            // Image URLs for 0, 1, 2
+            const images = {
+                '0': 'https://placehold.co/64x64/2EC4B6/ffffff?text=0', // Teal
+                '1': 'https://placehold.co/64x64/FF9F1C/ffffff?text=1', // Orange
+                '2': 'https://placehold.co/64x64/333333/ffffff?text=2'  // Dark
+            };
+
+            if (snapSlider && snapImage) {
+                snapSlider.addEventListener('input', (e) => {
+                    const val = e.target.value;
+                    if (images[val]) {
+                        snapImage.src = images[val];
+                    }
                 });
-
-                const hideBubble = () => bubble.classList.remove('active');
-
-                ['change', 'mouseup', 'touchend'].forEach(evt =>
-                    slider.addEventListener(evt, hideBubble)
-                );
             }
         }
     };
@@ -804,7 +861,8 @@
     // DOM Ready
     window.addEventListener('load', () => {
         Simulator.init();
-        UI.initSlider();
+        UI.initSliders();     // Changed from initSlider to general initSliders
+        UI.initSnapSlider();  // New logic for Settings 2
         Layout.refresh();
 
         // [NEW] DEVICE DETECTION LOGIC using UAParser
