@@ -848,26 +848,44 @@
 
     /**
      * ==========================================
-     * GROUP 4: ARROW SYSTEM (FIXED)
+     * GROUP 4: ARROW SYSTEM (CONFIGURABLE)
      * ==========================================
      */
     const ArrowSystem = {
         grid: document.getElementById('mainGrid'),
         arrows: [],
 
+        // --- [CONFIG] CONTROL VARIABLES ---
+
+        // Distance in pixels from the emanating tile edge
+        // Positive (+) = Further away | Negative (-) = Closer/Overlap
+        nudge: 12,
+
+        // Choose your Icon Style (Uncomment the one you want)
+
+        // 1. Standard Thin Arrow
+        arrowSVG: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 4 L12 20 M12 20 L5 13 M12 20 L19 13" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+
+        // 2. Bold Chevron
+        // arrowSVG: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>`,
+
+        // 3. Solid Triangle
+        // arrowSVG: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21l-10-16h20l-10 16z"/></svg>`,
+
+
+        // --- LOGIC ---
+
         init() {
             if (!this.grid) return;
+
+            // Clear existing arrows if re-initialized
+            this.arrows.forEach(a => a.element.remove());
+            this.arrows = [];
 
             const connections = [
                 { from: 'step1', to: 'step2' },
                 { from: 'step2', to: 'step3' }
             ];
-
-            const arrowSVG = `
-                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 4 L12 20 M12 20 L5 13 M12 20 L19 13" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-            `;
 
             connections.forEach(conn => {
                 const elFrom = document.getElementById(conn.from);
@@ -876,8 +894,8 @@
                 if (elFrom && elTo) {
                     const arrowEl = document.createElement('div');
                     arrowEl.className = 'floating-arrow';
-                    arrowEl.innerHTML = arrowSVG;
-                    // Ensure grid is relative so absolute positioning works inside it
+                    arrowEl.innerHTML = this.arrowSVG;
+
                     this.grid.style.position = 'relative';
                     this.grid.appendChild(arrowEl);
 
@@ -889,14 +907,11 @@
                 }
             });
 
-            // [CRITICAL FIX]: Use ResizeObserver to watch the GRID, not just the window.
-            // This detects when the slider changes the grid width.
             const resizeObserver = new ResizeObserver(() => {
                 this.update();
             });
             resizeObserver.observe(this.grid);
 
-            // Initial calculation
             setTimeout(() => this.update(), 100);
         },
 
@@ -908,38 +923,39 @@
                 const r1 = arrow.from.getBoundingClientRect();
                 const r2 = arrow.to.getBoundingClientRect();
 
-                // Calculate Centers
+                // Calculate Center of Source Tile
                 const c1 = { x: r1.left + r1.width/2, y: r1.top + r1.height/2 };
 
-                // Determine Orientation:
-                // If r2 is logically "below" r1, we are in vertical mode.
-                // We use a threshold of 10px to account for sub-pixel rendering.
+                // Determine Orientation
+                // If r2 is "below" r1 (with 10px tolerance), it's vertical
                 const isVertical = (r2.top > (r1.bottom - 10));
 
                 let x, y, rotation;
 
                 if (isVertical) {
-                    // Vertical Stack: Arrow between bottom of 1 and top of 2
+                    // Vertical: Snap to Bottom Edge + Nudge
                     x = c1.x;
-                    y = (r1.bottom + r2.top) / 2;
-                    rotation = 0; // Point Down
+                    y = r1.bottom + this.nudge;
+                    rotation = 0;
                 } else {
-                    // Horizontal Row: Arrow between right of 1 and left of 2
-                    x = (r1.right + r2.left) / 2;
+                    // Horizontal: Snap to Right Edge + Nudge
+                    x = r1.right + this.nudge;
                     y = c1.y;
-                    rotation = -90; // Point Right
+                    rotation = -90;
                 }
 
                 // Convert to relative coordinates inside the grid
                 const finalLeft = x - gridRect.left;
                 const finalTop = y - gridRect.top;
 
-                arrow.element.style.left = `${finalLeft - 24}px`; // -24 to center 48px icon
+                // Center the 48x48 arrow container on the calculated point
+                arrow.element.style.left = `${finalLeft - 24}px`;
                 arrow.element.style.top = `${finalTop - 24}px`;
                 arrow.element.style.transform = `rotate(${rotation}deg)`;
             });
         }
     };
+
 
     /**
      * ==========================================
