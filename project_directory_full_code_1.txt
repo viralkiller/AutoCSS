@@ -1,0 +1,1270 @@
+Aggregated on: 2025-12-19 08:47:01
+================================================================================
+Project Directory Tree:
+/
+├── templates
+│   ├── classic.html
+│   ├── index.html
+│   └── workspace.html
+├── .bashrc
+├── .gitconfig
+├── .gitignore
+├── .profile
+├── .pythonstartup.py
+├── .vimrc
+├── _Review_Functions.py
+├── flask_app.py
+├── project_directory_full_code_1.txt
+├── README.txt
+└── readme.txt
+
+1 directories, 14 files
+================================================================================
+
+[-] This file: .pythonstartup.py | Contents:
+import rlcompleter
+import readline
+readline.parse_and_bind("tab: complete")
+================================================================================
+
+[-] This file: flask_app.py | Contents:
+from flask import Flask, render_template, send_from_directory
+import os
+app = Flask(__name__)
+# Debug print on startup
+print("[BOOT] Flask app starting…")
+print("[PLEDGING] Allegiance to Sheev Palpatine…")
+print("[INFO] Template folder:", app.template_folder)
+print("[INFO] Static folder:", app.static_folder)
+# ----------------------
+# ROUTES
+# ----------------------
+@app.route("/")
+def home():
+    print("[ROUTE] GET /  → index.html")
+    return render_template("index.html")
+@app.route("/workspace")
+def workspace():
+    print("[ROUTE] GET /  → workspace.html")
+    return render_template("workspace.html")
+@app.route("/static/<path:filename>")
+def serve_static(filename):
+    print(f"[STATIC] /static/{filename}")
+    return send_from_directory("static", filename)
+# ----------------------
+# PYTHONANYWHERE ENTRY
+# ----------------------
+if __name__ == "__main__":
+    print("[RUN] Running in local dev mode on port 5000")
+    app.run(debug=True, host="0.0.0.0", port=5000)
+================================================================================
+
+[-] This file: templates/classic.html | Contents:
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demeza AutoCSS | Classic Template</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/UAParser.js/1.0.35/ua-parser.min.js"></script>
+    <style>
+        /* --- 1. QUANTIZED TOKENS --- */
+        :root {
+            /* Palette */
+            --bg-color: #f4f4f9;
+            --tile-bg: #ffffff;
+            --accent: #FF9F1C;
+            --text-main: #2EC4B6;
+            --text-dark: #333;
+            --nav-dark: #222;
+            --border-light: #ebeff5;
+            --border-med: #a3adbf;
+            /* Spacing Scale (Powers of 2 / Multiples of 8) */
+            --q-4: 4px;
+            --q-8: 8px;
+            --q-16: 16px;
+            --q-24: 24px;
+            --q-32: 32px;
+            --q-48: 48px;
+            /* Mappings */
+            --gap: var(--q-16);
+            --padding: var(--q-16);
+            /* [2] Square Aesthetic enforced */
+            --radius: 0px;
+        }
+        /* Apply Nunito Globally */
+        * { margin:0; padding:0; box-sizing: border-box; font-family: 'Nunito', sans-serif; }
+        body {
+            background-color: #1a1a1a;
+            color: #eee;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        /* --- 2. SIMULATOR FRAME --- */
+        .simulator-wrapper {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            align-content: center;
+            padding-top: var(--q-24);
+        }
+        .controls {
+            margin-bottom: var(--q-16);
+            background: #333;
+            padding: var(--q-16);
+            /* Square corners */
+            border-radius: var(--radius);
+            display: flex;
+            gap: var(--q-16);
+            align-items: center;
+            flex-wrap: wrap;
+            border: 1px solid #444;
+        }
+        #device-frame {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            width: 512px;
+            min-height: 768px;
+            transition: width 0.256s ease;
+            position: relative;
+            overflow-y: auto;
+            overflow-x: hidden;
+            box-shadow: 0 0 48px rgba(0,0,0,0.48);
+            resize: horizontal;
+            container-type: inline-size;
+            /* Explicit square borders for frame */
+            border: 4px solid #111;
+        }
+        /* --- 3. HEADER GROUPS --- */
+        .header-group {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: var(--tile-bg);
+            border-bottom: 4px solid var(--accent);
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+        /* ROW 1: Meta Bar (Desktop Only) */
+        .meta-bar {
+            height: 32px;
+            background-color: var(--nav-dark);
+            color: #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 var(--padding);
+            font-size: 16px;
+            letter-spacing: 0.48px;
+        }
+        .meta-left {font-weight: 400; color: var(--accent); }
+        .meta-left a {  text-decoration: none; cursor: pointer; }
+        .meta-left a:hover {  text-decoration: underline; }
+        .meta-right {font-weight: 600;  display: flex; gap: var(--q-16); align-items: center; }
+        .meta-right a { color: #eee; text-decoration: none; cursor: pointer; }
+        .meta-right a:hover { color: white; text-decoration: underline; }
+        /* ROW 2: Nav Bar */
+        .nav-bar {
+            min-height: var(--q-48);
+            padding: 0 var(--padding);
+            background-color: var(--tile-bg);
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            position: relative;
+        }
+        .nav-links {
+            display: flex;
+            gap: var(--q-24);
+            width: 100%;
+            align-items: center;
+        }
+        /* Base Desktop Styling for Links */
+        .nav-link {
+            font-weight: 600;
+            color: var(--text-dark);
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 16px;
+            line-height: var(--q-48);
+        }
+        .nav-link:hover{
+            text-decoration: underline;
+        }
+         .nav-link.active {
+             color: var(--text-main);
+             text-decoration: underline;
+         }
+        /* Mobile Meta Group Container (Hidden on Desktop) */
+        .mobile-meta-group { display: none; }
+        .hamburger-btn {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: var(--q-8);
+            position: absolute;
+            top: 0;
+            right: var(--q-8);
+            height: var(--q-48);
+            z-index: 101;
+            /* Square focus ring style if needed, default is fine */
+        }
+        .hamburger-icon {
+            width: 24px; height: 4px; background: #333; position: relative; display: block;
+        }
+        .hamburger-icon::before, .hamburger-icon::after {
+            content: ''; position: absolute; left: 0; width: 24px; height: 4px; background: #333;
+        }
+        .hamburger-icon::before { top: -8px; }
+        .hamburger-icon::after { top: 8px; }
+/* --- MOBILE LOGIC --- */
+        @container (max-width: 599px) {
+            /* Hide the Desktop Meta Bar */
+            .meta-bar { display: none; }
+            /* Re-orient Nav Links */
+            .nav-links {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                margin-top: var(--q-48);
+                border-top: none;
+                gap: 0;
+                align-items: flex-start;
+            }
+            .hamburger-btn { display: flex; align-items: center; }
+            .nav-bar.mobile-open .nav-links { display: flex; }
+            .nav-bar.mobile-open { flex-wrap: wrap; }
+            /* Show Mobile Meta Group */
+            .mobile-meta-group {
+                display: flex;
+                flex-direction: column;
+                width: 100%;
+                border-bottom: 4px solid var(--border-med);
+            }
+            /* UNIFIED LINK STYLING */
+            .nav-link,
+            .mobile-meta-group a {
+                width: 100%;
+                padding: var(--q-16) var(--q-4);
+                border-bottom: 4px solid var(--border-light);
+                font-family: inherit;
+                font-size: 16px;
+                font-weight: 400;
+                color: var(--text-dark);
+                line-height: 1.2;
+                text-decoration: none;
+                cursor: pointer;
+                display: block;
+            }
+            .nav-link:last-child {
+                border-bottom: none;
+            }
+            /* [NEW] Remove light separator from the last meta item (Login) */
+            .mobile-meta-group a:last-child {
+                border-bottom: none;
+            }
+            .nav-link:hover, .mobile-meta-group a:hover {
+                background-color: #fafafa;
+                text-decoration: none;
+            }
+            /* [FIX] Explicitly remove underline for active state in mobile */
+            .nav-link.active {
+                text-decoration: none;
+            }
+            .nav-link:active {
+                text-decoration: none;
+            }
+            .mobile-meta-group a.is-credits {
+                color: var(--accent);
+                font-weight: 700;
+            }
+        }
+/* --- 4. TILE GRID SYSTEM --- */
+        .tile-grid {
+            display: grid;
+            padding: var(--padding);
+            gap: var(--gap);
+            grid-template-columns: 1fr;
+            width: 100%;
+            /* [NEW] Relative positioning for absolute arrows */
+            position: relative;
+        }
+        @container (min-width: 600px) {
+            .tile-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        /* --- 5. TILE LOGIC --- */
+        .tile {
+            background-color: var(--tile-bg);
+            /* Enforce Square */
+            border-radius: var(--radius);
+            padding: var(--q-24);
+            border: 4px solid var(--accent);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            text-align: center;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            transition: all 0.256s ease;
+            position: relative;
+            gap: var(--q-4);
+        }
+        .tile-std { aspect-ratio: 1 / 1; }
+        .tile > :only-child { margin: auto; }
+        /* --- [UPDATED] 9-ROW GRID SYSTEM FOR 2 & 3 ITEMS --- */
+        /* 2 Items: Placed at Rows 4 and 6 */
+        .tile:has(> :last-child:nth-child(2)) {
+            display: grid;
+            grid-template-columns: 1fr;
+            grid-template-rows: repeat(9, 1fr); /* 9 Equal Rows */
+            gap: 0;
+            justify-items: center;
+            align-items: center;
+        }
+        .tile:has(> :last-child:nth-child(2)) > * { margin: 0; width: 100%; }
+        /* Grid rows are 1-based */
+        .tile:has(> :last-child:nth-child(2)) > :nth-child(1) { grid-row: 4; }
+        .tile:has(> :last-child:nth-child(2)) > :nth-child(2) { grid-row: 6; }
+        /* 3 Items: Placed at Rows 3, 5, and 7 */
+        .tile:has(> :last-child:nth-child(3)) {
+            display: grid;
+            grid-template-columns: 1fr;
+            grid-template-rows: repeat(9, 1fr); /* 9 Equal Rows */
+            gap: 0;
+            justify-items: center;
+            align-items: center;
+        }
+        .tile:has(> :last-child:nth-child(3)) > * { margin: 0; width: 100%; }
+        .tile:has(> :last-child:nth-child(3)) > :nth-child(1) { grid-row: 3; }
+        .tile:has(> :last-child:nth-child(3)) > :nth-child(2) { grid-row: 5; }
+        .tile:has(> :last-child:nth-child(3)) > :nth-child(3) { grid-row: 7; }
+        /* 4+ Items: Evenly Spread Logic (Fallback for complex tiles) */
+        .tile:has(> :nth-child(4)) {
+            justify-content: space-evenly;
+            gap: 0;
+        }
+        .tile-stretch { aspect-ratio: 1 / 1; border-color: var(--text-main); }
+        @container (min-width: 600px) {
+            .tile-stretch { grid-column: 1 / -1; aspect-ratio: 3 / 1; }
+        }
+        .tile-stretch img { height: 100%; width: auto; object-fit: contain; }
+        .tile-ghost {
+            display: none;
+            border: 4px dashed #ccc;
+            background: transparent;
+            opacity: 0.256;
+            aspect-ratio: 1 / 1;
+        }
+        @container (min-width: 600px) { .tile-ghost { display: flex; } }
+        /* UI Elements */
+        .tile h3 { margin: 0; font-weight: 700; }
+        .tile input[type="text"], .tile textarea {
+            width: 100%; padding: var(--q-16);
+            border: 4px solid #ddd;
+            /* Enforce Square */
+            border-radius: var(--radius);
+            background: #fafafa;
+        }
+        /* Specific textarea styling to match inputs */
+        .tile textarea {
+            resize: none;
+            font-family: 'Nunito', sans-serif;
+            height: auto; /* Handled by Flexbox in JS */
+        }
+        .tile button {
+            width: 100%; padding: var(--q-16);
+            background-color: var(--text-main); color: white;
+            border: none;
+            /* Enforce Square */
+            border-radius: var(--radius);
+            font-weight: 700;
+            letter-spacing: 1px;
+            cursor: pointer; box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+            /* Add explicit font-size so JS match isn't jumping too much */
+            font-size: 14px;
+        }
+        .tile button:active { transform: translateY(4px); box-shadow: 0 4px 0 rgba(0,0,0,0.1); }
+        /* --- 5.1 ADVANCED SLIDER STYLES --- */
+        .slider-wrapper {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: var(--q-8);
+        }
+        .range-container {
+            position: relative;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+        }
+        .slider-label {
+            font-family: monospace;
+            font-size: 14px;
+            color: var(--text-dark);
+            font-weight: 700;
+        }
+        /* Value Bubble */
+        .slider-value {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            /* Start hidden and slightly lower */
+            transform: translateX(-50%) translateY(10px);
+            background: var(--accent);
+            color: white;
+            padding: 2px 8px;
+            font-size: 12px;
+            font-weight: bold;
+            font-family: monospace;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            border-radius: var(--radius);
+            z-index: 10;
+        }
+        /* Active State for Bubble */
+        .slider-value.active {
+            opacity: 1;
+            /* Pop up animation */
+            transform: translateX(-50%) translateY(-14px);
+        }
+        /* Base Slider Track */
+        input[type="range"] {
+            width: 100% !important; margin: 0;
+            -webkit-appearance: none;
+            background: transparent;
+            cursor: grab;
+        }
+        input[type="range"]:active { cursor: grabbing; }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px; width: 16px;
+            background: var(--accent);
+            margin-top: -6px;
+            border-radius: 0;
+            transition: transform 0.1s;
+        }
+        input[type="range"]:active::-webkit-slider-thumb {
+            transform: scale(1.2);
+        }
+        input[type="range"]::-webkit-slider-runnable-track {
+            width: 100%; height: 4px; background: #ddd;
+        }
+        /* Simulator UI Controls Buttons */
+        .controls button {
+            border: none;
+            background: #555;
+            color: white;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-family: monospace;
+        }
+        .controls button:hover { background: #666; }
+        /* --- 6. LIVE VIEW TOGGLE OVERRIDES --- */
+        /* Style for the floating exit button */
+        #exit-live-btn {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            padding: 12px 24px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            border-radius: var(--radius);
+        }
+        /* When Body has 'view-live' class... */
+        body.view-live {
+            background-color: var(--bg-color); /* Match internal bg */
+            display: block; /* Reset flex center */
+        }
+        /* Hide Simulator UI and Wrapper constraints */
+        body.view-live .controls { display: none; }
+        body.view-live .simulator-wrapper {
+            padding: 0;
+            max-width: none;
+            width: 100%;
+            display: block;
+        }
+        /* Force Device Frame to be full Browser Window */
+        body.view-live #device-frame {
+            width: 100% !important;     /* Override inline JS width */
+            height: auto;
+            min-height: 100vh;
+            border: none;
+            box-shadow: none;
+            resize: none;                /* Disable CSS resize handle */
+        }
+        /* Show Exit Button */
+        body.view-live #exit-live-btn {
+            display: block;
+        }
+        /* [NEW] Override for Actual Mobile Devices detected by JS */
+        body.is-native-mobile #exit-live-btn {
+            display: none !important;
+        }
+        /* --- 7. HACKED FILE UPLOAD STYLES --- */
+        .file-upload-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: var(--q-16);
+            background-color: var(--text-main);
+            color: white;
+            text-align: center;
+            font-weight: 700;
+            letter-spacing: 1px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+            border-radius: var(--radius);
+            margin: 0;
+            /* Initial CSS baseline, will be overridden by JS if mismatch occurs */
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        .file-upload-label:active {
+            transform: translateY(4px);
+            box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+        }
+        .file-name-display {
+            font-size: 13px;
+            color: #888;
+            font-family: monospace;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+        /* --- 8. FLOATING ARROWS --- */
+        .floating-arrow {
+            position: absolute;
+            width: 48px;
+            height: 48px;
+            pointer-events: none;
+            z-index: 50;
+            color: var(--accent);
+            /* Centering transform handled by JS */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+            transition: top 0.2s ease, left 0.2s ease, transform 0.2s ease;
+        }
+        .floating-arrow svg {
+            width: 100%;
+            height: 100%;
+            fill: currentColor;
+        }
+    </style>
+</head>
+<body>
+    <button id="exit-live-btn" onclick="toggleLiveMode()">EXIT LIVE VIEW</button>
+    <div class="simulator-wrapper">
+        <div class="controls">
+            <span style="color:white; font-size: 12px; font-weight: 512;">DEVICE WIDTH:</span>
+            <input type="range" id="widthSlider" min="320" max="1280" value="400" style="width: 200px !important;">
+            <span id="pxDisplay" style="color:white; font-family: monospace; font-size: 12px;">400px</span>
+            <button onclick="setMode('mobile')" style="padding: 5px 15px;">MOBILE</button>
+            <button onclick="setMode('desktop')" style="padding: 5px 15px;">DESKTOP</button>
+            <button onclick="toggleLiveMode()" style="background: var(--text-main); margin-left: auto; padding: 5px 15px;">LIVE VIEW</button>
+        </div>
+        <div id="device-frame">
+            <div class="header-group">
+                <div class="meta-bar">
+                    <div class="meta-left"><a>100 Credits</a></div>
+                    <div class="meta-right">
+                        <a>Login</a>
+                    </div>
+                </div>
+                <nav class="nav-bar" id="mainNav">
+                    <div class="nav-links">
+                        <div class="mobile-meta-group">
+                            <a class="is-credits">100 Credits</a>
+                            <a>Login</a>
+                        </div>
+                        <a class="nav-link active">Home</a>
+                        <a class="nav-link">About</a>
+                        <a class="nav-link">Blog</a>
+                        <a class="nav-link">Contact</a>
+                    </div>
+                    <button class="hamburger-btn" onclick="toggleMenu()">
+                        <span class="hamburger-icon"></span>
+                    </button>
+                </nav>
+            </div>
+            <div class="tile-grid" id="mainGrid">
+                <div class="tile tile-stretch">
+                    <div style="height:100%; display:flex; align-items:center;">
+                         <h1 style="margin:0; color: var(--text-main); font-weight: 768; letter-spacing: -2px;">LOGO</h1>
+                    </div>
+                </div>
+                <div class="tile tile-ghost"></div>
+                <div class="tile tile-std">
+                    <h3>Join Mailing List</h3>
+                    <input type="text" placeholder="Enter your email">
+                    <button id="refButton" class="btn-ref">SUBMIT</button>
+                </div>
+                 <div class="tile tile-ghost"></div>
+                 <div class="tile tile-std">
+                    <h3>Settings Smooth</h3>
+                    <div class="slider-wrapper">
+                        <span class="slider-label">0</span>
+                        <div class="range-container">
+                            <input type="range" id="advSlider" min="0" max="100" value="50">
+                            <div class="slider-value" id="sliderValue">50</div>
+                        </div>
+                        <span class="slider-label">100</span>
+                    </div>
+                 </div>
+                 <div class="tile tile-std">
+                    <h3>Upload File</h3>
+                    <label id="matchLabel" class="file-upload-label btn-match">
+                        CHOOSE FILE
+                        <input type="file" id="fileInput" style="display:none;" onchange="document.getElementById('fileName').textContent = this.files[0] ? this.files[0].name : '...'">
+                    </label>
+                    <span id="fileName" class="file-name-display">...</span>
+                </div>
+                <div class="tile tile-std">
+                    <h3>Settings Snap</h3>
+                    <img id="snapImage" src="https://placehold.co/64x64/2EC4B6/ffffff?text=0" style="width:64px; height:64px; border-radius: 0; object-fit:cover;">
+                    <div class="slider-wrapper">
+                        <span class="slider-label">0</span>
+                        <div class="range-container">
+                            <input type="range" id="snapSlider" min="0" max="2" step="1" value="0">
+                            <div class="slider-value">0</div>
+                        </div>
+                        <span class="slider-label">2</span>
+                    </div>
+                 </div>
+                 <div class="tile tile-stretch">
+                    <h3>Paste text here</h3>
+                    <textarea></textarea>
+                </div>
+                <div class="tile tile-std" id="step1">
+                    <h3>Your file is ready!</h3>
+... (truncated, 293 more lines omitted; early cap: max_lines_per_file)
+================================================================================
+
+[-] This file: templates/index.html | Contents:
+
+================================================================================
+
+[-] This file: templates/workspace.html | Contents:
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Demeza AutoCSS | Workspace Template</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/UAParser.js/1.0.35/ua-parser.min.js"></script>
+  <style>
+    /* --- 1) QUANTIZED TOKENS --- */
+    :root{
+      --bg-color: #f4f4f9;
+      --tile-bg: #ffffff;
+      --accent: #FF9F1C;
+      --text-main: #2EC4B6;
+      --text-dark: #333;
+      --nav-dark: #222;
+      --border-light: #ebeff5;
+      --border-med: #a3adbf;
+      --q-4: 4px;
+      --q-8: 8px;
+      --q-16: 16px;
+      --q-24: 24px;
+      --q-32: 32px;
+      --q-48: 48px;
+      --gap: var(--q-16);
+      --padding: var(--q-16);
+      --radius: 0px;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Nunito', sans-serif; }
+    body{
+      background-color:#1a1a1a;
+      color:#eee;
+      margin:0;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      min-height:100vh;
+    }
+    /* --- 2) SIMULATOR FRAME --- */
+    .simulator-wrapper{
+      width:100%;
+      max-width:1200px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      align-content:center;
+      padding-top:var(--q-24);
+    }
+    .controls{
+      margin-bottom:var(--q-16);
+      background:#333;
+      padding:var(--q-16);
+      border-radius:var(--radius);
+      display:flex;
+      gap:var(--q-16);
+      align-items:center;
+      flex-wrap:wrap;
+      border:1px solid #444;
+      width: min(1200px, 100%);
+    }
+    #device-frame{
+      background-color:var(--bg-color);
+      color:var(--text-dark);
+      width:512px;
+      min-height:768px;
+      transition: width 0.256s ease;
+      position:relative;
+      overflow-y:auto;
+      overflow-x:hidden;
+      box-shadow:0 0 48px rgba(0,0,0,0.48);
+      resize:horizontal;
+      container-type:inline-size;
+      border:4px solid #111;
+    }
+    /* [FIX] Workspace pages should never micro-scroll */
+    #device-frame.has-workspace{
+      overflow-y:hidden;
+      overscroll-behavior: none;
+    }
+    /* --- 3) HEADER GROUPS (COLLAPSES TO HAMBURGER ON MOBILE) --- */
+    .header-group{
+      position:sticky;
+      top:0;
+      z-index:100;
+      background-color:var(--tile-bg);
+      border-bottom:4px solid var(--accent);
+      display:flex;
+      flex-direction:column;
+      width:100%;
+    }
+    .meta-bar{
+      height:32px;
+      background-color:var(--nav-dark);
+      color:#ccc;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 var(--padding);
+      font-size:16px;
+      letter-spacing:0.48px;
+    }
+    .meta-left{ font-weight:400; color:var(--accent); }
+    .meta-left a{ text-decoration:none; cursor:pointer; }
+    .meta-left a:hover{ text-decoration:underline; }
+    .meta-right{ font-weight:600; display:flex; gap:var(--q-16); align-items:center; }
+    .meta-right a{ color:#eee; text-decoration:none; cursor:pointer; }
+    .meta-right a:hover{ color:#fff; text-decoration:underline; }
+    .nav-bar{
+      min-height:var(--q-48);
+      padding:0 var(--padding);
+      background-color:var(--tile-bg);
+      display:flex;
+      align-items:center;
+      justify-content:flex-start;
+      position:relative;
+    }
+    .nav-links{
+      display:flex;
+      gap:var(--q-24);
+      width:100%;
+      align-items:center;
+    }
+    .nav-link{
+      font-weight:600;
+      color:var(--text-dark);
+      text-decoration:none;
+      cursor:pointer;
+      font-size:16px;
+      line-height:var(--q-48);
+    }
+    .nav-link:hover{ text-decoration:underline; }
+    .nav-link.active{
+      color:var(--text-main);
+      text-decoration:underline;
+    }
+    .mobile-meta-group{ display:none; }
+    .hamburger-btn{
+      display:none;
+      background:none;
+      border:none;
+      cursor:pointer;
+      padding:var(--q-8);
+      position:absolute;
+      top:0;
+      right:var(--q-8);
+      height:var(--q-48);
+      z-index:101;
+    }
+    .hamburger-icon{
+      width:24px; height:4px; background:#333;
+      position:relative; display:block;
+    }
+    .hamburger-icon::before, .hamburger-icon::after{
+      content:'';
+      position:absolute; left:0;
+      width:24px; height:4px;
+      background:#333;
+    }
+    .hamburger-icon::before{ top:-8px; }
+    .hamburger-icon::after{ top:8px; }
+    /* MOBILE LOGIC VIA CONTAINER QUERY */
+    @container (max-width: 599px){
+      .meta-bar{ display:none; }
+      .nav-links{
+        display:none;
+        flex-direction:column;
+        width:100%;
+        margin-top:var(--q-48);
+        gap:0;
+        align-items:flex-start;
+      }
+      .hamburger-btn{ display:flex; align-items:center; }
+      .nav-bar.mobile-open .nav-links{ display:flex; }
+      .nav-bar.mobile-open{ flex-wrap:wrap; }
+      .mobile-meta-group{
+        display:flex;
+        flex-direction:column;
+        width:100%;
+        border-bottom:4px solid var(--border-med);
+      }
+      .nav-link,
+      .mobile-meta-group a{
+        width:100%;
+        padding:var(--q-16) var(--q-4);
+        border-bottom:4px solid var(--border-light);
+        font-size:16px;
+        font-weight:400;
+        color:var(--text-dark);
+        line-height:1.2;
+        text-decoration:none;
+        cursor:pointer;
+        display:block;
+      }
+      .mobile-meta-group a:last-child{ border-bottom:none; }
+      .nav-link:hover, .mobile-meta-group a:hover{
+        background-color:#fafafa;
+        text-decoration:none;
+      }
+      .nav-link.active{ text-decoration:none; }
+      .mobile-meta-group a.is-credits{
+        color:var(--accent);
+        font-weight:700;
+      }
+    }
+    /* --- 4) TILE GRID --- */
+    .tile-grid{
+      display:grid;
+      padding:var(--padding);
+      gap:var(--gap);
+      grid-template-columns: 1fr;
+      width:100%;
+      position:relative;
+      min-height: 0;
+    }
+    @container (min-width: 600px){
+      .tile-grid{ grid-template-columns: repeat(3, 1fr); }
+    }
+    .tile{
+      background-color:var(--tile-bg);
+      border-radius:var(--radius);
+      padding:var(--q-24);
+      border:4px solid var(--accent);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      overflow:hidden;
+      box-shadow:0 4px 8px rgba(0,0,0,0.05);
+      transition:all 0.256s ease;
+      position:relative;
+      gap:var(--q-8);
+    }
+    .tile-ghost{
+      display:none;
+      border:4px dashed #ccc;
+      background:transparent;
+      opacity:0.256;
+      aspect-ratio:1 / 1;
+    }
+    @container (min-width: 600px){
+      .tile-ghost{ display:flex; }
+    }
+    /* --- 5) WORKSPACE TILE --- */
+    .tile-workspace{
+      grid-column: 1 / -1;
+      padding:0;
+      border-color: var(--text-main);
+      align-items:stretch;
+      justify-content:stretch;
+      text-align:left;
+      background: var(--tile-bg);
+      min-height: 0;
+    }
+    /* Workspace dominates: ignore everything after it */
+    .tile-workspace ~ .tile{
+      display:none !important;
+    }
+    #workspaceCanvas{
+      position:relative;
+      width:100%;
+      height:100%;
+      overflow:hidden;
+      outline:none;
+      background-image:
+        linear-gradient(to right, rgba(0,0,0,0.06) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0,0,0,0.06) 1px, transparent 1px);
+      background-size: 32px 32px;
+      user-select:none;
+      touch-action:none;
+    }
+    .workspace-hint{
+      position:absolute;
+      top:12px;
+      left:12px;
+      padding:6px 10px;
+      background:rgba(255,255,255,0.9);
+      border:2px solid rgba(0,0,0,0.12);
+      color:var(--text-dark);
+      font-family:monospace;
+      font-size:12px;
+      z-index:5;
+      border-radius:var(--radius);
+      pointer-events:none;
+    }
+    /* --- 6) LIVE VIEW OVERRIDES --- */
+    #exit-live-btn{
+      display:none;
+      position:fixed;
+      bottom:20px;
+      right:20px;
+      z-index:9999;
+      padding:12px 24px;
+      background:#e74c3c;
+      color:#fff;
+      border:none;
+      font-weight:bold;
+      cursor:pointer;
+      box-shadow:0 4px 12px rgba(0,0,0,0.3);
+      border-radius:var(--radius);
+    }
+    body.view-live{
+      background-color:var(--bg-color);
+      display:block;
+      align-items:unset;
+    }
+    body.view-live .controls{ display:none; }
+    body.view-live .simulator-wrapper{
+      padding:0;
+      max-width:none;
+      width:100%;
+      display:block;
+    }
+    body.view-live #device-frame{
+      width:100% !important;
+      height:100vh;
+      min-height:100vh;
+      border:none;
+      box-shadow:none;
+      resize:none;
+    }
+    body.view-live #exit-live-btn{ display:block; }
+    body.is-native-mobile #exit-live-btn{
+      display:none !important;
+    }
+  </style>
+</head>
+<body>
+  <button id="exit-live-btn" onclick="toggleLiveMode()">EXIT LIVE VIEW</button>
+  <div class="simulator-wrapper">
+    <div class="controls">
+      <span style="color:white; font-size:12px; font-weight:512;">DEVICE WIDTH:</span>
+      <input type="range" id="widthSlider" min="320" max="1280" value="512" style="width:200px !important;">
+      <span id="pxDisplay" style="color:white; font-family:monospace; font-size:12px;">512px</span>
+      <button id="btnMobile" onclick="setMode('mobile')" style="padding:5px 15px;">MOBILE</button>
+      <button id="btnDesktop" onclick="setMode('desktop')" style="padding:5px 15px;">DESKTOP</button>
+      <button id="btnLive" onclick="toggleLiveMode()" style="background:var(--text-main); margin-left:auto; padding:5px 15px;">
+        LIVE VIEW
+      </button>
+    </div>
+    <div id="device-frame">
+      <div class="header-group" id="headerGroup">
+        <div class="meta-bar">
+          <div class="meta-left"><a id="metaCredits">100 Credits</a></div>
+          <div class="meta-right"><a id="metaLogin">Login</a></div>
+        </div>
+        <nav class="nav-bar" id="mainNav">
+          <div class="nav-links" id="navLinks">
+            <div class="mobile-meta-group">
+              <a class="is-credits" id="mobileCredits">100 Credits</a>
+              <a id="mobileLogin">Login</a>
+            </div>
+            <a class="nav-link active" data-nav="Workspace">Workspace</a>
+            <a class="nav-link" data-nav="About">About</a>
+            <a class="nav-link" data-nav="Blog">Blog</a>
+            <a class="nav-link" data-nav="Contact">Contact</a>
+          </div>
+          <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle menu" aria-expanded="false" aria-controls="navLinks" onclick="toggleMenu()">
+            <span class="hamburger-icon"></span>
+          </button>
+        </nav>
+      </div>
+      <div class="tile-grid" id="mainGrid">
+        <!-- WORKSPACE TILE (dominant) -->
+        <div class="tile tile-workspace" id="workspaceTile">
+          <div id="workspaceCanvas" tabindex="0">
+            <div class="workspace-hint">Workspace Canvas (nodes go here)</div>
+          </div>
+        </div>
+        <!-- Ghost tiles (exist in HTML, but ignored after workspace) -->
+        <div class="tile tile-ghost"></div>
+        <div class="tile tile-ghost"></div>
+        <div class="tile tile-ghost"></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    function log(msg, obj){
+      const ts = new Date().toISOString().slice(11, 23);
+      if (obj !== undefined) console.log(`[${ts}] ${msg}`, obj);
+      else console.log(`[${ts}] ${msg}`);
+    }
+    function numPx(v){
+      const n = parseFloat(v);
+      return Number.isFinite(n) ? n : 0;
+    }
+    /**
+     * =========================
+     * SIMULATOR
+     * =========================
+     */
+    const Simulator = {
+      slider: document.getElementById('widthSlider'),
+      frame: document.getElementById('device-frame'),
+      display: document.getElementById('pxDisplay'),
+      init(){
+        log('[Init] Simulator.init');
+        if (this.slider){
+          this.slider.addEventListener('input', (e) => {
+            log('[UI] widthSlider input', { value: e.target.value });
+            this.setWidth(e.target.value);
+          });
+          this.slider.addEventListener('change', (e) => {
+            log('[UI] widthSlider change', { value: e.target.value });
+          });
+        }
+        const initial = Number(this.slider?.value || 512);
+        this.setWidth(initial);
+      },
+      setWidth(width){
+        const w = Math.max(320, Math.min(1280, Number(width) || 512));
+        this.frame.style.width = w + 'px';
+        this.display.innerText = `${w}px`;
+        if (this.slider) this.slider.value = w;
+        WorkspaceSystem.fitSoon('Simulator.setWidth');
+      },
+      setMode(mode){
+        log('[UI] setMode clicked', { mode });
+        const width = (mode === 'mobile') ? 512 : 1024;
+        this.setWidth(width);
+      },
+      toggleLive(){
+        const before = document.body.classList.contains('view-live');
+        document.body.classList.toggle('view-live');
+        const after = document.body.classList.contains('view-live');
+        log('[UI] toggleLiveMode', { before, after });
+        WorkspaceSystem.fitSoon('Simulator.toggleLive');
+      }
+    };
+    /**
+     * =========================
+     * UI (NAV + LINKS)
+     * =========================
+     */
+    const UI = {
+      toggleMenu(){
+        const nav = document.getElementById('mainNav');
+        const btn = document.getElementById('hamburgerBtn');
+        if (!nav) return;
+        const before = nav.classList.contains('mobile-open');
+        nav.classList.toggle('mobile-open');
+        const after = nav.classList.contains('mobile-open');
+        if (btn) btn.setAttribute('aria-expanded', after ? 'true' : 'false');
+        log('[UI] hamburger toggle', { before, after });
+        WorkspaceSystem.fitSoon('UI.toggleMenu');
+      },
+      bindLinkLogging(){
+        log('[Init] UI.bindLinkLogging');
+        const metaCredits = document.getElementById('metaCredits');
+        const metaLogin = document.getElementById('metaLogin');
+        const mobileCredits = document.getElementById('mobileCredits');
+        const mobileLogin = document.getElementById('mobileLogin');
+        [metaCredits, metaLogin, mobileCredits, mobileLogin].forEach(el => {
+          if (!el) return;
+          el.addEventListener('click', () => log('[UI] meta link click', { id: el.id, text: el.textContent }));
+        });
+        document.querySelectorAll('.nav-link').forEach(a => {
+          a.addEventListener('click', () => {
+            log('[UI] nav click', { label: a.getAttribute('data-nav') || a.textContent });
+          });
+        });
+        const btnMobile = document.getElementById('btnMobile');
+        const btnDesktop = document.getElementById('btnDesktop');
+        const btnLive = document.getElementById('btnLive');
+        const btnExit = document.getElementById('exit-live-btn');
+        if (btnMobile) btnMobile.addEventListener('click', () => log('[UI] button click', { id: 'btnMobile' }));
+        if (btnDesktop) btnDesktop.addEventListener('click', () => log('[UI] button click', { id: 'btnDesktop' }));
+        if (btnLive) btnLive.addEventListener('click', () => log('[UI] button click', { id: 'btnLive' }));
+        if (btnExit) btnExit.addEventListener('click', () => log('[UI] button click', { id: 'exit-live-btn' }));
+      }
+    };
+    /**
+     * =========================
+     * WORKSPACE INPUT (BASIC)
+     * =========================
+     */
+    const WorkspaceInput = {
+      canvas: document.getElementById('workspaceCanvas'),
+      isPointerDown: false,
+      last: { x: 0, y: 0 },
+      init(){
+        if (!this.canvas) return;
+        log('[Init] WorkspaceInput.init');
+        this.canvas.addEventListener('pointerdown', (e) => {
+          this.isPointerDown = true;
+          this.last = { x: e.clientX, y: e.clientY };
+          this.canvas.setPointerCapture?.(e.pointerId);
+          log('[WorkspaceInput] pointerdown', { x: e.clientX, y: e.clientY, button: e.button, pointerType: e.pointerType });
+        });
+        this.canvas.addEventListener('pointerup', (e) => {
+          this.isPointerDown = false;
+          log('[WorkspaceInput] pointerup', { x: e.clientX, y: e.clientY, button: e.button, pointerType: e.pointerType });
+        });
+        this.canvas.addEventListener('wheel', (e) => {
+          log('[WorkspaceInput] wheel', { deltaX: e.deltaX, deltaY: e.deltaY, ctrlKey: e.ctrlKey });
+        }, { passive: true });
+        this.canvas.addEventListener('keydown', (e) => {
+          log('[WorkspaceInput] keydown', { key: e.key, code: e.code, ctrl: e.ctrlKey, shift: e.shiftKey, alt: e.altKey });
+        });
+        this.canvas.addEventListener('focus', () => log('[WorkspaceInput] focus'));
+        this.canvas.addEventListener('blur', () => log('[WorkspaceInput] blur'));
+      }
+    };
+    /**
+     * =========================
+     * WORKSPACE SIZING
+     * =========================
+     */
+    const WorkspaceSystem = {
+      frame: document.getElementById('device-frame'),
+      header: document.getElementById('headerGroup'),
+      grid: document.getElementById('mainGrid'),
+      tile: document.getElementById('workspaceTile'),
+      canvas: document.getElementById('workspaceCanvas'),
+      _raf: null,
+      fitSoon(reason){
+        if (this._raf) cancelAnimationFrame(this._raf);
+        this._raf = requestAnimationFrame(() => {
+          this._raf = null;
+          this.fit(reason || 'fitSoon');
+        });
+      },
+      fit(reason){
+        if (!this.frame || !this.header || !this.grid || !this.tile || !this.canvas){
+          log('[Workspace] fit skipped (missing elements)');
+          return;
+        }
+        const isLive = document.body.classList.contains('view-live');
+        // 1) Set frame height to visible viewport (simulator mode)
+        if (!isLive){
+          const gutter = 16;
+          const top = this.frame.getBoundingClientRect().top;   // float
+          const desired = Math.max(320, Math.round(window.innerHeight - top - gutter));
+          this.frame.style.height = desired + 'px';
+        } else {
+          this.frame.style.height = '100vh';
+        }
+        // 2) Use integer layout heights to avoid sub-pixel drift
+        const frameClientH = this.frame.clientHeight;         // int
+        const headerH = this.header.offsetHeight;             // int
+        const gridStyle = window.getComputedStyle(this.grid);
+        const padTop = numPx(gridStyle.paddingTop);
+        const padBot = numPx(gridStyle.paddingBottom);
+        // 3) Safety fudge to prevent 1px overflow scroll
+        const fudge = 1;
+        const raw = frameClientH - headerH - padTop - padBot - fudge;
+        const workspaceH = Math.max(200, raw);
+        this.tile.style.height = workspaceH + 'px';
+        this.canvas.style.height = '100%';
+        // 4) Debug overflow checks
+        const overflowFrame = this.frame.scrollHeight - this.frame.clientHeight;
+        const overflowGrid = this.grid.scrollHeight - this.grid.clientHeight;
+        // Make any micro scroll impossible to "pop"
+        if (this.frame.scrollTop !== 0){
+          log('[Workspace] frame scrollTop reset', { before: this.frame.scrollTop });
+          this.frame.scrollTop = 0;
+        }
+        log('[Workspace] fit', {
+          reason,
+          isLive,
+          frameClientH,
+          headerH,
+          padTop,
+          padBot,
+          fudge,
+          workspaceH,
+          overflowFrame,
+          overflowGrid
+        });
+      }
+    };
+    /**
+     * =========================
+     * EXPORTS
+     * =========================
+     */
+    window.setMode = (m) => Simulator.setMode(m);
+    window.toggleLiveMode = () => Simulator.toggleLive();
+    window.toggleMenu = () => UI.toggleMenu();
+    window.addEventListener('load', () => {
+      log('[Init] load');
+      // Mark workspace mode
+      const hasWorkspace = !!document.getElementById('workspaceTile');
+      if (hasWorkspace){
+        document.getElementById('device-frame')?.classList.add('has-workspace');
+        log('[Init] has-workspace enabled');
+      }
+      UI.bindLinkLogging();
+      Simulator.init();
+      WorkspaceInput.init();
+      WorkspaceSystem.fitSoon('load');
+      // Mobile auto-live mode (same behavior as your original)
+      if (typeof UAParser !== 'undefined'){
+        try{
+          const parser = new UAParser();
+... (truncated, 21 more lines omitted; early cap: max_lines_per_file)
+================================================================================

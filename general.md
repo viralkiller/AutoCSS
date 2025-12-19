@@ -1,0 +1,38 @@
+The |deMeza AutoCSS system| is a new way to design websites that removes the usual headache of maintaining separate desktop and mobile layouts.
+
+You follow a small set of rules, and the desktop and mobile versions emerge automatically.
+
+There are three main templates, and together they cover almost every project: Classic, Workspace, and Game.
+
+Although the templates differ in purpose, they all share the same core tile logic.
+
+With the exception of the top two menu bars, everything on the page is a 'tile'.
+On mobile, tiles stack vertically. On desktop, tiles flow horizontally. In practice, you don’t design separate layouts at all — you just add tiles.
+
+Desktop centering is handled in a simple, reliable way. You are only ever allowed a maximum of three tiles per horizontal row.
+
+This limitation is deliberate: it keeps layouts fast to build and hard to break.
+
+To center an element on desktop, you place a ghost tile before it and another ghost tile after it.
+Ghost tiles appear on desktop as blank spacers, but disappear entirely on mobile.
+The result is a centered desktop layout that collapses cleanly into a sensible mobile stack.
+
+Normal tiles automatically center and arrange their contents in a pleasing way depending on how many UI items they contain.
+A set of ready-made normal tiles is provided for common needs such as mailing list signup, sliders, file upload, text areas, and other standard inputs.
+
+The stretch tile is used when you want something to span the full row on desktop.
+On mobile it behaves like a normal square tile, but on desktop it expands to occupy the width of three tiles.
+This makes it ideal for banner areas, hero content, or wide information panels.
+
+The workspace tile is a special case.
+It ignores any tiles that come after it and expands to fill the available screen space, similar to a Figma or Photoshop canvas.
+This workspace area is then ready to receive your custom UI elements, nodes, and interactive components.
+
+Finally, the game tile is similar to the workspace tile, but optimized for play. On desktop it behaves like a normal full workspace.
+On mobile, instead of trying to squeeze the experience into portrait, the user is prompted to rotate the device.
+This ensures that the game runs in a landscape layout that matches the desktop feel.
+
+These three templates all use the same core tile logic and should cover 99% of your design needs.
+
+Coming soon: a live page editor that lets you add, remove, and reorder tiles in real time,
+plus a “Generate Final Code” button that outputs a clean, single-page HTML/CSS/JS build of your layout, ready to deploy immediately.

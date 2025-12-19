@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Demeza Quantized CSS System - Automatic CSS for Mobile and Desktop</title>
+    <title>Demeza AutoCSS | Classic Template</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,8 +21,8 @@
             --text-main: #2EC4B6;
             --text-dark: #333;
             --nav-dark: #222;
-            --border-light: #f0f0f0;
-            --border-med: #ddd;
+            --border-light: #ebeff5;
+            --border-med: #a3adbf;
 
             /* Spacing Scale (Powers of 2 / Multiples of 8) */
             --q-4: 4px;
@@ -116,12 +116,15 @@
             align-items: center;
             justify-content: space-between;
             padding: 0 var(--padding);
-            font-size: 14px;
+            font-size: 16px;
             letter-spacing: 0.48px;
         }
 
-        .meta-left { font-weight: 700; color: var(--accent); }
-        .meta-right { display: flex; gap: var(--q-16); align-items: center; }
+        .meta-left {font-weight: 400; color: var(--accent); }
+        .meta-left a {  text-decoration: none; cursor: pointer; }
+        .meta-left a:hover {  text-decoration: underline; }
+
+        .meta-right {font-weight: 600;  display: flex; gap: var(--q-16); align-items: center; }
         .meta-right a { color: #eee; text-decoration: none; cursor: pointer; }
         .meta-right a:hover { color: white; text-decoration: underline; }
 
@@ -152,7 +155,16 @@
             font-size: 16px;
             line-height: var(--q-48);
         }
-        .nav-link:hover, .nav-link.active { color: var(--text-main); }
+        .nav-link:hover{
+            text-decoration: underline;
+        }
+
+
+         .nav-link.active {
+             color: var(--text-main);
+             text-decoration: underline;
+
+         }
 
         /* Mobile Meta Group Container (Hidden on Desktop) */
         .mobile-meta-group { display: none; }
@@ -179,7 +191,7 @@
         .hamburger-icon::before { top: -8px; }
         .hamburger-icon::after { top: 8px; }
 
-        /* --- MOBILE LOGIC --- */
+/* --- MOBILE LOGIC --- */
         @container (max-width: 599px) {
             /* Hide the Desktop Meta Bar */
             .meta-bar { display: none; }
@@ -189,7 +201,7 @@
                 display: none;
                 flex-direction: column;
                 width: 100%;
-                padding-bottom: var(--q-16);
+
                 margin-top: var(--q-48);
                 border-top: none;
                 gap: 0;
@@ -228,9 +240,23 @@
                 border-bottom: none;
             }
 
+            /* [NEW] Remove light separator from the last meta item (Login) */
+            .mobile-meta-group a:last-child {
+                border-bottom: none;
+            }
+
             .nav-link:hover, .mobile-meta-group a:hover {
                 background-color: #fafafa;
-                color: var(--text-main);
+                text-decoration: none;
+            }
+
+            /* [FIX] Explicitly remove underline for active state in mobile */
+            .nav-link.active {
+                text-decoration: none;
+            }
+
+            .nav-link:active {
+                text-decoration: none;
             }
 
             .mobile-meta-group a.is-credits {
@@ -248,6 +274,8 @@
             gap: var(--gap);
             grid-template-columns: 1fr;
             width: 100%;
+            /* [NEW] Relative positioning for absolute arrows */
+            position: relative;
         }
 
         @container (min-width: 600px) {
@@ -538,6 +566,28 @@
             text-overflow: ellipsis;
             max-width: 100%;
         }
+
+        /* --- 8. FLOATING ARROWS --- */
+        .floating-arrow {
+            position: absolute;
+            width: 48px;
+            height: 48px;
+            pointer-events: none;
+            z-index: 50;
+            color: var(--accent);
+            /* Centering transform handled by JS */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+            transition: top 0.2s ease, left 0.2s ease, transform 0.2s ease;
+        }
+        .floating-arrow svg {
+            width: 100%;
+            height: 100%;
+            fill: currentColor;
+        }
+
     </style>
 </head>
 <body>
@@ -570,7 +620,7 @@
                     <div class="nav-links">
 
                         <div class="mobile-meta-group">
-                            <a class="is-credits" >100 Credits</a>
+                            <a class="is-credits">100 Credits</a>
                             <a>Login</a>
 
                         </div>
@@ -588,7 +638,7 @@
 
 
 
-            <div class="tile-grid">
+            <div class="tile-grid" id="mainGrid">
 
                 <div class="tile tile-stretch">
                     <div style="height:100%; display:flex; align-items:center;">
@@ -607,7 +657,7 @@
                  <div class="tile tile-ghost"></div>
 
                  <div class="tile tile-std">
-                    <h3>Settings</h3>
+                    <h3>Settings Smooth</h3>
                     <div class="slider-wrapper">
                         <span class="slider-label">0</span>
                         <div class="range-container">
@@ -627,12 +677,36 @@
                     <span id="fileName" class="file-name-display">...</span>
                 </div>
 
+
+                <div class="tile tile-std">
+                    <h3>Settings Snap</h3>
+                    <img id="snapImage" src="https://placehold.co/64x64/2EC4B6/ffffff?text=0" style="width:64px; height:64px; border-radius: 0; object-fit:cover;">
+                    <div class="slider-wrapper">
+                        <span class="slider-label">0</span>
+                        <div class="range-container">
+                            <input type="range" id="snapSlider" min="0" max="2" step="1" value="0">
+                            <div class="slider-value">0</div>
+                        </div>
+                        <span class="slider-label">2</span>
+                    </div>
+                 </div>
+
                  <div class="tile tile-stretch">
                     <h3>Paste text here</h3>
                     <textarea></textarea>
-
                 </div>
 
+                <div class="tile tile-std" id="step1">
+                    <h3>Your file is ready!</h3>
+                </div>
+
+                <div class="tile tile-std" id="step2">
+                    <button id="viewButton" class="btn-ref">View File</button>
+                </div>
+
+                <div class="tile tile-std" id="step3">
+                    <button id="againButton" class="btn-ref">Generate Another</button>
+                </div>
 
             </div>
         </div>
@@ -660,6 +734,11 @@
             this.frame.style.width = width + 'px';
             this.display.innerText = `${width}px`;
             this.slider.value = width; // Sync slider
+
+            // [Fix] Force arrow update immediately when slider moves
+            if (typeof ArrowSystem !== 'undefined') {
+                ArrowSystem.update();
+            }
         },
 
         setMode(mode) {
@@ -669,6 +748,8 @@
 
         toggleLive() {
             document.body.classList.toggle('view-live');
+            // [Fix] Update arrows after layout shift
+            setTimeout(() => ArrowSystem.update(), 50);
         }
     };
 
@@ -683,82 +764,82 @@
             if (nav) nav.classList.toggle('mobile-open');
         },
 
-        initSlider() {
-            const slider = document.getElementById('advSlider');
-            const bubble = document.getElementById('sliderValue');
+        initSliders() {
+            const containers = document.querySelectorAll('.range-container');
+            containers.forEach(container => {
+                const slider = container.querySelector('input[type="range"]');
+                const bubble = container.querySelector('.slider-value');
 
-            if (slider && bubble) {
-                const updateBubble = (val) => {
-                    const min = slider.min || 0;
-                    const max = slider.max || 100;
-                    const percent = ((val - min) * 100) / (max - min);
+                if (slider && bubble) {
+                    const updateBubble = (val) => {
+                        const min = parseFloat(slider.min) || 0;
+                        const max = parseFloat(slider.max) || 100;
+                        const percent = ((val - min) * 100) / (max - min);
+                        const offset = 8 - (percent * 0.15);
+                        bubble.textContent = val;
+                        bubble.style.left = `calc(${percent}% + ${offset}px)`;
+                    };
+                    updateBubble(slider.value);
+                    slider.addEventListener('input', (e) => {
+                        updateBubble(e.target.value);
+                        bubble.classList.add('active');
+                    });
+                    const hideBubble = () => bubble.classList.remove('active');
+                    ['change', 'mouseup', 'touchend'].forEach(evt =>
+                        slider.addEventListener(evt, hideBubble)
+                    );
+                }
+            });
+        },
 
-                    // Center bubble over 16px thumb
-                    const offset = 8 - (percent * 0.15);
-
-                    bubble.textContent = val;
-                    bubble.style.left = `calc(${percent}% + ${offset}px)`;
-                };
-
-                updateBubble(slider.value); // Init
-
-                slider.addEventListener('input', (e) => {
-                    updateBubble(e.target.value);
-                    bubble.classList.add('active');
-                    console.log(`[UI] Drag: ${e.target.value}`);
+        initSnapSlider() {
+            const snapSlider = document.getElementById('snapSlider');
+            const snapImage = document.getElementById('snapImage');
+            const images = {
+                '0': 'https://placehold.co/64x64/2EC4B6/ffffff?text=0',
+                '1': 'https://placehold.co/64x64/FF9F1C/ffffff?text=1',
+                '2': 'https://placehold.co/64x64/333333/ffffff?text=2'
+            };
+            if (snapSlider && snapImage) {
+                snapSlider.addEventListener('input', (e) => {
+                    const val = e.target.value;
+                    if (images[val]) snapImage.src = images[val];
                 });
-
-                const hideBubble = () => bubble.classList.remove('active');
-
-                ['change', 'mouseup', 'touchend'].forEach(evt =>
-                    slider.addEventListener(evt, hideBubble)
-                );
             }
         }
     };
 
     /**
      * ==========================================
-     * GROUP 3: LAYOUT ENGINE & PATCHES
+     * GROUP 3: LAYOUT ENGINE
      * ==========================================
      */
     const Layout = {
-        // Match file upload button to standard button
         syncButtonStyles() {
             const ref = document.getElementById('refButton');
             const target = document.getElementById('matchLabel');
-
             if (ref && target) {
                 const computed = window.getComputedStyle(ref);
                 ['fontSize', 'fontFamily', 'fontWeight', 'lineHeight', 'height']
                     .forEach(prop => target.style[prop] = computed[prop]);
             }
         },
-
-        // Force textarea tile to flex layout
         optimizeTextarea() {
             const txtArea = document.querySelector('.tile textarea');
             if (!txtArea) return;
-
             const tile = txtArea.closest('.tile');
             const header = tile.querySelector('h3');
-
-            // Override Grid with Flex
             tile.style.display = 'flex';
             tile.style.flexDirection = 'column';
             tile.style.alignItems = 'flex-start';
             tile.style.textAlign = 'left';
-
-            // Stretch input to fill space
             txtArea.style.flexGrow = '1';
             txtArea.style.width = '100%';
-
             if (header) {
                 header.style.marginBottom = 'var(--q-16)';
                 header.style.width = '100%';
             }
         },
-
         refresh() {
             this.syncButtonStyles();
             this.optimizeTextarea();
@@ -767,40 +848,145 @@
 
     /**
      * ==========================================
+     * GROUP 4: ARROW SYSTEM (CONFIGURABLE)
+     * ==========================================
+     */
+    const ArrowSystem = {
+        grid: document.getElementById('mainGrid'),
+        arrows: [],
+
+        // --- [CONFIG] CONTROL VARIABLES ---
+
+        // Distance in pixels from the emanating tile edge
+        // Positive (+) = Further away | Negative (-) = Closer/Overlap
+        nudge: 12,
+
+        // Choose your Icon Style (Uncomment the one you want)
+
+        // 1. Standard Thin Arrow
+        //arrowSVG: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 4 L12 20 M12 20 L5 13 M12 20 L19 13" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+
+        // 2. Bold Chevron
+        // arrowSVG: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>`,
+
+        // 3. Solid Triangle
+        arrowSVG: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21l-10-16h20l-10 16z"/></svg>`,
+
+
+        // --- LOGIC ---
+
+        init() {
+            if (!this.grid) return;
+
+            // Clear existing arrows if re-initialized
+            this.arrows.forEach(a => a.element.remove());
+            this.arrows = [];
+
+            const connections = [
+                { from: 'step1', to: 'step2' },
+                { from: 'step2', to: 'step3' }
+            ];
+
+            connections.forEach(conn => {
+                const elFrom = document.getElementById(conn.from);
+                const elTo = document.getElementById(conn.to);
+
+                if (elFrom && elTo) {
+                    const arrowEl = document.createElement('div');
+                    arrowEl.className = 'floating-arrow';
+                    arrowEl.innerHTML = this.arrowSVG;
+
+                    this.grid.style.position = 'relative';
+                    this.grid.appendChild(arrowEl);
+
+                    this.arrows.push({
+                        element: arrowEl,
+                        from: elFrom,
+                        to: elTo
+                    });
+                }
+            });
+
+            const resizeObserver = new ResizeObserver(() => {
+                this.update();
+            });
+            resizeObserver.observe(this.grid);
+
+            setTimeout(() => this.update(), 100);
+        },
+
+        update() {
+            if (!this.grid) return;
+            const gridRect = this.grid.getBoundingClientRect();
+
+            this.arrows.forEach(arrow => {
+                const r1 = arrow.from.getBoundingClientRect();
+                const r2 = arrow.to.getBoundingClientRect();
+
+                // Calculate Center of Source Tile
+                const c1 = { x: r1.left + r1.width/2, y: r1.top + r1.height/2 };
+
+                // Determine Orientation
+                // If r2 is "below" r1 (with 10px tolerance), it's vertical
+                const isVertical = (r2.top > (r1.bottom - 10));
+
+                let x, y, rotation;
+
+                if (isVertical) {
+                    // Vertical: Snap to Bottom Edge + Nudge
+                    x = c1.x;
+                    y = r1.bottom + this.nudge;
+                    rotation = 0;
+                } else {
+                    // Horizontal: Snap to Right Edge + Nudge
+                    x = r1.right + this.nudge;
+                    y = c1.y;
+                    rotation = -90;
+                }
+
+                // Convert to relative coordinates inside the grid
+                const finalLeft = x - gridRect.left;
+                const finalTop = y - gridRect.top;
+
+                // Center the 48x48 arrow container on the calculated point
+                arrow.element.style.left = `${finalLeft - 24}px`;
+                arrow.element.style.top = `${finalTop - 24}px`;
+                arrow.element.style.transform = `rotate(${rotation}deg)`;
+            });
+        }
+    };
+
+
+    /**
+     * ==========================================
      * INIT & EXPORTS
      * ==========================================
      */
-    // Expose functions for HTML onclick attributes
     window.setMode = (m) => Simulator.setMode(m);
     window.toggleLiveMode = () => Simulator.toggleLive();
     window.toggleMenu = () => UI.toggleMenu();
 
-    // DOM Ready
     window.addEventListener('load', () => {
         Simulator.init();
-        UI.initSlider();
+        UI.initSliders();
+        UI.initSnapSlider();
         Layout.refresh();
+        ArrowSystem.init();
 
-        // [NEW] DEVICE DETECTION LOGIC using UAParser
         if (typeof UAParser !== 'undefined') {
             var parser = new UAParser();
             var result = parser.getResult();
-            var deviceType = result.device.type; // 'mobile', 'tablet', 'console', etc.
-
-            // If actual mobile device, force Live Mode and hide Exit Button
-            if (deviceType === 'mobile' || deviceType === 'tablet') {
-                console.log("[Device] Mobile detected. Forcing Live View.");
+            if (result.device.type === 'mobile' || result.device.type === 'tablet') {
+                console.log("[Device] Mobile detected.");
                 document.body.classList.add('is-native-mobile');
                 Simulator.toggleLive();
-            } else {
-                console.log("[Device] Desktop detected. Using Simulator.");
             }
         }
     });
 
-    // Resize Observer
     window.addEventListener('resize', () => {
         Layout.refresh();
+        ArrowSystem.update();
     });
 </script>
 </body>
