@@ -4,9 +4,9 @@
   const L = window.Demeza.Log;
   const Bus = window.Demeza.LayoutBus;
 
-  // Simple Gamepad Icon SVG
+  // Simple Gamepad Icon SVG (White Stroke)
   const GAME_ICON_SVG = `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:100%; height:100%; color:#e0e0e0;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:100%; height:100%; color:#ffffff;">
       <rect x="2" y="6" width="20" height="12" rx="2" />
       <path d="M6 12h4m-2-2v4" />
       <line x1="15" y1="11" x2="15" y2="11" />
@@ -41,7 +41,6 @@
       this.frame.classList.add('has-workspace');
 
       Bus && Bus.on && Bus.on((reason) => this.fitSoon(reason));
-
       window.addEventListener('resize', () => this.fitSoon('window.resize'));
       window.addEventListener('orientationchange', () => this.fitSoon('window.orientationchange'));
 
@@ -77,7 +76,7 @@
 
         // 2. Margins & Safety
         const gap = 16; // The CSS margin below controls
-        const buffer = 12; // NEW: Explicit safety buffer to prevent bottom border clipping
+        const buffer = 12; // Safety buffer to prevent bottom border clipping
 
         // 3. Calculate Available Height
         // Formula: Window - TopPad - Toolbar - ToolbarMargin - BottomPad - SafetyBuffer
@@ -95,8 +94,8 @@
       const gridStyle = window.getComputedStyle(this.grid);
       const gridPadTop = parseFloat(gridStyle.paddingTop) || 0;
       const gridPadBot = parseFloat(gridStyle.paddingBottom) || 0;
-
       const fudge = 1;
+
       const workspaceH = Math.max(200, frameClientH - headerH - gridPadTop - gridPadBot - fudge);
 
       this.tile.style.height = workspaceH + 'px';
@@ -119,6 +118,7 @@
       if (isGame) {
         // Game Mode: Rotating Icon
         this.canvas.style.backgroundImage = 'none';
+
         if (!this._gameIcon) {
           const div = document.createElement('div');
           div.style.cssText = 'position:absolute;left:50%;top:50%;width:128px;height:128px;opacity:0.2;transition:transform 0.3s ease;pointer-events:none;';
@@ -130,9 +130,11 @@
         this._gameIcon.style.transform = (h > w)
           ? 'translate(-50%, -50%) rotate(90deg)' // Portrait
           : 'translate(-50%, -50%) rotate(0deg)'; // Landscape
+
       } else {
         // Workspace Mode: Grid
         if (this._gameIcon) this._gameIcon.style.display = 'none';
+
         if (w > 0) {
           const targetSize = 32;
           const cols = Math.round(w / targetSize) || 1;

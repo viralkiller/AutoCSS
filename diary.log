@@ -78,6 +78,30 @@ Finally, we gave the Game template a distinct identity separate from the Workspa
 * **Dynamic Iconography:** We updated `workspace_system.js` to detect this class. When present, it disables the grid lines and instead renders a large, faint Gamepad SVG icon in the center of the canvas.
 * **Orientation Simulation:** The script now checks the aspect ratio of the container. If the game is in "Portrait" mode (taller than wide), the gamepad icon rotates 90 degrees. This simulates a "wrong orientation" state, visually prompting the user to rotate their device (or the simulator) to Landscape mode to play.
 
+Since the last report, our primary focus has been debugging a persistent layout instability where the Workspace and Game templates would "pop" or overflow the viewport bottom during simulator adjustments (slider dragging or mode toggles).
+
+**1. Diagnosing the "Pop"**
+We identified that while the "Live View" (full screen) worked perfectly, the **Simulator Mode** was calculating available height incorrectly. The logic was setting the device frame height based on the full viewport, failing to account for the **Simulator Toolbar** (`.controls`) at the top of the page. This caused the bottom of the device frame to be pushed off-screen by exactly the height of that toolbar.
+
+**2. The "Enforcer" Experiment**
+To fix this, we initially implemented a strict "Layout Enforcer" script in `layout_bus.js`. This script monitored the DOM every 16ms and forcibly corrected margins and heights if it detected an overflow.
+
+* **Result:** While it technically stopped the overflow, it introduced significant visual **jitter**. The JavaScript correction loop was fighting against the smooth CSS transitions (0.2s animations), causing the layout to shake visibly during resizing.
+
+**3. The Final Solution: Targeted Logic**
+We discarded the "Enforcer" approach to restore smoothness and implemented a cleaner, logic-based fix within `workspace_system.js`:
+
+* **Reverted `layout_bus.js`:** We stripped out the complex monitoring code, returning the bus to its original, lightweight state.
+* **Updated `workspace_system.js`:** We rewrote the `fit()` function with two distinct logic paths:
+* **Live Mode:** Continues to use `calc(100vh - padding)` for a full-screen immersive experience.
+* **Simulator Mode:** Now explicitly measures the height of the `.controls` toolbar. It calculates the frame height as:
+`Viewport - Toolbar Height - Padding - Safety Buffer (12px)`.
+
+
+
+This approach solves the root cause (ignoring the toolbar) rather than trying to patch the symptoms, ensuring the bottom border remains visible and the layout remains stable without any jitter.
+
+
 19-DEC-2025
 ---------------------------------------------------
 

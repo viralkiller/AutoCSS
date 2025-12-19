@@ -1,4 +1,4 @@
-Aggregated on: 2025-12-19 10:27:46
+Aggregated on: 2025-12-19 11:18:44
 ================================================================================
 Project Directory Tree:
 /
@@ -46,6 +46,77 @@ Project Directory Tree:
 import rlcompleter
 import readline
 readline.parse_and_bind("tab: complete")
+================================================================================
+
+[-] This file: diary.log | Contents:
+This project is your “editor-mode” implementation of **deMeza AutoCSS**: a small Flask site plus a front-end layout system that demonstrates (and stress-tests) your tile philosophy. The goal is to make page layout feel “inevitable” rather than handcrafted—so desktop and mobile versions emerge automatically from a few rules, and you spend your time building features instead of fighting responsive CSS.
+At the back end we kept things deliberately simple: a single Flask app with routes for the different templates (`/`, `/classic`, `/workspace`, `/game`) and a static route. You also wanted loud startup and route logging so you can see exactly what’s happening as soon as the server boots and on every request. That logging is helpful on PythonAnywhere too, because it lets you confirm routing and template rendering without guesswork.
+On the front end, the real work was defining and stabilizing the **deMeza tile system** and getting the “three templates cover 99% of needs” approach into a working, repeatable structure:
+1. **Classic template**
+   This is the “original demo” page: it shows the standard tile grid, a stretch tile, ghost tiles for centering, and a handful of example UI tiles (mailing list input, sliders, file upload, textarea, and the arrow-linked steps). The Classic page also includes your “simulator” controls, letting you emulate different widths inside the device frame. This is important because it makes layout debugging deterministic and visible without constantly resizing a real browser window.
+2. **Workspace template**
+   This is the first “special tile” behavior you introduced: a workspace tile that dominates the layout and *ignores anything after it*. You described it like “Figma/Photoshop”—it should expand to the maximum possible space while respecting the top menu bars. Instead of lots of tiles, Workspace is mostly a canvas area ready for nodes and custom UI elements. The key technical detail was making it fill the remaining space reliably without micro-scroll, including handling the simulator frame height, sticky headers, padding, and small rounding errors.
+3. **Game template**
+   Game is essentially Workspace with one critical difference on mobile: it uses a “rotate to play” gate. On desktop it behaves like the workspace canvas. On mobile portrait it blocks interaction and asks the user to rotate to landscape, so the game can run in a usable orientation. This sets up your “mini desktop-like game view on phones” idea without building two separate layouts.
+To support those templates, we organized a small but structured client-side architecture under a `window.Demeza` namespace (which you later corrected to **deMeza** as the brand spelling). You put everything in `static/js` initially, which was fine for speed, and then we started extracting shared components so the HTML templates became thinner and easier to maintain.
+The shared JavaScript pieces we set up included:
+* **log.js**: a consistent timestamped logger so every UI interaction and lifecycle event is traceable. This is foundational for your workflow: you want to be able to follow a “what happened first?” sequence in the console at any time.
+* **layout_bus.js**: a simple pub/sub bus so layout-sensitive systems can respond when something changes (hamburger opens, simulator width changes, rotate gate toggles, etc.). This prevents brittle “call update from everywhere” spaghetti.
+* **device.js**: device detection helpers. We used UAParser if available, and also fallbacks like pointer-coarse and UA hints. The intent is to treat “native mobile” as a first-class mode, not just a small screen.
+* **nav_ui.js**: the top navigation behavior, especially the hamburger toggle, aria attributes, and click logging.
+* **simulator.js**: the device-frame resizing slider and buttons (mobile/desktop width presets + live view). This drives layout changes and notifies the LayoutBus.
+* **workspace_input.js**: basic pointer and wheel input logging for the workspace canvas. Even before building real node interactions, it proves input works and creates a clean place to expand.
+* **workspace_system.js**: the sizing engine that makes the workspace tile reliably fill the available vertical space. This is where we handled the tricky bits like “no micro scroll,” integer sizing, and accounting for header height and grid padding.
+* **rotate_gate.js**: the mobile portrait blocker overlay for the game template. It listens for resize/orientation changes and toggles a full overlay when portrait is detected.
+* **index.js / index_boot.js / game_boot.js**: small “boot” scripts that initialize the relevant subsystems per page.
+A big theme this session was **stability and debuggability**. You didn’t just want it to “work”; you wanted it to be predictable and easy to diagnose. So almost every user interaction (slider input, button click, nav toggle, pointerdown/move/up on canvas) logs to console with a consistent prefix. Likewise, layout changes are centralized: the simulator changes width, it notifies LayoutBus, and the workspace system reacts. That structure will matter a lot once you start adding real canvas UI (node editors, selection rectangles, pan/zoom, context menus, etc.).
+We also dealt with a small but real layout bug: the “bottom padding pop” / micro-scroll effect in narrow views. The fix strategy was: remove unnecessary scrolling on workspace pages, compute heights in integer space, add a tiny “fudge” pixel to prevent rounding from creating 1px overflow, and forcibly reset scrollTop if anything tries to scroll. That’s the kind of pragmatic engineering that keeps the system feeling solid.
+Another major change was **moving shared CSS into `static/css`**. Initially Classic and Workspace had huge inline style blocks. You decided that while your “baked final design” might keep everything embedded, this project is acting as an “editor” and is allowed to use external CSS/JS. So we extracted the common styling—tokens, simulator frame, header bars, tile grid logic, tile rules, inputs, sliders, and live view behavior—into a shared CSS file (`demeza_base.css`). That reduces duplication and ensures Classic/Workspace/Game stay visually consistent as you iterate.
+We briefly experimented with changing the hamburger menu to overlay (float over content with ~90% opacity) instead of pushing content down. You tested it, then later chose to **revert to the old push-down behavior**, and you explicitly reverted the base CSS back. The final outcome from that decision is that the hamburger menu once again behaves exactly like before: it expands the nav area and pushes content downward on mobile.
+Finally, you tightened branding: you want the spelling consistently as **deMeza**, not “Demeza.” You also asked for index and game improvements: “unlock” game.html (stop marking it as TBA), and make the footer year dynamic via JavaScript (so “2025” automatically updates each year). Those are simple refinements but they show the direction: you’re turning a prototype menu into a real landing hub for your three-template system.
+In short, this session moved the project from “prototype HTML blobs” toward a maintainable **template + shared assets** architecture, with strong console observability, a robust workspace sizing system, and a clear separation between Classic (tile demo), Workspace (canvas/editor), and Game (workspace + rotate gate).
+19-DEC-2025
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+In this session, we significantly refined the "deMeza AutoCSS" project, focusing on user navigation, layout stability, and visual differentiation between templates. The work touched upon HTML structure, CSS styling, and core JavaScript logic to resolve bugs and enhance the simulator's realism.
+Here is a breakdown of the key accomplishments:
+**1. Navigation and Social Integration**
+We started by improving the project's connectivity and navigation flow.
+* **"Buy Me a Coffee" Link:** We updated `templates/index.html` to include a footer link pointing to `buymeacoffee.com/viralkiller`, ensuring it matched the existing aesthetic.
+* **"Back to Index" Button:** We implemented a consistent "Back" button (an arrow icon) in the top-left corner of `classic.html`, `workspace.html`, and `game.html`. This allows users to easily return to the main menu.
+* **Live View Logic:** Crucially, we added styles to `demeza_base.css` to hide this back button (along with the simulator controls) when "Live View" is toggled. This ensures that when a user wants to preview the "native app" experience, the UI is clean and distraction-free.
+**2. Resolving CSS 404 Errors**
+A major layout bug was identified where the Workspace and Game canvases were failing to span the full width of the desktop screen.
+* **Diagnosis:** The templates were referencing a non-existent file named `demeza_workspace.css`.
+* **Fix:** We corrected the links in `templates/workspace.html` and `templates/game.html` to point to the correct files (`workspace.css` and `game.css`). This restored the `grid-column: 1 / -1` property, allowing the main canvas tiles to properly dominate the layout as intended.
+**3. Grid Precision and Padding Enforcement**
+We implemented two scripted solutions to polish the visual presentation.
+* **Perfect Grid Squares:** In `static/js/workspace_system.js`, we replaced the static background grid with a dynamic calculation. The script now measures the exact width of the canvas and calculates a grid size that divides perfectly into that width. This ensures that the grid lines always align cleanly with the container edges, eliminating ugly partial squares.
+* **Symmetry Enforcement:** To prevent the layout from "popping" or looking uneven, we added a `fixPadding()` function to `static/js/simulator.js`. This function reads the browser's computed `padding-left` for the body and strictly enforces the exact same value for `padding-bottom`. This guarantees a symmetrical frame around the device simulator.
+**4. Fixing the "Off-Screen" Vertical Overflow**
+We addressed a critical issue where the bottom of the workspace frame was being pushed off-screen in Live View.
+* **The Issue:** Setting the frame height to `100vh` ignored the body's padding, causing the total height to exceed the viewport.
+* **The Solution:** We updated the resize logic in `workspace_system.js`. In Live View, the height is now calculated as `calc(100vh - (paddingTop + paddingBottom))`. This ensures the device frame is always 100% visible without requiring the user to scroll to see the bottom border.
+**5. Differentiating the Game Template**
+Finally, we gave the Game template a distinct identity separate from the Workspace.
+* **Visual Logic:** We added a `template-game` class to `templates/game.html`.
+* **Dynamic Iconography:** We updated `workspace_system.js` to detect this class. When present, it disables the grid lines and instead renders a large, faint Gamepad SVG icon in the center of the canvas.
+* **Orientation Simulation:** The script now checks the aspect ratio of the container. If the game is in "Portrait" mode (taller than wide), the gamepad icon rotates 90 degrees. This simulates a "wrong orientation" state, visually prompting the user to rotate their device (or the simulator) to Landscape mode to play.
+Since the last report, our primary focus has been debugging a persistent layout instability where the Workspace and Game templates would "pop" or overflow the viewport bottom during simulator adjustments (slider dragging or mode toggles).
+**1. Diagnosing the "Pop"**
+We identified that while the "Live View" (full screen) worked perfectly, the **Simulator Mode** was calculating available height incorrectly. The logic was setting the device frame height based on the full viewport, failing to account for the **Simulator Toolbar** (`.controls`) at the top of the page. This caused the bottom of the device frame to be pushed off-screen by exactly the height of that toolbar.
+**2. The "Enforcer" Experiment**
+To fix this, we initially implemented a strict "Layout Enforcer" script in `layout_bus.js`. This script monitored the DOM every 16ms and forcibly corrected margins and heights if it detected an overflow.
+* **Result:** While it technically stopped the overflow, it introduced significant visual **jitter**. The JavaScript correction loop was fighting against the smooth CSS transitions (0.2s animations), causing the layout to shake visibly during resizing.
+**3. The Final Solution: Targeted Logic**
+We discarded the "Enforcer" approach to restore smoothness and implemented a cleaner, logic-based fix within `workspace_system.js`:
+* **Reverted `layout_bus.js`:** We stripped out the complex monitoring code, returning the bus to its original, lightweight state.
+* **Updated `workspace_system.js`:** We rewrote the `fit()` function with two distinct logic paths:
+* **Live Mode:** Continues to use `calc(100vh - padding)` for a full-screen immersive experience.
+* **Simulator Mode:** Now explicitly measures the height of the `.controls` toolbar. It calculates the frame height as:
+`Viewport - Toolbar Height - Padding - Safety Buffer (12px)`.
+This approach solves the root cause (ignoring the toolbar) rather than trying to patch the symptoms, ensuring the bottom border remains visible and the layout remains stable without any jitter.
+19-DEC-2025
+---------------------------------------------------
 ================================================================================
 
 [-] This file: flask_app.py | Contents:
@@ -217,6 +288,32 @@ body{
   font-family:monospace;
 }
 .controls button:hover{ background:#666; }
+/* Back to Home Button */
+.back-home-btn{
+  position:fixed;
+  top:8px;
+  left:8px;
+  width:32px;
+  height:32px;
+  background:#333;
+  border:1px solid #444;
+  border-radius:var(--radius);
+  color:var(--accent);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+  z-index:500;
+  transition:background 0.2s ease, transform 0.1s ease;
+  cursor:pointer;
+}
+.back-home-btn:hover{ background:#444; }
+.back-home-btn:active{ transform:scale(1); }
+.back-home-btn svg{
+  width:16px;
+  height:16px;
+  fill:currentColor;
+}
 /* Device frame */
 #device-frame{
   background-color:var(--bg-color);
@@ -613,6 +710,7 @@ body.view-live{
   display:block;
 }
 body.view-live .controls{ display:none; }
+body.view-live .back-home-btn{ display:none; }
 body.view-live .simulator-wrapper{
   padding:0;
   max-width:none;
@@ -1210,6 +1308,10 @@ body{
       if (btnExit) btnExit.addEventListener('click', () => L.log('[UI] button click', { id: 'exit-live-btn' }));
       const initial = Number(this.slider?.value || 512);
       this.setWidth(initial, 'init');
+      // Padding enforcement listener
+      window.addEventListener('resize', () => this.fixPadding());
+      // Run once immediately
+      this.fixPadding();
     },
     setWidth(width, reason) {
       if (!this.frame) {
@@ -1222,6 +1324,8 @@ body{
       if (this.slider) this.slider.value = String(w);
       L.log('[Simulator] setWidth', { w, reason });
       Bus && Bus.notify && Bus.notify('Simulator.setWidth');
+      // Re-check padding after width change
+      this.fixPadding();
     },
     setMode(mode) {
       L.log('[UI] setMode clicked', { mode });
@@ -1234,6 +1338,26 @@ body{
       const after = document.body.classList.contains('view-live');
       L.log('[UI] toggleLiveMode', { before, after });
       Bus && Bus.notify && Bus.notify('Simulator.toggleLive');
+      // Re-check padding after mode toggle to ensure view updates
+      setTimeout(() => {
+        this.fixPadding();
+        // Trigger workspace refit if it exists
+        if (window.Demeza.WorkspaceSystem && window.Demeza.WorkspaceSystem.fitSoon) {
+          window.Demeza.WorkspaceSystem.fitSoon('toggleLive');
+        }
+      }, 50);
+    },
+    fixPadding() {
+      // ENFORCEMENT LAYER:
+      // Ensure bottom padding exactly matches left padding.
+      const body = document.body;
+      if (!body) return;
+      const computed = window.getComputedStyle(body);
+      const padLeft = computed.paddingLeft; // e.g., "24px"
+      // Force padding-bottom to match padding-left
+      if (body.style.paddingBottom !== padLeft) {
+        body.style.paddingBottom = padLeft;
+      }
     }
   };
   window.Demeza.Simulator = Simulator;
@@ -1300,13 +1424,24 @@ body{
   window.Demeza = window.Demeza || {};
   const L = window.Demeza.Log;
   const Bus = window.Demeza.LayoutBus;
+  // Simple Gamepad Icon SVG
+  const GAME_ICON_SVG = `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:100%; height:100%; color:#e0e0e0;">
+      <rect x="2" y="6" width="20" height="12" rx="2" />
+      <path d="M6 12h4m-2-2v4" />
+      <line x1="15" y1="11" x2="15" y2="11" />
+      <line x1="18" y1="13" x2="18" y2="13" />
+    </svg>
+  `;
   const WorkspaceSystem = {
     frame: null,
     header: null,
     grid: null,
     tile: null,
     canvas: null,
+    controls: null,
     _raf: null,
+    _gameIcon: null,
     init() {
       L.log('[Init] WorkspaceSystem.init');
       this.frame = document.getElementById('device-frame');
@@ -1314,26 +1449,15 @@ body{
       this.grid = document.getElementById('mainGrid');
       this.tile = document.getElementById('workspaceTile');
       this.canvas = document.getElementById('workspaceCanvas');
+      this.controls = document.querySelector('.controls');
       if (!this.frame || !this.header || !this.grid || !this.tile || !this.canvas) {
-        L.warn('[Workspace] init missing elements', {
-          frame: !!this.frame, header: !!this.header, grid: !!this.grid, tile: !!this.tile, canvas: !!this.canvas
-        });
+        L.warn('[Workspace] init missing elements');
         return;
       }
-      // Mark workspace mode for CSS overrides.
       this.frame.classList.add('has-workspace');
-      L.log('[Workspace] has-workspace enabled');
-      // React to layout signals.
       Bus && Bus.on && Bus.on((reason) => this.fitSoon(reason));
-      // React to actual window changes.
-      window.addEventListener('resize', () => {
-        L.log('[Workspace] window resize');
-        this.fitSoon('window.resize');
-      });
-      window.addEventListener('orientationchange', () => {
-        L.log('[Workspace] orientationchange');
-        this.fitSoon('window.orientationchange');
-      });
+      window.addEventListener('resize', () => this.fitSoon('window.resize'));
+      window.addEventListener('orientationchange', () => this.fitSoon('window.orientationchange'));
       this.fitSoon('init');
     },
     fitSoon(reason) {
@@ -1344,51 +1468,78 @@ body{
       });
     },
     fit(reason) {
-      if (!this.frame || !this.header || !this.grid || !this.tile || !this.canvas) {
-        L.warn('[Workspace] fit skipped (missing elements)');
-        return;
-      }
+      if (!this.frame || !this.header || !this.grid || !this.tile || !this.canvas) return;
       const isLive = document.body.classList.contains('view-live');
-      // 1) Frame height.
-      if (!isLive) {
-        const gutter = 16;
-        const top = this.frame.getBoundingClientRect().top;
-        const desired = Math.max(320, Math.round(window.innerHeight - top - gutter));
-        this.frame.style.height = desired + 'px';
+      const bodyStyle = window.getComputedStyle(document.body);
+      const padTop = parseFloat(bodyStyle.paddingTop) || 0;
+      const padBot = parseFloat(bodyStyle.paddingBottom) || 0;
+      // --- HEIGHT CALCULATION ---
+      if (isLive) {
+        // LIVE MODE: Full viewport minus body padding
+        this.frame.style.height = `calc(100vh - ${padTop + padBot}px)`;
       } else {
-        this.frame.style.height = '100vh';
+        // SIMULATOR MODE
+        // We calculate exact pixel height to fit between Toolbar and Bottom of screen.
+        // 1. Measure Toolbar
+        const controlsHeight = this.controls ? this.controls.offsetHeight : 0;
+        // 2. Margins & Safety
+        const gap = 16; // The CSS margin below controls
+        const buffer = 12; // NEW: Explicit safety buffer to prevent bottom border clipping
+        // 3. Calculate Available Height
+        // Formula: Window - TopPad - Toolbar - ToolbarMargin - BottomPad - SafetyBuffer
+        const availableH = Math.floor(window.innerHeight - padTop - controlsHeight - gap - padBot - buffer);
+        // 4. Clamp min height (320px)
+        const safeH = Math.max(320, availableH);
+        this.frame.style.height = `${safeH}px`;
       }
-      // 2) Integer math only.
+      // --- INNER CONTENT FITTING ---
       const frameClientH = this.frame.clientHeight;
       const headerH = this.header.offsetHeight;
       const gridStyle = window.getComputedStyle(this.grid);
-      const padTop = L.numPx(gridStyle.paddingTop);
-      const padBot = L.numPx(gridStyle.paddingBottom);
-      // 3) Fudge prevents 1px scroll pop.
+      const gridPadTop = parseFloat(gridStyle.paddingTop) || 0;
+      const gridPadBot = parseFloat(gridStyle.paddingBottom) || 0;
       const fudge = 1;
-      const raw = frameClientH - headerH - padTop - padBot - fudge;
-      const workspaceH = Math.max(200, raw);
+      const workspaceH = Math.max(200, frameClientH - headerH - gridPadTop - gridPadBot - fudge);
       this.tile.style.height = workspaceH + 'px';
       this.canvas.style.height = '100%';
-      // 4) Micro-scroll kill.
-      if (this.frame.scrollTop !== 0) {
-        L.log('[Workspace] frame scrollTop reset', { before: this.frame.scrollTop });
-        this.frame.scrollTop = 0;
+      // Reset scroll if it happened during resize
+      if (this.frame.scrollTop !== 0) this.frame.scrollTop = 0;
+      // --- VISUALS (Grid / Icon) ---
+      this.updateVisuals();
+      L.log('[Workspace] fit', { reason, isLive, frameH: this.frame.style.height });
+    },
+    updateVisuals() {
+      const isGame = document.body.classList.contains('template-game');
+      const w = this.canvas.clientWidth;
+      const h = this.canvas.clientHeight;
+      if (isGame) {
+        // Game Mode: Rotating Icon
+        this.canvas.style.backgroundImage = 'none';
+        if (!this._gameIcon) {
+          const div = document.createElement('div');
+          div.style.cssText = 'position:absolute;left:50%;top:50%;width:128px;height:128px;opacity:0.2;transition:transform 0.3s ease;pointer-events:none;';
+          div.innerHTML = GAME_ICON_SVG;
+          this.canvas.appendChild(div);
+          this._gameIcon = div;
+        }
+        this._gameIcon.style.display = 'block';
+        this._gameIcon.style.transform = (h > w)
+          ? 'translate(-50%, -50%) rotate(90deg)' // Portrait
+          : 'translate(-50%, -50%) rotate(0deg)'; // Landscape
+      } else {
+        // Workspace Mode: Grid
+        if (this._gameIcon) this._gameIcon.style.display = 'none';
+        if (w > 0) {
+          const targetSize = 32;
+          const cols = Math.round(w / targetSize) || 1;
+          const exactSize = w / cols;
+          this.canvas.style.backgroundSize = `${exactSize}px ${exactSize}px`;
+          this.canvas.style.backgroundImage = `
+            linear-gradient(to right, rgba(0,0,0,0.08) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(0,0,0,0.08) 1px, transparent 1px)
+          `;
+        }
       }
-      const overflowFrame = this.frame.scrollHeight - this.frame.clientHeight;
-      const overflowGrid = this.grid.scrollHeight - this.grid.clientHeight;
-      L.log('[Workspace] fit', {
-        reason,
-        isLive,
-        frameClientH,
-        headerH,
-        padTop,
-        padBot,
-        fudge,
-        workspaceH,
-        overflowFrame,
-        overflowGrid
-      });
     }
   };
   window.Demeza.WorkspaceSystem = WorkspaceSystem;
@@ -1401,17 +1552,18 @@ body{
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Demeza AutoCSS | Classic Template</title>
+  <title>deMeza AutoCSS | Classic Template</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
-  <!-- Optional (Device.js will use if present) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/UAParser.js/1.0.35/ua-parser.min.js"></script>
-  <!-- Shared CSS -->
   <link rel="stylesheet" href="/static/css/demeza_base.css" />
   <link rel="stylesheet" href="/static/css/classic.css" />
 </head>
 <body>
+  <a href="/" class="back-home-btn" aria-label="Back to Index">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+  </a>
   <button id="exit-live-btn" onclick="toggleLiveMode()">EXIT LIVE VIEW</button>
   <div class="simulator-wrapper">
     <div class="controls">
@@ -1528,13 +1680,11 @@ body{
       </div>
     </div>
   </div>
-  <!-- Shared JS -->
   <script src="/static/js/log.js"></script>
   <script src="/static/js/layout_bus.js"></script>
   <script src="/static/js/device.js"></script>
   <script src="/static/js/nav_ui.js"></script>
   <script src="/static/js/simulator.js"></script>
-  <!-- Classic-only JS (kept inline for now) -->
   <script>
     (function () {
       const D = window.Demeza || {};
@@ -1758,9 +1908,12 @@ body{
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/UAParser.js/1.0.35/ua-parser.min.js"></script>
   <link rel="stylesheet" href="/static/css/demeza_base.css">
-  <link rel="stylesheet" href="/static/css/demeza_workspace.css">
+  <link rel="stylesheet" href="/static/css/game.css">
 </head>
-<body>
+<body class="template-game">
+  <a href="/" class="back-home-btn" aria-label="Back to Index">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+  </a>
   <button id="exit-live-btn" onclick="toggleLiveMode()">EXIT LIVE VIEW</button>
   <div class="simulator-wrapper">
     <div class="controls">
@@ -1789,7 +1942,7 @@ body{
               <a class="is-credits" id="mobileCredits">100 Credits</a>
               <a id="mobileLogin">Login</a>
             </div>
-            <a class="nav-link active" data-nav="Game">Game</a>
+            <a class="nav-link active" data-nav="Game">Home</a>
             <a class="nav-link" data-nav="About">About</a>
             <a class="nav-link" data-nav="Blog">Blog</a>
             <a class="nav-link" data-nav="Contact">Contact</a>
@@ -1808,7 +1961,6 @@ body{
       <div class="tile-grid" id="mainGrid">
         <div class="tile tile-workspace" id="workspaceTile">
           <div id="workspaceCanvas" tabindex="0">
-            <div class="workspace-hint">Game Canvas (rotate on mobile)</div>
           </div>
         </div>
       </div>
@@ -1854,7 +2006,7 @@ body{
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>deMeza AutoCSS | Never design a separate mobile and desktop version again | Home</title>
+  <title>deMeza AutoCSS | Never design a separate mobile and desktop version ever again!</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
@@ -1984,6 +2136,13 @@ body{
       font-size: 12px;
       opacity: 0.65;
       padding: 0 var(--q-4);
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .footer a:hover {
+      text-decoration: underline;
+      color: var(--accent);
     }
   </style>
 </head>
@@ -1992,7 +2151,7 @@ body{
     <div class="titlebar">
       <div>
         <div class="brand">deMeza AutoCSS</div>
-        <div class="subtitle">Choose a common template</div>
+        <div class="subtitle" style="margin-top:8px;">Never design a separate mobile and desktop version ever again!</div>
       </div>
     </div>
     <div class="grid" aria-label="Mode selection">
@@ -2032,7 +2191,6 @@ body{
           <span class="arrow">→</span>
         </div>
       </div>
-      <!-- UNLOCKED: no "TBA" styling -->
       <div
         class="card"
         role="button"
@@ -2053,10 +2211,13 @@ body{
       </div>
     </div>
     <div class="footer">
-      <span>deMeza AutoCSS </span><span id="footerYear">2025</span>
+      <span>deMeza AutoCSS</span><span id="footerYear">2025</span>
+      <span>|</span>
+      <a href="https://www.buymeacoffee.com/viralkiller" target="_blank" style="color:inherit; text-decoration:none;">
+        ☕ Buy me a coffee
+      </a>
     </div>
   </div>
-  <!-- JS -->
   <script src="/static/js/log.js"></script>
   <script src="/static/js/layout_bus.js"></script>
   <script src="/static/js/device.js"></script>
@@ -2098,18 +2259,18 @@ body{
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Demeza AutoCSS | Workspace Template</title>
+  <title>deMeza AutoCSS | Workspace Template</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
-  <!-- UAParser optional, Device.js will use it if present -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/UAParser.js/1.0.35/ua-parser.min.js"></script>
-  <!-- Shared CSS -->
   <link rel="stylesheet" href="/static/css/demeza_base.css">
-  <!-- Workspace-specific CSS -->
-  <link rel="stylesheet" href="/static/css/demeza_workspace.css">
+  <link rel="stylesheet" href="/static/css/workspace.css">
 </head>
 <body>
+  <a href="/" class="back-home-btn" aria-label="Back to Index">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+  </a>
   <button id="exit-live-btn" onclick="toggleLiveMode()">EXIT LIVE VIEW</button>
   <div class="simulator-wrapper">
     <div class="controls">
@@ -2138,7 +2299,7 @@ body{
               <a class="is-credits" id="mobileCredits">100 Credits</a>
               <a id="mobileLogin">Login</a>
             </div>
-            <a class="nav-link active" data-nav="Workspace">Workspace</a>
+            <a class="nav-link active" data-nav="Workspace">Home</a>
             <a class="nav-link" data-nav="About">About</a>
             <a class="nav-link" data-nav="Blog">Blog</a>
             <a class="nav-link" data-nav="Contact">Contact</a>
@@ -2155,25 +2316,20 @@ body{
         </nav>
       </div>
       <div class="tile-grid" id="mainGrid">
-        <!-- WORKSPACE TILE (dominant) -->
         <div class="tile tile-workspace" id="workspaceTile">
           <div id="workspaceCanvas" tabindex="0">
-            <div class="workspace-hint">Workspace Canvas (nodes go here)</div>
           </div>
         </div>
       </div>
     </div>
   </div>
-  <!-- Shared JS -->
   <script src="/static/js/log.js"></script>
   <script src="/static/js/layout_bus.js"></script>
   <script src="/static/js/device.js"></script>
   <script src="/static/js/nav_ui.js"></script>
   <script src="/static/js/simulator.js"></script>
-  <!-- Workspace JS -->
   <script src="/static/js/workspace_input.js"></script>
   <script src="/static/js/workspace_system.js"></script>
-  <!-- Boot -->
   <script>
     (function () {
       'use strict';

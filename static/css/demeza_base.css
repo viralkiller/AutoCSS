@@ -512,3 +512,100 @@ body.view-live #exit-live-btn{ display:block; }
 body.is-native-mobile #exit-live-btn{
   display:none !important;
 }
+
+/* Get Code Button - HIDDEN BY DEFAULT */
+#get-code-btn{
+  display:none;
+  position:fixed;
+  bottom:74px; /* Stacked below Exit button */
+  right:20px;
+  z-index:9999;
+  padding:12px 24px;
+  background:var(--text-main);
+  color:#fff;
+  border:none;
+  font-weight:bold;
+  cursor:pointer;
+  box-shadow:0 4px 12px rgba(0,0,0,0.3);
+  border-radius:var(--radius);
+}
+
+/* ONLY VISIBLE IN LIVE VIEW */
+body.view-live #get-code-btn{ display:block; }
+
+/* Native mobile hides it (since you can't copy-paste code easily on phone) */
+body.is-native-mobile #get-code-btn{ display:none !important; }
+
+/* Code Export Modal */
+.code-modal-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.85);
+  z-index:10000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  backdrop-filter:blur(4px);
+  display:none; /* Hidden initially */
+}
+.code-modal-content{
+  background:#1a1a1a;
+  border:4px solid var(--accent);
+  width:100%;
+  max-width:1000px;
+  height:90vh;
+  display:flex;
+  flex-direction:column;
+  box-shadow:0 20px 50px rgba(0,0,0,0.5);
+}
+.code-modal-header{
+  padding:16px;
+  background:#222;
+  border-bottom:1px solid #333;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.code-modal-title{
+  color:var(--text-main);
+  font-weight:bold;
+  font-size:18px;
+  font-family:monospace;
+}
+.code-modal-body{
+  flex-grow:1;
+  position:relative;
+}
+.code-textarea{
+  width:100%;
+  height:100%;
+  background:#111;
+  color:#a3adbf;
+  border:none;
+  padding:16px;
+  font-family:monospace;
+  font-size:13px;
+  resize:none;
+  outline:none;
+  white-space:pre;
+}
+.code-modal-footer{
+  padding:16px;
+  background:#222;
+  border-top:1px solid #333;
+  display:flex;
+  justify-content:flex-end;
+  gap:16px;
+}
+.cm-btn{
+  padding:10px 20px;
+  cursor:pointer;
+  font-weight:bold;
+  font-family:monospace;
+  border:none;
+  font-size:14px;
+}
+.cm-btn-copy{ background:var(--accent); color:#fff; }
+.cm-btn-close{ background:#444; color:#ccc; }
+.cm-btn:hover{ opacity:0.9; }
