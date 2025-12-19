@@ -3,33 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Demeza AutoCSS | Workspace Template</title>
-
+  <title>deMeza AutoCSS | Workspace Template</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
-
-  <!-- UAParser optional, Device.js will use it if present -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/UAParser.js/1.0.35/ua-parser.min.js"></script>
-
-  <!-- Shared CSS -->
   <link rel="stylesheet" href="/static/css/demeza_base.css">
-  <!-- Workspace-specific CSS -->
-  <link rel="stylesheet" href="/static/css/demeza_workspace.css">
+  <link rel="stylesheet" href="/static/css/workspace.css">
 </head>
-
 <body>
+  <a href="/" class="back-home-btn" aria-label="Back to Index">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+  </a>
   <button id="exit-live-btn" onclick="toggleLiveMode()">EXIT LIVE VIEW</button>
-
   <div class="simulator-wrapper">
     <div class="controls">
       <span style="color:white; font-size:12px; font-weight:512;">DEVICE WIDTH:</span>
       <input type="range" id="widthSlider" min="320" max="1280" value="512" style="width:200px !important;">
       <span id="pxDisplay" style="color:white; font-family:monospace; font-size:12px;">512px</span>
-
       <button id="btnMobile" onclick="setMode('mobile')" style="padding:5px 15px;">MOBILE</button>
       <button id="btnDesktop" onclick="setMode('desktop')" style="padding:5px 15px;">DESKTOP</button>
-
       <button
         id="btnLive"
         onclick="toggleLiveMode()"
@@ -38,27 +31,23 @@
         LIVE VIEW
       </button>
     </div>
-
     <div id="device-frame">
       <div class="header-group" id="headerGroup">
         <div class="meta-bar">
           <div class="meta-left"><a id="metaCredits">100 Credits</a></div>
           <div class="meta-right"><a id="metaLogin">Login</a></div>
         </div>
-
         <nav class="nav-bar" id="mainNav">
           <div class="nav-links" id="navLinks">
             <div class="mobile-meta-group">
               <a class="is-credits" id="mobileCredits">100 Credits</a>
               <a id="mobileLogin">Login</a>
             </div>
-
             <a class="nav-link active" data-nav="Workspace">Workspace</a>
             <a class="nav-link" data-nav="About">About</a>
             <a class="nav-link" data-nav="Blog">Blog</a>
             <a class="nav-link" data-nav="Contact">Contact</a>
           </div>
-
           <button
             class="hamburger-btn"
             id="hamburgerBtn"
@@ -70,52 +59,37 @@
           </button>
         </nav>
       </div>
-
       <div class="tile-grid" id="mainGrid">
-        <!-- WORKSPACE TILE (dominant) -->
         <div class="tile tile-workspace" id="workspaceTile">
           <div id="workspaceCanvas" tabindex="0">
-            <div class="workspace-hint">Workspace Canvas (nodes go here)</div>
+
           </div>
         </div>
-
-
       </div>
     </div>
   </div>
-
-  <!-- Shared JS -->
   <script src="/static/js/log.js"></script>
   <script src="/static/js/layout_bus.js"></script>
   <script src="/static/js/device.js"></script>
   <script src="/static/js/nav_ui.js"></script>
   <script src="/static/js/simulator.js"></script>
-
-  <!-- Workspace JS -->
   <script src="/static/js/workspace_input.js"></script>
   <script src="/static/js/workspace_system.js"></script>
-
-  <!-- Boot -->
   <script>
     (function () {
       'use strict';
-
       window.addEventListener('load', () => {
         const D = window.Demeza || {};
         const L = D.Log;
-
         L && L.log && L.log('[Boot] workspace_boot');
-
         D.NavUI && D.NavUI.init && D.NavUI.init();
         D.Simulator && D.Simulator.init && D.Simulator.init();
         D.WorkspaceInput && D.WorkspaceInput.init && D.WorkspaceInput.init();
         D.WorkspaceSystem && D.WorkspaceSystem.init && D.WorkspaceSystem.init();
-
         // Optional: auto-live on real mobile devices (no exit button on mobile by design)
         try {
           const isMobile = D.Device && D.Device.isNativeMobile && D.Device.isNativeMobile();
           L && L.log && L.log('[Workspace] mobile auto-live check', { isMobile });
-
           if (isMobile) {
             document.body.classList.add('is-native-mobile');
             if (!document.body.classList.contains('view-live')) {

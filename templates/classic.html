@@ -3,27 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Demeza AutoCSS | Classic Template</title>
-
+  <title>deMeza AutoCSS | Classic Template</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
-
-  <!-- Optional (Device.js will use if present) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/UAParser.js/1.0.35/ua-parser.min.js"></script>
-
-  <!-- Shared CSS -->
   <link rel="stylesheet" href="/static/css/demeza_base.css" />
   <link rel="stylesheet" href="/static/css/classic.css" />
 </head>
-
 <body>
+  <a href="/" class="back-home-btn" aria-label="Back to Index">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+  </a>
   <button id="exit-live-btn" onclick="toggleLiveMode()">EXIT LIVE VIEW</button>
-
   <div class="simulator-wrapper">
     <div class="controls">
       <span style="color:white; font-size:12px; font-weight:512;">DEVICE WIDTH:</span>
-
       <input
         type="range"
         id="widthSlider"
@@ -32,12 +27,9 @@
         value="400"
         style="width:200px !important;"
       />
-
       <span id="pxDisplay" style="color:white; font-family:monospace; font-size:12px;">400px</span>
-
       <button id="btnMobile" onclick="setMode('mobile')" style="padding:5px 15px;">MOBILE</button>
       <button id="btnDesktop" onclick="setMode('desktop')" style="padding:5px 15px;">DESKTOP</button>
-
       <button
         id="btnLive"
         onclick="toggleLiveMode()"
@@ -46,27 +38,23 @@
         LIVE VIEW
       </button>
     </div>
-
     <div id="device-frame">
       <div class="header-group" id="headerGroup">
         <div class="meta-bar">
           <div class="meta-left"><a id="metaCredits" href="#">100 Credits</a></div>
           <div class="meta-right"><a id="metaLogin" href="#">Login</a></div>
         </div>
-
         <nav class="nav-bar" id="mainNav">
           <div class="nav-links" id="navLinks">
             <div class="mobile-meta-group">
               <a class="is-credits" id="mobileCredits" href="#">100 Credits</a>
               <a id="mobileLogin" href="#">Login</a>
             </div>
-
             <a class="nav-link active" data-nav="Home" href="#">Home</a>
             <a class="nav-link" data-nav="About" href="#">About</a>
             <a class="nav-link" data-nav="Blog" href="#">Blog</a>
             <a class="nav-link" data-nav="Contact" href="#">Contact</a>
           </div>
-
           <button
             class="hamburger-btn"
             id="hamburgerBtn"
@@ -78,24 +66,19 @@
           </button>
         </nav>
       </div>
-
       <div class="tile-grid" id="mainGrid">
         <div class="tile tile-stretch">
           <div style="height:100%; display:flex; align-items:center;">
             <h1 style="margin:0; color: var(--text-main); font-weight:768; letter-spacing:-2px;">LOGO</h1>
           </div>
         </div>
-
         <div class="tile tile-ghost"></div>
-
         <div class="tile tile-std">
           <h3>Join Mailing List</h3>
           <input id="mailInput" type="text" placeholder="Enter your email">
           <button id="refButton" class="btn-ref">SUBMIT</button>
         </div>
-
         <div class="tile tile-ghost"></div>
-
         <div class="tile tile-std">
           <h3>Settings Smooth</h3>
           <div class="slider-wrapper">
@@ -107,7 +90,6 @@
             <span class="slider-label">100</span>
           </div>
         </div>
-
         <div class="tile tile-std">
           <h3>Upload File</h3>
           <label id="matchLabel" class="file-upload-label btn-match">
@@ -116,7 +98,6 @@
           </label>
           <span id="fileName" class="file-name-display">...</span>
         </div>
-
         <div class="tile tile-std">
           <h3>Settings Snap</h3>
           <img
@@ -134,40 +115,31 @@
             <span class="slider-label">2</span>
           </div>
         </div>
-
         <div class="tile tile-stretch">
           <h3>Paste text here</h3>
           <textarea id="pasteArea"></textarea>
         </div>
-
         <div class="tile tile-std" id="step1">
           <h3>Your file is ready!</h3>
         </div>
-
         <div class="tile tile-std" id="step2">
           <button id="viewButton" class="btn-ref">View File</button>
         </div>
-
         <div class="tile tile-std" id="step3">
           <button id="againButton" class="btn-ref">Generate Another</button>
         </div>
       </div>
     </div>
   </div>
-
-  <!-- Shared JS -->
   <script src="/static/js/log.js"></script>
   <script src="/static/js/layout_bus.js"></script>
   <script src="/static/js/device.js"></script>
   <script src="/static/js/nav_ui.js"></script>
   <script src="/static/js/simulator.js"></script>
-
-  <!-- Classic-only JS (kept inline for now) -->
   <script>
     (function () {
       const D = window.Demeza || {};
       const L = D.Log || console;
-
       function preventNavDefaultClicks() {
         const ids = ['metaCredits','metaLogin','mobileCredits','mobileLogin'];
         ids.forEach((id) => {
@@ -185,7 +157,6 @@
           });
         });
       }
-
       const ClassicUI = {
         initSliders() {
           L.log('[Init] ClassicUI.initSliders');
@@ -193,7 +164,6 @@
             const slider = container.querySelector('input[type="range"]');
             const bubble = container.querySelector('.slider-value');
             if (!slider || !bubble) return;
-
             const updateBubble = (val) => {
               const min = parseFloat(slider.min) || 0;
               const max = parseFloat(slider.max) || 100;
@@ -202,20 +172,16 @@
               bubble.textContent = String(val);
               bubble.style.left = `calc(${percent}% + ${offset}px)`;
             };
-
             updateBubble(slider.value);
-
             slider.addEventListener('input', (e) => {
               updateBubble(e.target.value);
               bubble.classList.add('active');
               L.log('[UI] slider input', { id: slider.id, value: e.target.value });
             });
-
             const hideBubble = () => bubble.classList.remove('active');
             ['change', 'mouseup', 'touchend'].forEach((evt) => slider.addEventListener(evt, hideBubble));
           });
         },
-
         initSnapSlider() {
           L.log('[Init] ClassicUI.initSnapSlider');
           const snapSlider = document.getElementById('snapSlider');
@@ -235,7 +201,6 @@
             L.log('[UI] snapSlider input', { value: val });
           });
         },
-
         bindButtonsAndFile() {
           const refButton = document.getElementById('refButton');
           const viewButton = document.getElementById('viewButton');
@@ -243,13 +208,11 @@
           const fileInput = document.getElementById('fileInput');
           const fileName = document.getElementById('fileName');
           const mailInput = document.getElementById('mailInput');
-
           if (refButton) refButton.addEventListener('click', () => {
             L.log('[UI] submit mailing list', { email: (mailInput?.value || '').trim() });
           });
           if (viewButton) viewButton.addEventListener('click', () => L.log('[UI] view file'));
           if (againButton) againButton.addEventListener('click', () => L.log('[UI] generate another'));
-
           if (fileInput) {
             fileInput.addEventListener('change', () => {
               const name = fileInput.files && fileInput.files[0] ? fileInput.files[0].name : '...';
@@ -259,72 +222,57 @@
           }
         }
       };
-
       const ClassicLayout = {
         syncButtonStyles() {
           const ref = document.getElementById('refButton');
           const target = document.getElementById('matchLabel');
           if (!ref || !target) return;
-
           const computed = window.getComputedStyle(ref);
           ['fontSize','fontFamily','fontWeight','lineHeight','height']
             .forEach((prop) => target.style[prop] = computed[prop]);
-
           L.log('[Layout] syncButtonStyles', { ok: true });
         },
-
         optimizeTextarea() {
           const txtArea = document.getElementById('pasteArea');
           if (!txtArea) return;
-
           const tile = txtArea.closest('.tile');
           const header = tile ? tile.querySelector('h3') : null;
           if (!tile) return;
-
           tile.style.display = 'flex';
           tile.style.flexDirection = 'column';
           tile.style.alignItems = 'flex-start';
           tile.style.textAlign = 'left';
-
           txtArea.style.flexGrow = '1';
           txtArea.style.width = '100%';
-
           if (header) {
             header.style.marginBottom = 'var(--q-16)';
             header.style.width = '100%';
           }
-
           L.log('[Layout] optimizeTextarea', { ok: true });
         },
-
         refresh(reason) {
           L.log('[Layout] refresh', { reason });
           this.syncButtonStyles();
           this.optimizeTextarea();
         }
       };
-
       const ArrowSystem = {
         grid: null,
         arrows: [],
         nudge: 12,
         arrowSVG: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21l-10-16h20l-10 16z"/></svg>`,
-
         init() {
           this.grid = document.getElementById('mainGrid');
           if (!this.grid) {
             L.warn('[ArrowSystem] mainGrid missing');
             return;
           }
-
           this.arrows.forEach((a) => a.element.remove());
           this.arrows = [];
-
           const connections = [
             { from: 'step1', to: 'step2' },
             { from: 'step2', to: 'step3' }
           ];
-
           connections.forEach((conn) => {
             const elFrom = document.getElementById(conn.from);
             const elTo = document.getElementById(conn.to);
@@ -332,34 +280,26 @@
               L.warn('[ArrowSystem] missing tiles', { from: conn.from, to: conn.to });
               return;
             }
-
             const arrowEl = document.createElement('div');
             arrowEl.className = 'floating-arrow';
             arrowEl.innerHTML = this.arrowSVG;
-
             this.grid.appendChild(arrowEl);
             this.arrows.push({ element: arrowEl, from: elFrom, to: elTo });
             L.log('[ArrowSystem] connection added', conn);
           });
-
           const ro = new ResizeObserver(() => this.update('ResizeObserver'));
           ro.observe(this.grid);
-
           setTimeout(() => this.update('init:timeout'), 100);
           this.update('init:immediate');
         },
-
         update(reason) {
           if (!this.grid) return;
           const gridRect = this.grid.getBoundingClientRect();
-
           this.arrows.forEach((arrow) => {
             const r1 = arrow.from.getBoundingClientRect();
             const r2 = arrow.to.getBoundingClientRect();
-
             const c1 = { x: r1.left + r1.width / 2, y: r1.top + r1.height / 2 };
             const isVertical = (r2.top > (r1.bottom - 10));
-
             let x, y, rotation;
             if (isVertical) {
               x = c1.x;
@@ -370,34 +310,25 @@
               y = c1.y;
               rotation = -90;
             }
-
             const finalLeft = x - gridRect.left;
             const finalTop = y - gridRect.top;
-
             arrow.element.style.left = `${finalLeft - 24}px`;
             arrow.element.style.top = `${finalTop - 24}px`;
             arrow.element.style.transform = `rotate(${rotation}deg)`;
           });
-
           L.log('[ArrowSystem] update', { reason, count: this.arrows.length });
         }
       };
-
       window.addEventListener('load', () => {
         L.log('[Boot] classic.html load');
-
         D.NavUI && D.NavUI.init && D.NavUI.init();
         D.Simulator && D.Simulator.init && D.Simulator.init();
-
         preventNavDefaultClicks();
-
         ClassicUI.initSliders();
         ClassicUI.initSnapSlider();
         ClassicUI.bindButtonsAndFile();
-
         ClassicLayout.refresh('load');
         ArrowSystem.init();
-
         const isMobile = D.Device && D.Device.isNativeMobile && D.Device.isNativeMobile();
         if (isMobile) {
           document.body.classList.add('is-native-mobile');
@@ -406,7 +337,6 @@
           window.toggleLiveMode && window.toggleLiveMode();
         }
       });
-
       window.addEventListener('resize', () => {
         ClassicLayout.refresh('window.resize');
         ArrowSystem.update('window.resize');
