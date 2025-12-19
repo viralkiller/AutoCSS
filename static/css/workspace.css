@@ -1,0 +1,52 @@
+/* static/css/workspace.css */
+/* Workspace-only styling */
+
+#device-frame.has-workspace{
+  overflow-y:hidden;
+  overscroll-behavior:none;
+}
+
+.tile-workspace{
+  grid-column:1 / -1;
+  padding:0;
+  border-color:var(--text-main);
+  align-items:stretch;
+  justify-content:stretch;
+  text-align:left;
+  background:var(--tile-bg);
+  min-height:0;
+}
+
+/* Workspace dominates */
+.tile-workspace ~ .tile{
+  display:none !important;
+}
+
+#workspaceCanvas{
+  position:relative;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  outline:none;
+  background-image:
+    linear-gradient(to right, rgba(0,0,0,0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0,0,0,0.06) 1px, transparent 1px);
+  background-size:32px 32px;
+  user-select:none;
+  touch-action:none;
+}
+
+.workspace-hint{
+  position:absolute;
+  top:12px;
+  left:12px;
+  padding:6px 10px;
+  background:rgba(255,255,255,0.9);
+  border:2px solid rgba(0,0,0,0.12);
+  color:var(--text-dark);
+  font-family:monospace;
+  font-size:12px;
+  z-index:5;
+  border-radius:var(--radius);
+  pointer-events:none;
+}

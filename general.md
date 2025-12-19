@@ -1,3 +1,5 @@
+DEMO: https://autocss.pythonanywhere.com
+
 The |deMeza AutoCSS system| is a new way to design websites that removes the usual headache of maintaining separate desktop and mobile layouts.
 
 You follow a small set of rules, and the desktop and mobile versions emerge automatically.
@@ -36,3 +38,11 @@ These three templates all use the same core tile logic and should cover 99% of y
 
 Coming soon: a live page editor that lets you add, remove, and reorder tiles in real time,
 plus a “Generate Final Code” button that outputs a clean, single-page HTML/CSS/JS build of your layout, ready to deploy immediately.
+
+ADDITIONAL NOTES:
+
+The website is in essence a sort of demo and 'editor', and is therefore allowed separate JS and CSS files (usually we prefer HTML/CSS/JS all on the same page).
+However the final 'baked' design that the user exports should have the HTML/CSS/JS code all in one file i.e. index.html
+This is to make life easy, they just upload the file to their server and point to it, without having to setup dir trees and such.
+
+

@@ -1,7 +1,20 @@
-Aggregated on: 2025-12-19 08:47:01
+Aggregated on: 2025-12-19 09:27:22
 ================================================================================
 Project Directory Tree:
 /
+├── static
+│   └── js
+│       ├── device.js
+│       ├── game_boot.js
+│       ├── index.js
+│       ├── index_boot.js
+│       ├── layout_bus.js
+│       ├── log.js
+│       ├── nav_ui.js
+│       ├── rotate_gate.js
+│       ├── simulator.js
+│       ├── workspace_input.js
+│       └── workspace_system.js
 ├── templates
 │   ├── classic.html
 │   ├── index.html
@@ -14,11 +27,11 @@ Project Directory Tree:
 ├── .vimrc
 ├── _Review_Functions.py
 ├── flask_app.py
+├── general.md
 ├── project_directory_full_code_1.txt
-├── README.txt
-└── readme.txt
+└── README.txt
 
-1 directories, 14 files
+3 directories, 25 files
 ================================================================================
 
 [-] This file: .pythonstartup.py | Contents:
@@ -33,7 +46,7 @@ import os
 app = Flask(__name__)
 # Debug print on startup
 print("[BOOT] Flask app starting…")
-print("[PLEDGING] Allegiance to Sheev Palpatine…")
+print("[PLEDGING] Allegiance to Sheev Palpatine…") # do not delete this line
 print("[INFO] Template folder:", app.template_folder)
 print("[INFO] Static folder:", app.static_folder)
 # ----------------------
@@ -43,10 +56,18 @@ print("[INFO] Static folder:", app.static_folder)
 def home():
     print("[ROUTE] GET /  → index.html")
     return render_template("index.html")
+@app.route("/classic")
+def classic():
+    print("[ROUTE] GET /  → classic.html")
+    return render_template("classic.html")
 @app.route("/workspace")
 def workspace():
     print("[ROUTE] GET /  → workspace.html")
     return render_template("workspace.html")
+@app.route("/game")
+def game():
+    print("[ROUTE] GET /  → game.html")
+    return render_template("game.html")
 @app.route("/static/<path:filename>")
 def serve_static(filename):
     print(f"[STATIC] /static/{filename}")
@@ -57,6 +78,522 @@ def serve_static(filename):
 if __name__ == "__main__":
     print("[RUN] Running in local dev mode on port 5000")
     app.run(debug=True, host="0.0.0.0", port=5000)
+================================================================================
+
+[-] This file: static/js/device.js | Contents:
+(function () {
+  'use strict';
+  window.Demeza = window.Demeza || {};
+  const L = window.Demeza.Log;
+  function _uaMobileHint() {
+    const ua = (navigator.userAgent || '').toLowerCase();
+    return /android|iphone|ipad|ipod|mobile/.test(ua);
+  }
+  function isCoarsePointer() {
+    return !!window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+  }
+  function isPortrait() {
+    return !!window.matchMedia && window.matchMedia('(orientation: portrait)').matches;
+  }
+  function isLandscape() {
+    return !!window.matchMedia && window.matchMedia('(orientation: landscape)').matches;
+  }
+  function isNativeMobile() {
+    // Prefer UAParser if present.
+    if (typeof window.UAParser !== 'undefined') {
+      try {
+        const p = new window.UAParser();
+        const dev = p.getDevice();
+        const type = (dev && dev.type) || '';
+        const res = (type === 'mobile' || type === 'tablet');
+        L && L.log && L.log('[Device] UAParser check', { type, res });
+        return res;
+      } catch (e) {
+        L && L.warn && L.warn('[Device] UAParser failed, fallback', { e: String(e) });
+      }
+    }
+    const res = isCoarsePointer() || _uaMobileHint();
+    L && L.log && L.log('[Device] fallback mobile check', { res, coarse: isCoarsePointer(), uaHint: _uaMobileHint() });
+    return res;
+  }
+  window.Demeza.Device = { isNativeMobile, isCoarsePointer, isPortrait, isLandscape };
+})();
+================================================================================
+
+[-] This file: static/js/game_boot.js | Contents:
+(function () {
+  'use strict';
+  window.addEventListener('load', () => {
+    const D = window.Demeza || {};
+    const L = D.Log;
+    L && L.log && L.log('[Boot] game_boot');
+    D.NavUI && D.NavUI.init && D.NavUI.init();
+    D.Simulator && D.Simulator.init && D.Simulator.init();
+    // Game uses workspace sizing + canvas input too.
+    D.WorkspaceInput && D.WorkspaceInput.init && D.WorkspaceInput.init();
+    D.WorkspaceSystem && D.WorkspaceSystem.init && D.WorkspaceSystem.init();
+    // Mobile-only: rotate to play.
+    D.RotateGate && D.RotateGate.init && D.RotateGate.init();
+  });
+})();
+================================================================================
+
+[-] This file: static/js/index.js | Contents:
+(function () {
+  'use strict';
+  window.Demeza = window.Demeza || {};
+  const L = window.Demeza.Log;
+  function go(path) {
+    L.log('[Index] navigate', { path });
+    window.location.href = path;
+  }
+  const Index = {
+    init() {
+      L.log('[Init] Index.init');
+      document.querySelectorAll('[data-home-card]').forEach((card) => {
+        card.addEventListener('click', () => {
+          const target = card.getAttribute('data-target') || '';
+          L.log('[UI] home card click', { target, text: (card.textContent || '').trim() });
+          if (target) go(target);
+        });
+        card.addEventListener('mouseenter', () => {
+          L.log('[UI] home card hover', { target: card.getAttribute('data-target') || '' });
+        });
+      });
+    }
+  };
+  window.Demeza.Index = Index;
+})();
+================================================================================
+
+[-] This file: static/js/index_boot.js | Contents:
+(function () {
+  'use strict';
+  window.addEventListener('load', () => {
+    const D = window.Demeza || {};
+    const L = D.Log;
+    L && L.log && L.log('[Boot] index_boot');
+    D.Index && D.Index.init && D.Index.init();
+  });
+})();
+================================================================================
+
+[-] This file: static/js/layout_bus.js | Contents:
+(function () {
+  'use strict';
+  window.Demeza = window.Demeza || {};
+  const { log } = window.Demeza.Log || console;
+  const LayoutBus = {
+    _subs: [],
+    on(fn) {
+      if (typeof fn !== 'function') return;
+      this._subs.push(fn);
+      log('[LayoutBus] subscribed', { count: this._subs.length });
+    },
+    notify(reason) {
+      log('[LayoutBus] notify', { reason, subs: this._subs.length });
+      this._subs.forEach(fn => {
+        try { fn(reason); }
+        catch (e) { console.error('[LayoutBus] subscriber error', e); }
+      });
+      if (typeof window.onLayoutChange === 'function') {
+        try { window.onLayoutChange(reason); }
+        catch (e) { console.error('[LayoutBus] window.onLayoutChange error', e); }
+      }
+    }
+  };
+  window.Demeza.LayoutBus = LayoutBus;
+})();
+================================================================================
+
+[-] This file: static/js/log.js | Contents:
+(function () {
+  'use strict';
+  window.Demeza = window.Demeza || {};
+  function _ts() {
+    return new Date().toISOString().slice(11, 23);
+  }
+  function log(msg, obj) {
+    if (obj !== undefined) console.log(`[${_ts()}] ${msg}`, obj);
+    else console.log(`[${_ts()}] ${msg}`);
+  }
+  function warn(msg, obj) {
+    if (obj !== undefined) console.warn(`[${_ts()}] ${msg}`, obj);
+    else console.warn(`[${_ts()}] ${msg}`);
+  }
+  function err(msg, obj) {
+    if (obj !== undefined) console.error(`[${_ts()}] ${msg}`, obj);
+    else console.error(`[${_ts()}] ${msg}`);
+  }
+  function numPx(v) {
+    const n = parseFloat(v);
+    return Number.isFinite(n) ? n : 0;
+  }
+  function byId(id) {
+    const el = document.getElementById(id);
+    if (!el) warn('[DOM] missing id', { id });
+    return el;
+  }
+  window.Demeza.Log = { log, warn, err, numPx, byId };
+})();
+================================================================================
+
+[-] This file: static/js/nav_ui.js | Contents:
+(function () {
+  'use strict';
+  window.Demeza = window.Demeza || {};
+  const L = window.Demeza.Log;
+  const Bus = window.Demeza.LayoutBus;
+  const NavUI = {
+    init() {
+      L.log('[Init] NavUI.init');
+      const nav = document.getElementById('mainNav');
+      const btn = document.getElementById('hamburgerBtn');
+      const navLinks = document.getElementById('navLinks');
+      if (btn) {
+        btn.addEventListener('click', () => {
+          const before = nav && nav.classList.contains('mobile-open');
+          if (nav) nav.classList.toggle('mobile-open');
+          const after = nav && nav.classList.contains('mobile-open');
+          btn.setAttribute('aria-expanded', after ? 'true' : 'false');
+          if (navLinks) btn.setAttribute('aria-controls', 'navLinks');
+          L.log('[UI] hamburger toggle', { before, after });
+          Bus && Bus.notify && Bus.notify('NavUI.toggleMenu');
+        });
+      }
+      // Meta links
+      ['metaCredits', 'metaLogin', 'mobileCredits', 'mobileLogin'].forEach((id) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('click', () => {
+          L.log('[UI] meta link click', { id, text: (el.textContent || '').trim() });
+        });
+      });
+      // Nav links
+      document.querySelectorAll('.nav-link').forEach((a) => {
+        a.addEventListener('click', () => {
+          L.log('[UI] nav click', {
+            label: a.getAttribute('data-nav') || (a.textContent || '').trim()
+          });
+        });
+      });
+    }
+  };
+  window.Demeza.NavUI = NavUI;
+})();
+================================================================================
+
+[-] This file: static/js/rotate_gate.js | Contents:
+(function () {
+  'use strict';
+  window.Demeza = window.Demeza || {};
+  const L = window.Demeza.Log;
+  const Device = window.Demeza.Device;
+  const Bus = window.Demeza.LayoutBus;
+  const RotateGate = {
+    enabled: true,
+    overlay: null,
+    _lastState: null,
+    init() {
+      L.log('[Init] RotateGate.init');
+      // Only meaningful on mobile.
+      const isMobile = Device && Device.isNativeMobile && Device.isNativeMobile();
+      L.log('[RotateGate] mobile check', { isMobile });
+      if (!isMobile) {
+        document.body.classList.remove('is-native-mobile');
+        return;
+      }
+      document.body.classList.add('is-native-mobile');
+      // Create overlay once.
+      this.overlay = document.getElementById('rotateGate');
+      if (!this.overlay) {
+        this.overlay = document.createElement('div');
+        this.overlay.id = 'rotateGate';
+        this.overlay.setAttribute('role', 'dialog');
+        this.overlay.setAttribute('aria-live', 'polite');
+        this.overlay.style.position = 'absolute';
+        this.overlay.style.inset = '0';
+        this.overlay.style.display = 'none';
+        this.overlay.style.alignItems = 'center';
+        this.overlay.style.justifyContent = 'center';
+        this.overlay.style.background = 'rgba(0,0,0,0.75)';
+        this.overlay.style.zIndex = '9999';
+        this.overlay.style.pointerEvents = 'auto';
+        const box = document.createElement('div');
+        box.style.background = 'white';
+        box.style.color = '#111';
+        box.style.border = '4px solid #FF9F1C';
+        box.style.borderRadius = '0px';
+        box.style.padding = '16px';
+        box.style.maxWidth = '320px';
+        box.style.fontFamily = 'monospace';
+        box.style.textAlign = 'center';
+        const h = document.createElement('div');
+        h.textContent = 'Rotate to play';
+        h.style.fontSize = '18px';
+        h.style.fontWeight = '700';
+        h.style.marginBottom = '8px';
+        const p = document.createElement('div');
+        p.textContent = 'Please rotate your device to landscape.';
+        p.style.fontSize = '13px';
+        p.style.opacity = '0.85';
+        box.appendChild(h);
+        box.appendChild(p);
+        this.overlay.appendChild(box);
+        // Put it inside device frame if possible.
+        const frame = document.getElementById('device-frame') || document.body;
+        frame.style.position = frame.style.position || 'relative';
+        frame.appendChild(this.overlay);
+        L.log('[RotateGate] overlay created');
+      }
+      window.addEventListener('resize', () => this.tick('window.resize'));
+      window.addEventListener('orientationchange', () => this.tick('window.orientationchange'));
+      this.tick('init');
+    },
+    tick(reason) {
+      if (!this.enabled) return;
+      const portrait = Device && Device.isPortrait && Device.isPortrait();
+      const shouldBlock = !!portrait;
+      // Avoid spam logs.
+      if (this._lastState === shouldBlock) {
+        return;
+      }
+      this._lastState = shouldBlock;
+      if (shouldBlock) {
+        this.overlay.style.display = 'flex';
+        document.body.classList.add('rotate-blocked');
+        L.log('[RotateGate] BLOCK', { reason, portrait: true });
+      } else {
+        this.overlay.style.display = 'none';
+        document.body.classList.remove('rotate-blocked');
+        L.log('[RotateGate] UNBLOCK', { reason, portrait: false });
+      }
+      Bus && Bus.notify && Bus.notify('RotateGate.tick');
+    }
+  };
+  window.Demeza.RotateGate = RotateGate;
+})();
+================================================================================
+
+[-] This file: static/js/simulator.js | Contents:
+(function () {
+  'use strict';
+  window.Demeza = window.Demeza || {};
+  const L = window.Demeza.Log;
+  const Bus = window.Demeza.LayoutBus;
+  const Simulator = {
+    slider: null,
+    frame: null,
+    display: null,
+    init() {
+      L.log('[Init] Simulator.init');
+      this.slider = document.getElementById('widthSlider');
+      this.frame = document.getElementById('device-frame');
+      this.display = document.getElementById('pxDisplay');
+      const btnMobile = document.getElementById('btnMobile');
+      const btnDesktop = document.getElementById('btnDesktop');
+      const btnLive = document.getElementById('btnLive');
+      const btnExit = document.getElementById('exit-live-btn');
+      if (this.slider) {
+        this.slider.addEventListener('input', (e) => {
+          L.log('[UI] widthSlider input', { value: e.target.value });
+          this.setWidth(e.target.value, 'slider:input');
+        });
+        this.slider.addEventListener('change', (e) => {
+          L.log('[UI] widthSlider change', { value: e.target.value });
+        });
+      } else {
+        L.warn('[Simulator] widthSlider missing');
+      }
+      if (btnMobile) btnMobile.addEventListener('click', () => L.log('[UI] button click', { id: 'btnMobile' }));
+      if (btnDesktop) btnDesktop.addEventListener('click', () => L.log('[UI] button click', { id: 'btnDesktop' }));
+      if (btnLive) btnLive.addEventListener('click', () => L.log('[UI] button click', { id: 'btnLive' }));
+      if (btnExit) btnExit.addEventListener('click', () => L.log('[UI] button click', { id: 'exit-live-btn' }));
+      const initial = Number(this.slider?.value || 512);
+      this.setWidth(initial, 'init');
+    },
+    setWidth(width, reason) {
+      if (!this.frame) {
+        L.warn('[Simulator] device-frame missing');
+        return;
+      }
+      const w = Math.max(320, Math.min(1280, Number(width) || 512));
+      this.frame.style.width = w + 'px';
+      if (this.display) this.display.innerText = `${w}px`;
+      if (this.slider) this.slider.value = String(w);
+      L.log('[Simulator] setWidth', { w, reason });
+      Bus && Bus.notify && Bus.notify('Simulator.setWidth');
+    },
+    setMode(mode) {
+      L.log('[UI] setMode clicked', { mode });
+      const width = (mode === 'mobile') ? 512 : 1024;
+      this.setWidth(width, `setMode:${mode}`);
+    },
+    toggleLive() {
+      const before = document.body.classList.contains('view-live');
+      document.body.classList.toggle('view-live');
+      const after = document.body.classList.contains('view-live');
+      L.log('[UI] toggleLiveMode', { before, after });
+      Bus && Bus.notify && Bus.notify('Simulator.toggleLive');
+    }
+  };
+  window.Demeza.Simulator = Simulator;
+  // Optional globals for your inline HTML onclick handlers.
+  window.setMode = (m) => Simulator.setMode(m);
+  window.toggleLiveMode = () => Simulator.toggleLive();
+})();
+================================================================================
+
+[-] This file: static/js/workspace_input.js | Contents:
+(function () {
+  'use strict';
+  window.Demeza = window.Demeza || {};
+  const L = window.Demeza.Log;
+  const WorkspaceInput = {
+    canvas: null,
+    isPointerDown: false,
+    last: { x: 0, y: 0 },
+    init() {
+      this.canvas = document.getElementById('workspaceCanvas');
+      if (!this.canvas) {
+        L.warn('[WorkspaceInput] workspaceCanvas missing');
+        return;
+      }
+      L.log('[Init] WorkspaceInput.init');
+      this.canvas.addEventListener('pointerdown', (e) => {
+        this.isPointerDown = true;
+        this.last = { x: e.clientX, y: e.clientY };
+        this.canvas.setPointerCapture?.(e.pointerId);
+        L.log('[WorkspaceInput] pointerdown', {
+          x: e.clientX, y: e.clientY, button: e.button, pointerType: e.pointerType
+        });
+      });
+      this.canvas.addEventListener('pointermove', (e) => {
+        if (!this.isPointerDown) return;
+        const dx = e.clientX - this.last.x;
+        const dy = e.clientY - this.last.y;
+        this.last = { x: e.clientX, y: e.clientY };
+        L.log('[WorkspaceInput] pointermove(drag)', { x: e.clientX, y: e.clientY, dx, dy, pointerType: e.pointerType });
+      });
+      this.canvas.addEventListener('pointerup', (e) => {
+        this.isPointerDown = false;
+        L.log('[WorkspaceInput] pointerup', {
+          x: e.clientX, y: e.clientY, button: e.button, pointerType: e.pointerType
+        });
+      });
+      this.canvas.addEventListener('wheel', (e) => {
+        L.log('[WorkspaceInput] wheel', { deltaX: e.deltaX, deltaY: e.deltaY, ctrlKey: e.ctrlKey });
+      }, { passive: true });
+      this.canvas.addEventListener('keydown', (e) => {
+        L.log('[WorkspaceInput] keydown', { key: e.key, code: e.code, ctrl: e.ctrlKey, shift: e.shiftKey, alt: e.altKey });
+      });
+      this.canvas.addEventListener('focus', () => L.log('[WorkspaceInput] focus'));
+      this.canvas.addEventListener('blur', () => L.log('[WorkspaceInput] blur'));
+    }
+  };
+  window.Demeza.WorkspaceInput = WorkspaceInput;
+})();
+================================================================================
+
+[-] This file: static/js/workspace_system.js | Contents:
+(function () {
+  'use strict';
+  window.Demeza = window.Demeza || {};
+  const L = window.Demeza.Log;
+  const Bus = window.Demeza.LayoutBus;
+  const WorkspaceSystem = {
+    frame: null,
+    header: null,
+    grid: null,
+    tile: null,
+    canvas: null,
+    _raf: null,
+    init() {
+      L.log('[Init] WorkspaceSystem.init');
+      this.frame = document.getElementById('device-frame');
+      this.header = document.getElementById('headerGroup');
+      this.grid = document.getElementById('mainGrid');
+      this.tile = document.getElementById('workspaceTile');
+      this.canvas = document.getElementById('workspaceCanvas');
+      if (!this.frame || !this.header || !this.grid || !this.tile || !this.canvas) {
+        L.warn('[Workspace] init missing elements', {
+          frame: !!this.frame, header: !!this.header, grid: !!this.grid, tile: !!this.tile, canvas: !!this.canvas
+        });
+        return;
+      }
+      // Mark workspace mode for CSS overrides.
+      this.frame.classList.add('has-workspace');
+      L.log('[Workspace] has-workspace enabled');
+      // React to layout signals.
+      Bus && Bus.on && Bus.on((reason) => this.fitSoon(reason));
+      // React to actual window changes.
+      window.addEventListener('resize', () => {
+        L.log('[Workspace] window resize');
+        this.fitSoon('window.resize');
+      });
+      window.addEventListener('orientationchange', () => {
+        L.log('[Workspace] orientationchange');
+        this.fitSoon('window.orientationchange');
+      });
+      this.fitSoon('init');
+    },
+    fitSoon(reason) {
+      if (this._raf) cancelAnimationFrame(this._raf);
+      this._raf = requestAnimationFrame(() => {
+        this._raf = null;
+        this.fit(reason || 'fitSoon');
+      });
+    },
+    fit(reason) {
+      if (!this.frame || !this.header || !this.grid || !this.tile || !this.canvas) {
+        L.warn('[Workspace] fit skipped (missing elements)');
+        return;
+      }
+      const isLive = document.body.classList.contains('view-live');
+      // 1) Frame height.
+      if (!isLive) {
+        const gutter = 16;
+        const top = this.frame.getBoundingClientRect().top;
+        const desired = Math.max(320, Math.round(window.innerHeight - top - gutter));
+        this.frame.style.height = desired + 'px';
+      } else {
+        this.frame.style.height = '100vh';
+      }
+      // 2) Integer math only.
+      const frameClientH = this.frame.clientHeight;
+      const headerH = this.header.offsetHeight;
+      const gridStyle = window.getComputedStyle(this.grid);
+      const padTop = L.numPx(gridStyle.paddingTop);
+      const padBot = L.numPx(gridStyle.paddingBottom);
+      // 3) Fudge prevents 1px scroll pop.
+      const fudge = 1;
+      const raw = frameClientH - headerH - padTop - padBot - fudge;
+      const workspaceH = Math.max(200, raw);
+      this.tile.style.height = workspaceH + 'px';
+      this.canvas.style.height = '100%';
+      // 4) Micro-scroll kill.
+      if (this.frame.scrollTop !== 0) {
+        L.log('[Workspace] frame scrollTop reset', { before: this.frame.scrollTop });
+        this.frame.scrollTop = 0;
+      }
+      const overflowFrame = this.frame.scrollHeight - this.frame.clientHeight;
+      const overflowGrid = this.grid.scrollHeight - this.grid.clientHeight;
+      L.log('[Workspace] fit', {
+        reason,
+        isLive,
+        frameClientH,
+        headerH,
+        padTop,
+        padBot,
+        fudge,
+        workspaceH,
+        overflowFrame,
+        overflowGrid
+      });
+    }
+  };
+  window.Demeza.WorkspaceSystem = WorkspaceSystem;
+})();
 ================================================================================
 
 [-] This file: templates/classic.html | Contents:
@@ -663,7 +1200,249 @@ if __name__ == "__main__":
 ================================================================================
 
 [-] This file: templates/index.html | Contents:
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Demeza AutoCSS | Home</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg-color: #f4f4f9;
+      --tile-bg: #ffffff;
+      --accent: #FF9F1C;
+      --text-main: #2EC4B6;
+      --text-dark: #333;
+      --nav-dark: #222;
+      --border-light: #ebeff5;
+      --border-med: #a3adbf;
+      --q-4: 4px;
+      --q-8: 8px;
+      --q-16: 16px;
+      --q-24: 24px;
+      --q-32: 32px;
+      --q-48: 48px;
+      --gap: var(--q-16);
+      --padding: var(--q-16);
+      --radius: 0px;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Nunito', sans-serif; }
+    body{
+      background-color:#1a1a1a;
+      color:#eee;
+      margin:0;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: var(--q-24);
+    }
+    .wrap{
+      width: min(980px, 100%);
+      display:flex;
+      flex-direction:column;
+      gap: var(--q-16);
+    }
+    .titlebar{
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      gap: var(--q-16);
+      padding: var(--q-16);
+      border: 4px solid #111;
+      background: #2b2b2b;
+    }
+    .brand{
+      font-weight: 800;
+      letter-spacing: -1px;
+      color: var(--text-main);
+      font-size: 28px;
+      line-height: 1.1;
+    }
+    .subtitle{
+      font-family: monospace;
+      font-size: 12px;
+      color: #cfcfcf;
+      opacity: 0.85;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: var(--gap);
+    }
+    @media (min-width: 760px){
+      .grid{ grid-template-columns: repeat(3, 1fr); }
+    }
+    .card{
+      background: var(--tile-bg);
+      color: var(--text-dark);
+      border: 4px solid var(--accent);
+      border-radius: var(--radius);
+      padding: var(--q-24);
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.12s ease;
+      display:flex;
+      flex-direction:column;
+      gap: var(--q-16);
+      min-height: 220px;
+      justify-content:space-between;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.28);
+      outline: none;
+    }
+    .card:hover{ transform: translateY(-2px); }
+    .card:active{ transform: translateY(1px); }
+    .card h2{
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: -0.5px;
+      color: var(--text-main);
+    }
+    .card p{
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.45;
+      opacity: 0.9;
+    }
+    .badge-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: var(--q-16);
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap: var(--q-8);
+      padding: 6px 10px;
+      border: 2px solid rgba(0,0,0,0.12);
+      background: rgba(255,255,255,0.92);
+      font-family: monospace;
+      font-size: 12px;
+      color: #111;
+      border-radius: var(--radius);
+    }
+    .arrow{
+      font-family: monospace;
+      font-weight: 900;
+      color: var(--accent);
+    }
+    /* TBA styling */
+    .card.is-tba{
+      border-color: var(--border-med);
+      opacity: 0.95;
+    }
+    .card.is-tba h2{ color: #666; }
+    .card.is-tba .arrow{ color: #888; }
+    .card.is-tba .badge{ opacity: 0.8; }
+    .footer{
+      font-family: monospace;
+      font-size: 12px;
+      opacity: 0.65;
+      padding: 0 var(--q-4);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="titlebar">
+      <div>
+        <div class="brand">Demeza AutoCSS</div>
+        <div class="subtitle">Choose a mode</div>
+      </div>
+      <div class="subtitle" id="bootNote">[BOOT] index.html loaded</div>
+    </div>
+    <div class="grid" aria-label="Mode selection">
+      <div
+        class="card"
+        role="button"
+        tabindex="0"
+        data-home-card="1"
+        data-target="/classic"
+        aria-label="Open Classic">
+        <div>
+          <h2>Classic</h2>
+          <p>
+            The original AutoCSS tile layout with standard tiles and simulator controls.
+          </p>
+        </div>
+        <div class="badge-row">
+          <span class="badge">Route: /classic</span>
+          <span class="arrow">→</span>
+        </div>
+      </div>
+      <div
+        class="card"
+        role="button"
+        tabindex="0"
+        data-home-card="1"
+        data-target="/workspace"
+        aria-label="Open Workspace">
+        <div>
+          <h2>Workspace</h2>
+          <p>
+            Full-width workspace tile that dominates the layout, ready for nodes and canvas UI.
+          </p>
+        </div>
+        <div class="badge-row">
+          <span class="badge">Route: /workspace</span>
+          <span class="arrow">→</span>
+        </div>
+      </div>
+      <div
+        class="card is-tba"
+        role="button"
+        tabindex="0"
+        data-home-card="1"
+        data-target="/game"
+        aria-label="Open Game (TBA)">
+        <div>
+          <h2>Game (TBA)</h2>
+          <p>
+            Game layout (based on Workspace). On mobile, shows “Rotate to play” overlay.
+          </p>
+        </div>
+        <div class="badge-row">
+          <span class="badge">Route: /game</span>
+          <span class="arrow">→</span>
+        </div>
+      </div>
+    </div>
+    <div class="footer">
+      Console logging enabled. Click a card to navigate.
+    </div>
+  </div>
+  <!-- JS (all in static/js for now) -->
+  <script src="/static/js/log.js"></script>
+  <script src="/static/js/layout_bus.js"></script>
+  <script src="/static/js/device.js"></script>
+  <script src="/static/js/index.js"></script>
+  <script src="/static/js/index_boot.js"></script>
+  <script>
+    // Keyboard support for the cards, with logging.
+    (function(){
+      const L = window.Demeza && window.Demeza.Log ? window.Demeza.Log : null;
+      const log = L ? L.log : console.log;
+      document.querySelectorAll('[data-home-card]').forEach((card) => {
+        card.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            const target = card.getAttribute('data-target') || '';
+            log('[UI] home card key activate', { key: e.key, target });
+            if (target) window.location.href = target;
+          } else {
+            log('[UI] home card keydown', { key: e.key });
+          }
+        });
+      });
+      log('[Init] index.html inline keybinds ready');
+    })();
+  </script>
+</body>
+</html>
 ================================================================================
 
 [-] This file: templates/workspace.html | Contents:

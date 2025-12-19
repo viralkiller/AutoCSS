@@ -1,0 +1,54 @@
+/* static/css/game.css */
+/* Game-only styling (workspace + rotate gate) */
+
+/* Same workspace behavior */
+#device-frame.has-workspace{
+  overflow-y:hidden;
+  overscroll-behavior:none;
+}
+
+.tile-workspace{
+  grid-column:1 / -1;
+  padding:0;
+  border-color:var(--text-main);
+  align-items:stretch;
+  justify-content:stretch;
+  text-align:left;
+  background:var(--tile-bg);
+  min-height:0;
+}
+
+.tile-workspace ~ .tile{
+  display:none !important;
+}
+
+#workspaceCanvas{
+  position:relative;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  outline:none;
+  background-image:
+    linear-gradient(to right, rgba(0,0,0,0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0,0,0,0.06) 1px, transparent 1px);
+  background-size:32px 32px;
+  user-select:none;
+  touch-action:none;
+}
+
+/* Rotate overlay hook */
+#rotateGate{
+  position:absolute;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,0.75);
+  z-index:9999;
+  pointer-events:auto;
+}
+
+/* Optional: hide canvas when blocked */
+body.rotate-blocked #workspaceCanvas{
+  filter:blur(0.5px);
+}

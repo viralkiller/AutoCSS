@@ -1,0 +1,162 @@
+/* static/css/index.css */
+/* Home selector page */
+
+:root{
+  --bg-color:#f4f4f9;
+  --tile-bg:#ffffff;
+  --accent:#FF9F1C;
+  --text-main:#2EC4B6;
+  --text-dark:#333;
+  --nav-dark:#222;
+  --border-light:#ebeff5;
+  --border-med:#a3adbf;
+
+  --q-4:4px;
+  --q-8:8px;
+  --q-16:16px;
+  --q-24:24px;
+  --q-32:32px;
+  --q-48:48px;
+
+  --gap:var(--q-16);
+  --padding:var(--q-16);
+  --radius:0px;
+}
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Nunito', sans-serif;
+}
+
+body{
+  background-color:#1a1a1a;
+  color:#eee;
+  margin:0;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:var(--q-24);
+}
+
+.wrap{
+  width:min(980px, 100%);
+  display:flex;
+  flex-direction:column;
+  gap:var(--q-16);
+}
+
+.titlebar{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:var(--q-16);
+  padding:var(--q-16);
+  border:4px solid #111;
+  background:#2b2b2b;
+}
+
+.brand{
+  font-weight:800;
+  letter-spacing:-1px;
+  color:var(--text-main);
+  font-size:28px;
+  line-height:1.1;
+}
+
+.subtitle{
+  font-family:monospace;
+  font-size:12px;
+  color:#cfcfcf;
+  opacity:0.85;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:var(--gap);
+}
+
+@media (min-width: 760px){
+  .grid{ grid-template-columns:repeat(3, 1fr); }
+}
+
+.card{
+  background:var(--tile-bg);
+  color:var(--text-dark);
+  border:4px solid var(--accent);
+  border-radius:var(--radius);
+  padding:var(--q-24);
+  cursor:pointer;
+  user-select:none;
+  transition:transform 0.12s ease;
+  display:flex;
+  flex-direction:column;
+  gap:var(--q-16);
+  min-height:220px;
+  justify-content:space-between;
+  box-shadow:0 6px 18px rgba(0,0,0,0.28);
+  outline:none;
+}
+
+.card:hover{ transform:translateY(-2px); }
+.card:active{ transform:translateY(1px); }
+
+.card h2{
+  margin:0;
+  font-size:22px;
+  letter-spacing:-0.5px;
+  color:var(--text-main);
+}
+
+.card p{
+  margin:0;
+  font-size:14px;
+  line-height:1.45;
+  opacity:0.9;
+}
+
+.badge-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:var(--q-16);
+}
+
+.badge{
+  display:inline-flex;
+  align-items:center;
+  gap:var(--q-8);
+  padding:6px 10px;
+  border:2px solid rgba(0,0,0,0.12);
+  background:rgba(255,255,255,0.92);
+  font-family:monospace;
+  font-size:12px;
+  color:#111;
+  border-radius:var(--radius);
+}
+
+.arrow{
+  font-family:monospace;
+  font-weight:900;
+  color:var(--accent);
+}
+
+/* TBA card */
+.card.is-tba{
+  border-color:var(--border-med);
+  opacity:0.95;
+}
+
+.card.is-tba h2{ color:#666; }
+.card.is-tba .arrow{ color:#888; }
+.card.is-tba .badge{ opacity:0.8; }
+
+.footer{
+  font-family:monospace;
+  font-size:12px;
+  opacity:0.65;
+  padding:0 var(--q-4);
+}

@@ -1,0 +1,22 @@
+/* static/css/classic.css */
+/* Classic-only styling */
+
+.floating-arrow{
+  position:absolute;
+  width:48px;
+  height:48px;
+  pointer-events:none;
+  z-index:50;
+  color:var(--accent);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  filter:drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+  transition:top 0.2s ease, left 0.2s ease, transform 0.2s ease;
+}
+
+.floating-arrow svg{
+  width:100%;
+  height:100%;
+  fill:currentColor;
+}

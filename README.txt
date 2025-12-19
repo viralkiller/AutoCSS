@@ -1,4 +1,5 @@
 DEMO: https://autocss.pythonanywhere.com
+SUPPORT: https://buymeacoffee.com/viralkiller
 
 The |deMeza AutoCSS system| is a new way to design websites that removes the usual headache of maintaining separate desktop and mobile layouts.
 
@@ -38,3 +39,5 @@ These three templates all use the same core tile logic and should cover 99% of y
 
 Coming soon: a live page editor that lets you add, remove, and reorder tiles in real time,
 plus a “Generate Final Code” button that outputs a clean, single-page HTML/CSS/JS build of your layout, ready to deploy immediately.
+
+
