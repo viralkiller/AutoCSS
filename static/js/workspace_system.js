@@ -20,6 +20,7 @@
     grid: null,
     tile: null,
     canvas: null,
+    controls: null,
     _raf: null,
     _gameIcon: null,
 
@@ -30,30 +31,19 @@
       this.grid = document.getElementById('mainGrid');
       this.tile = document.getElementById('workspaceTile');
       this.canvas = document.getElementById('workspaceCanvas');
+      this.controls = document.querySelector('.controls');
 
       if (!this.frame || !this.header || !this.grid || !this.tile || !this.canvas) {
-        L.warn('[Workspace] init missing elements', {
-          frame: !!this.frame, header: !!this.header, grid: !!this.grid, tile: !!this.tile, canvas: !!this.canvas
-        });
+        L.warn('[Workspace] init missing elements');
         return;
       }
 
-      // Mark workspace mode for CSS overrides.
       this.frame.classList.add('has-workspace');
-      L.log('[Workspace] has-workspace enabled');
 
-      // React to layout signals.
       Bus && Bus.on && Bus.on((reason) => this.fitSoon(reason));
 
-      // React to actual window changes.
-      window.addEventListener('resize', () => {
-        L.log('[Workspace] window resize');
-        this.fitSoon('window.resize');
-      });
-      window.addEventListener('orientationchange', () => {
-        L.log('[Workspace] orientationchange');
-        this.fitSoon('window.orientationchange');
-      });
+      window.addEventListener('resize', () => this.fitSoon('window.resize'));
+      window.addEventListener('orientationchange', () => this.fitSoon('window.orientationchange'));
 
       this.fitSoon('init');
     },
@@ -67,90 +57,86 @@
     },
 
     fit(reason) {
-      if (!this.frame || !this.header || !this.grid || !this.tile || !this.canvas) {
-        L.warn('[Workspace] fit skipped (missing elements)');
-        return;
-      }
+      if (!this.frame || !this.header || !this.grid || !this.tile || !this.canvas) return;
+
       const isLive = document.body.classList.contains('view-live');
+      const bodyStyle = window.getComputedStyle(document.body);
+      const padTop = parseFloat(bodyStyle.paddingTop) || 0;
+      const padBot = parseFloat(bodyStyle.paddingBottom) || 0;
 
-      // 1) Frame height calculation
-      if (!isLive) {
-        const gutter = 16;
-        const top = this.frame.getBoundingClientRect().top;
-        const desired = Math.max(320, Math.round(window.innerHeight - top - gutter));
-        this.frame.style.height = desired + 'px';
-      } else {
-        const bodyStyle = window.getComputedStyle(document.body);
-        const padTop = parseFloat(bodyStyle.paddingTop) || 0;
-        const padBot = parseFloat(bodyStyle.paddingBottom) || 0;
+      // --- HEIGHT CALCULATION ---
+      if (isLive) {
+        // LIVE MODE: Full viewport minus body padding
         this.frame.style.height = `calc(100vh - ${padTop + padBot}px)`;
+      } else {
+        // SIMULATOR MODE
+        // We calculate exact pixel height to fit between Toolbar and Bottom of screen.
+
+        // 1. Measure Toolbar
+        const controlsHeight = this.controls ? this.controls.offsetHeight : 0;
+
+        // 2. Margins & Safety
+        const gap = 16; // The CSS margin below controls
+        const buffer = 12; // NEW: Explicit safety buffer to prevent bottom border clipping
+
+        // 3. Calculate Available Height
+        // Formula: Window - TopPad - Toolbar - ToolbarMargin - BottomPad - SafetyBuffer
+        const availableH = Math.floor(window.innerHeight - padTop - controlsHeight - gap - padBot - buffer);
+
+        // 4. Clamp min height (320px)
+        const safeH = Math.max(320, availableH);
+
+        this.frame.style.height = `${safeH}px`;
       }
 
-      // 2) Integer math for inner items
+      // --- INNER CONTENT FITTING ---
       const frameClientH = this.frame.clientHeight;
       const headerH = this.header.offsetHeight;
       const gridStyle = window.getComputedStyle(this.grid);
-      const padTop = L.numPx(gridStyle.paddingTop);
-      const padBot = L.numPx(gridStyle.paddingBottom);
+      const gridPadTop = parseFloat(gridStyle.paddingTop) || 0;
+      const gridPadBot = parseFloat(gridStyle.paddingBottom) || 0;
 
-      // 3) Fudge prevents 1px scroll pop
       const fudge = 1;
-      const raw = frameClientH - headerH - padTop - padBot - fudge;
-      const workspaceH = Math.max(200, raw);
+      const workspaceH = Math.max(200, frameClientH - headerH - gridPadTop - gridPadBot - fudge);
 
       this.tile.style.height = workspaceH + 'px';
       this.canvas.style.height = '100%';
 
-      // 4) Micro-scroll kill
-      if (this.frame.scrollTop !== 0) {
-        L.log('[Workspace] frame scrollTop reset', { before: this.frame.scrollTop });
-        this.frame.scrollTop = 0;
-      }
+      // Reset scroll if it happened during resize
+      if (this.frame.scrollTop !== 0) this.frame.scrollTop = 0;
 
-      // 5) VISUALS: Grid vs Game Icon
+      // --- VISUALS (Grid / Icon) ---
+      this.updateVisuals();
+
+      L.log('[Workspace] fit', { reason, isLive, frameH: this.frame.style.height });
+    },
+
+    updateVisuals() {
       const isGame = document.body.classList.contains('template-game');
       const w = this.canvas.clientWidth;
       const h = this.canvas.clientHeight;
 
       if (isGame) {
-        // --- GAME MODE: No Grid, Rotating Icon ---
+        // Game Mode: Rotating Icon
         this.canvas.style.backgroundImage = 'none';
-
-        // Ensure icon exists
         if (!this._gameIcon) {
-          const iconWrapper = document.createElement('div');
-          iconWrapper.style.position = 'absolute';
-          iconWrapper.style.left = '50%';
-          iconWrapper.style.top = '50%';
-          iconWrapper.style.width = '128px';
-          iconWrapper.style.height = '128px';
-          iconWrapper.style.opacity = '0.2'; // Subtle watermark
-          iconWrapper.style.transition = 'transform 0.3s ease';
-          iconWrapper.style.pointerEvents = 'none';
-          iconWrapper.innerHTML = GAME_ICON_SVG;
-          this.canvas.appendChild(iconWrapper);
-          this._gameIcon = iconWrapper;
-        }
-
-        // ORIENTATION LOGIC:
-        // If container height > width (Portrait), we are "wrong".
-        // Rotate icon 90deg to simulate "needs tilt".
-        if (h > w) {
-          this._gameIcon.style.transform = 'translate(-50%, -50%) rotate(90deg)';
-        } else {
-          this._gameIcon.style.transform = 'translate(-50%, -50%) rotate(0deg)';
+          const div = document.createElement('div');
+          div.style.cssText = 'position:absolute;left:50%;top:50%;width:128px;height:128px;opacity:0.2;transition:transform 0.3s ease;pointer-events:none;';
+          div.innerHTML = GAME_ICON_SVG;
+          this.canvas.appendChild(div);
+          this._gameIcon = div;
         }
         this._gameIcon.style.display = 'block';
-
+        this._gameIcon.style.transform = (h > w)
+          ? 'translate(-50%, -50%) rotate(90deg)' // Portrait
+          : 'translate(-50%, -50%) rotate(0deg)'; // Landscape
       } else {
-        // --- WORKSPACE MODE: Perfect Grid ---
+        // Workspace Mode: Grid
         if (this._gameIcon) this._gameIcon.style.display = 'none';
-
         if (w > 0) {
           const targetSize = 32;
-          const cols = Math.round(w / targetSize);
-          const safeCols = cols < 1 ? 1 : cols;
-          const exactSize = w / safeCols;
+          const cols = Math.round(w / targetSize) || 1;
+          const exactSize = w / cols;
           this.canvas.style.backgroundSize = `${exactSize}px ${exactSize}px`;
           this.canvas.style.backgroundImage = `
             linear-gradient(to right, rgba(0,0,0,0.08) 1px, transparent 1px),
@@ -158,14 +144,6 @@
           `;
         }
       }
-
-      L.log('[Workspace] fit', {
-        reason,
-        isLive,
-        isGame,
-        workspaceH,
-        orientation: (h > w) ? 'portrait' : 'landscape'
-      });
     }
   };
   window.Demeza.WorkspaceSystem = WorkspaceSystem;
