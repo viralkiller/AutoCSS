@@ -73,10 +73,10 @@ body{
 /* Back to Home Button */
 .back-home-btn{
   position:fixed;
-  top:20px;
-  left:20px;
-  width:40px;
-  height:40px;
+  top:8px;
+  left:8px;
+  width:32px;
+  height:32px;
   background:#333;
   border:1px solid #444;
   border-radius:var(--radius);
@@ -90,10 +90,10 @@ body{
   cursor:pointer;
 }
 .back-home-btn:hover{ background:#444; }
-.back-home-btn:active{ transform:scale(0.95); }
+.back-home-btn:active{ transform:scale(1); }
 .back-home-btn svg{
-  width:24px;
-  height:24px;
+  width:16px;
+  height:16px;
   fill:currentColor;
 }
 /* Device frame */
