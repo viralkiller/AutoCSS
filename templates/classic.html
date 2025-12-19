@@ -1,993 +1,417 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Demeza AutoCSS | Classic Template</title>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/UAParser.js/1.0.35/ua-parser.min.js"></script>
-
-    <style>
-        /* --- 1. QUANTIZED TOKENS --- */
-        :root {
-            /* Palette */
-            --bg-color: #f4f4f9;
-            --tile-bg: #ffffff;
-            --accent: #FF9F1C;
-            --text-main: #2EC4B6;
-            --text-dark: #333;
-            --nav-dark: #222;
-            --border-light: #ebeff5;
-            --border-med: #a3adbf;
-
-            /* Spacing Scale (Powers of 2 / Multiples of 8) */
-            --q-4: 4px;
-            --q-8: 8px;
-            --q-16: 16px;
-            --q-24: 24px;
-            --q-32: 32px;
-            --q-48: 48px;
-
-            /* Mappings */
-            --gap: var(--q-16);
-            --padding: var(--q-16);
-
-            /* [2] Square Aesthetic enforced */
-            --radius: 0px;
-        }
-
-        /* Apply Nunito Globally */
-        * { margin:0; padding:0; box-sizing: border-box; font-family: 'Nunito', sans-serif; }
-
-        body {
-            background-color: #1a1a1a;
-            color: #eee;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        /* --- 2. SIMULATOR FRAME --- */
-        .simulator-wrapper {
-            width: 100%;
-            max-width: 1200px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            align-content: center;
-            padding-top: var(--q-24);
-        }
-
-        .controls {
-            margin-bottom: var(--q-16);
-            background: #333;
-            padding: var(--q-16);
-            /* Square corners */
-            border-radius: var(--radius);
-            display: flex;
-            gap: var(--q-16);
-            align-items: center;
-            flex-wrap: wrap;
-            border: 1px solid #444;
-        }
-
-        #device-frame {
-            background-color: var(--bg-color);
-            color: var(--text-dark);
-            width: 512px;
-            min-height: 768px;
-            transition: width 0.256s ease;
-            position: relative;
-            overflow-y: auto;
-            overflow-x: hidden;
-            box-shadow: 0 0 48px rgba(0,0,0,0.48);
-            resize: horizontal;
-            container-type: inline-size;
-            /* Explicit square borders for frame */
-            border: 4px solid #111;
-        }
-
-        /* --- 3. HEADER GROUPS --- */
-
-        .header-group {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            background-color: var(--tile-bg);
-            border-bottom: 4px solid var(--accent);
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-        }
-
-        /* ROW 1: Meta Bar (Desktop Only) */
-        .meta-bar {
-            height: 32px;
-            background-color: var(--nav-dark);
-            color: #ccc;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 var(--padding);
-            font-size: 16px;
-            letter-spacing: 0.48px;
-        }
-
-        .meta-left {font-weight: 400; color: var(--accent); }
-        .meta-left a {  text-decoration: none; cursor: pointer; }
-        .meta-left a:hover {  text-decoration: underline; }
-
-        .meta-right {font-weight: 600;  display: flex; gap: var(--q-16); align-items: center; }
-        .meta-right a { color: #eee; text-decoration: none; cursor: pointer; }
-        .meta-right a:hover { color: white; text-decoration: underline; }
-
-        /* ROW 2: Nav Bar */
-        .nav-bar {
-            min-height: var(--q-48);
-            padding: 0 var(--padding);
-            background-color: var(--tile-bg);
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            position: relative;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: var(--q-24);
-            width: 100%;
-            align-items: center;
-        }
-
-        /* Base Desktop Styling for Links */
-        .nav-link {
-            font-weight: 600;
-            color: var(--text-dark);
-            text-decoration: none;
-            cursor: pointer;
-            font-size: 16px;
-            line-height: var(--q-48);
-        }
-        .nav-link:hover{
-            text-decoration: underline;
-        }
-
-
-         .nav-link.active {
-             color: var(--text-main);
-             text-decoration: underline;
-
-         }
-
-        /* Mobile Meta Group Container (Hidden on Desktop) */
-        .mobile-meta-group { display: none; }
-
-        .hamburger-btn {
-            display: none;
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: var(--q-8);
-            position: absolute;
-            top: 0;
-            right: var(--q-8);
-            height: var(--q-48);
-            z-index: 101;
-            /* Square focus ring style if needed, default is fine */
-        }
-        .hamburger-icon {
-            width: 24px; height: 4px; background: #333; position: relative; display: block;
-        }
-        .hamburger-icon::before, .hamburger-icon::after {
-            content: ''; position: absolute; left: 0; width: 24px; height: 4px; background: #333;
-        }
-        .hamburger-icon::before { top: -8px; }
-        .hamburger-icon::after { top: 8px; }
-
-/* --- MOBILE LOGIC --- */
-        @container (max-width: 599px) {
-            /* Hide the Desktop Meta Bar */
-            .meta-bar { display: none; }
-
-            /* Re-orient Nav Links */
-            .nav-links {
-                display: none;
-                flex-direction: column;
-                width: 100%;
-
-                margin-top: var(--q-48);
-                border-top: none;
-                gap: 0;
-                align-items: flex-start;
-            }
-
-            .hamburger-btn { display: flex; align-items: center; }
-            .nav-bar.mobile-open .nav-links { display: flex; }
-            .nav-bar.mobile-open { flex-wrap: wrap; }
-
-            /* Show Mobile Meta Group */
-            .mobile-meta-group {
-                display: flex;
-                flex-direction: column;
-                width: 100%;
-                border-bottom: 4px solid var(--border-med);
-            }
-
-            /* UNIFIED LINK STYLING */
-            .nav-link,
-            .mobile-meta-group a {
-                width: 100%;
-                padding: var(--q-16) var(--q-4);
-                border-bottom: 4px solid var(--border-light);
-                font-family: inherit;
-                font-size: 16px;
-                font-weight: 400;
-                color: var(--text-dark);
-                line-height: 1.2;
-                text-decoration: none;
-                cursor: pointer;
-                display: block;
-            }
-
-            .nav-link:last-child {
-                border-bottom: none;
-            }
-
-            /* [NEW] Remove light separator from the last meta item (Login) */
-            .mobile-meta-group a:last-child {
-                border-bottom: none;
-            }
-
-            .nav-link:hover, .mobile-meta-group a:hover {
-                background-color: #fafafa;
-                text-decoration: none;
-            }
-
-            /* [FIX] Explicitly remove underline for active state in mobile */
-            .nav-link.active {
-                text-decoration: none;
-            }
-
-            .nav-link:active {
-                text-decoration: none;
-            }
-
-            .mobile-meta-group a.is-credits {
-                color: var(--accent);
-                font-weight: 700;
-            }
-        }
-
-
-/* --- 4. TILE GRID SYSTEM --- */
-
-        .tile-grid {
-            display: grid;
-            padding: var(--padding);
-            gap: var(--gap);
-            grid-template-columns: 1fr;
-            width: 100%;
-            /* [NEW] Relative positioning for absolute arrows */
-            position: relative;
-        }
-
-        @container (min-width: 600px) {
-            .tile-grid { grid-template-columns: repeat(3, 1fr); }
-        }
-
-        /* --- 5. TILE LOGIC --- */
-
-        .tile {
-            background-color: var(--tile-bg);
-            /* Enforce Square */
-            border-radius: var(--radius);
-            padding: var(--q-24);
-            border: 4px solid var(--accent);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
-            text-align: center;
-            overflow: hidden;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-            transition: all 0.256s ease;
-            position: relative;
-            gap: var(--q-4);
-        }
-
-        .tile-std { aspect-ratio: 1 / 1; }
-
-        .tile > :only-child { margin: auto; }
-
-        /* --- [UPDATED] 9-ROW GRID SYSTEM FOR 2 & 3 ITEMS --- */
-
-        /* 2 Items: Placed at Rows 4 and 6 */
-        .tile:has(> :last-child:nth-child(2)) {
-            display: grid;
-            grid-template-columns: 1fr;
-            grid-template-rows: repeat(9, 1fr); /* 9 Equal Rows */
-            gap: 0;
-            justify-items: center;
-            align-items: center;
-        }
-        .tile:has(> :last-child:nth-child(2)) > * { margin: 0; width: 100%; }
-        /* Grid rows are 1-based */
-        .tile:has(> :last-child:nth-child(2)) > :nth-child(1) { grid-row: 4; }
-        .tile:has(> :last-child:nth-child(2)) > :nth-child(2) { grid-row: 6; }
-
-
-        /* 3 Items: Placed at Rows 3, 5, and 7 */
-        .tile:has(> :last-child:nth-child(3)) {
-            display: grid;
-            grid-template-columns: 1fr;
-            grid-template-rows: repeat(9, 1fr); /* 9 Equal Rows */
-            gap: 0;
-            justify-items: center;
-            align-items: center;
-        }
-        .tile:has(> :last-child:nth-child(3)) > * { margin: 0; width: 100%; }
-        .tile:has(> :last-child:nth-child(3)) > :nth-child(1) { grid-row: 3; }
-        .tile:has(> :last-child:nth-child(3)) > :nth-child(2) { grid-row: 5; }
-        .tile:has(> :last-child:nth-child(3)) > :nth-child(3) { grid-row: 7; }
-
-        /* 4+ Items: Evenly Spread Logic (Fallback for complex tiles) */
-        .tile:has(> :nth-child(4)) {
-            justify-content: space-evenly;
-            gap: 0;
-        }
-
-        .tile-stretch { aspect-ratio: 1 / 1; border-color: var(--text-main); }
-        @container (min-width: 600px) {
-            .tile-stretch { grid-column: 1 / -1; aspect-ratio: 3 / 1; }
-        }
-        .tile-stretch img { height: 100%; width: auto; object-fit: contain; }
-
-        .tile-ghost {
-            display: none;
-            border: 4px dashed #ccc;
-            background: transparent;
-            opacity: 0.256;
-            aspect-ratio: 1 / 1;
-        }
-        @container (min-width: 600px) { .tile-ghost { display: flex; } }
-
-        /* UI Elements */
-
-        .tile h3 { margin: 0; font-weight: 700; }
-        .tile input[type="text"], .tile textarea {
-            width: 100%; padding: var(--q-16);
-            border: 4px solid #ddd;
-            /* Enforce Square */
-            border-radius: var(--radius);
-            background: #fafafa;
-        }
-        /* Specific textarea styling to match inputs */
-        .tile textarea {
-            resize: none;
-            font-family: 'Nunito', sans-serif;
-            height: auto; /* Handled by Flexbox in JS */
-        }
-
-        .tile button {
-            width: 100%; padding: var(--q-16);
-            background-color: var(--text-main); color: white;
-            border: none;
-            /* Enforce Square */
-            border-radius: var(--radius);
-            font-weight: 700;
-            letter-spacing: 1px;
-            cursor: pointer; box-shadow: 0 4px 0 rgba(0,0,0,0.1);
-
-            /* Add explicit font-size so JS match isn't jumping too much */
-            font-size: 14px;
-        }
-        .tile button:active { transform: translateY(4px); box-shadow: 0 4px 0 rgba(0,0,0,0.1); }
-
-        /* --- 5.1 ADVANCED SLIDER STYLES --- */
-        .slider-wrapper {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            gap: var(--q-8);
-        }
-
-        .range-container {
-            position: relative;
-            flex-grow: 1;
-            display: flex;
-            align-items: center;
-        }
-
-        .slider-label {
-            font-family: monospace;
-            font-size: 14px;
-            color: var(--text-dark);
-            font-weight: 700;
-        }
-
-        /* Value Bubble */
-        .slider-value {
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            /* Start hidden and slightly lower */
-            transform: translateX(-50%) translateY(10px);
-            background: var(--accent);
-            color: white;
-            padding: 2px 8px;
-            font-size: 12px;
-            font-weight: bold;
-            font-family: monospace;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s ease, transform 0.2s ease;
-            border-radius: var(--radius);
-
-            z-index: 10;
-        }
-
-        /* Active State for Bubble */
-        .slider-value.active {
-            opacity: 1;
-            /* Pop up animation */
-            transform: translateX(-50%) translateY(-14px);
-        }
-
-        /* Base Slider Track */
-        input[type="range"] {
-            width: 100% !important; margin: 0;
-            -webkit-appearance: none;
-            background: transparent;
-            cursor: grab;
-        }
-        input[type="range"]:active { cursor: grabbing; }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 16px; width: 16px;
-            background: var(--accent);
-            margin-top: -6px;
-            border-radius: 0;
-            transition: transform 0.1s;
-        }
-        input[type="range"]:active::-webkit-slider-thumb {
-            transform: scale(1.2);
-        }
-
-        input[type="range"]::-webkit-slider-runnable-track {
-            width: 100%; height: 4px; background: #ddd;
-        }
-
-        /* Simulator UI Controls Buttons */
-        .controls button {
-            border: none;
-            background: #555;
-            color: white;
-            border-radius: var(--radius);
-            cursor: pointer;
-            font-family: monospace;
-        }
-        .controls button:hover { background: #666; }
-
-
-        /* --- 6. LIVE VIEW TOGGLE OVERRIDES --- */
-
-        /* Style for the floating exit button */
-        #exit-live-btn {
-            display: none;
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 9999;
-            padding: 12px 24px;
-            background: #e74c3c;
-            color: white;
-            border: none;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            border-radius: var(--radius);
-        }
-
-        /* When Body has 'view-live' class... */
-        body.view-live {
-            background-color: var(--bg-color); /* Match internal bg */
-            display: block; /* Reset flex center */
-        }
-
-        /* Hide Simulator UI and Wrapper constraints */
-        body.view-live .controls { display: none; }
-
-        body.view-live .simulator-wrapper {
-            padding: 0;
-            max-width: none;
-            width: 100%;
-            display: block;
-        }
-
-        /* Force Device Frame to be full Browser Window */
-        body.view-live #device-frame {
-            width: 100% !important;     /* Override inline JS width */
-            height: auto;
-            min-height: 100vh;
-            border: none;
-            box-shadow: none;
-            resize: none;                /* Disable CSS resize handle */
-        }
-
-        /* Show Exit Button */
-        body.view-live #exit-live-btn {
-            display: block;
-        }
-
-        /* [NEW] Override for Actual Mobile Devices detected by JS */
-        body.is-native-mobile #exit-live-btn {
-            display: none !important;
-        }
-
-        /* --- 7. HACKED FILE UPLOAD STYLES --- */
-        .file-upload-label {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            padding: var(--q-16);
-            background-color: var(--text-main);
-            color: white;
-            text-align: center;
-            font-weight: 700;
-            letter-spacing: 1px;
-            cursor: pointer;
-            box-shadow: 0 4px 0 rgba(0,0,0,0.1);
-            border-radius: var(--radius);
-            margin: 0;
-
-            /* Initial CSS baseline, will be overridden by JS if mismatch occurs */
-            font-size: 14px;
-            box-sizing: border-box;
-        }
-        .file-upload-label:active {
-            transform: translateY(4px);
-            box-shadow: 0 4px 0 rgba(0,0,0,0.1);
-        }
-        .file-name-display {
-            font-size: 13px;
-            color: #888;
-            font-family: monospace;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 100%;
-        }
-
-        /* --- 8. FLOATING ARROWS --- */
-        .floating-arrow {
-            position: absolute;
-            width: 48px;
-            height: 48px;
-            pointer-events: none;
-            z-index: 50;
-            color: var(--accent);
-            /* Centering transform handled by JS */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
-            transition: top 0.2s ease, left 0.2s ease, transform 0.2s ease;
-        }
-        .floating-arrow svg {
-            width: 100%;
-            height: 100%;
-            fill: currentColor;
-        }
-
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Demeza AutoCSS | Classic Template</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Optional (Device.js will use if present) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/UAParser.js/1.0.35/ua-parser.min.js"></script>
+
+  <!-- Shared CSS -->
+  <link rel="stylesheet" href="/static/css/demeza_base.css" />
+  <link rel="stylesheet" href="/static/css/classic.css" />
 </head>
+
 <body>
+  <button id="exit-live-btn" onclick="toggleLiveMode()">EXIT LIVE VIEW</button>
 
-    <button id="exit-live-btn" onclick="toggleLiveMode()">EXIT LIVE VIEW</button>
+  <div class="simulator-wrapper">
+    <div class="controls">
+      <span style="color:white; font-size:12px; font-weight:512;">DEVICE WIDTH:</span>
 
-    <div class="simulator-wrapper">
-        <div class="controls">
-            <span style="color:white; font-size: 12px; font-weight: 512;">DEVICE WIDTH:</span>
-            <input type="range" id="widthSlider" min="320" max="1280" value="400" style="width: 200px !important;">
-            <span id="pxDisplay" style="color:white; font-family: monospace; font-size: 12px;">400px</span>
-            <button onclick="setMode('mobile')" style="padding: 5px 15px;">MOBILE</button>
-            <button onclick="setMode('desktop')" style="padding: 5px 15px;">DESKTOP</button>
+      <input
+        type="range"
+        id="widthSlider"
+        min="320"
+        max="1280"
+        value="400"
+        style="width:200px !important;"
+      />
 
-            <button onclick="toggleLiveMode()" style="background: var(--text-main); margin-left: auto; padding: 5px 15px;">LIVE VIEW</button>
-        </div>
+      <span id="pxDisplay" style="color:white; font-family:monospace; font-size:12px;">400px</span>
 
-        <div id="device-frame">
+      <button id="btnMobile" onclick="setMode('mobile')" style="padding:5px 15px;">MOBILE</button>
+      <button id="btnDesktop" onclick="setMode('desktop')" style="padding:5px 15px;">DESKTOP</button>
 
-            <div class="header-group">
-                <div class="meta-bar">
-                    <div class="meta-left"><a>100 Credits</a></div>
-                    <div class="meta-right">
-                        <a>Login</a>
-
-                    </div>
-                </div>
-
-                <nav class="nav-bar" id="mainNav">
-                    <div class="nav-links">
-
-                        <div class="mobile-meta-group">
-                            <a class="is-credits">100 Credits</a>
-                            <a>Login</a>
-
-                        </div>
-                        <a class="nav-link active">Home</a>
-                        <a class="nav-link">About</a>
-                        <a class="nav-link">Blog</a>
-                        <a class="nav-link">Contact</a>
-
-                    </div>
-                    <button class="hamburger-btn" onclick="toggleMenu()">
-                        <span class="hamburger-icon"></span>
-                    </button>
-                </nav>
-            </div>
-
-
-
-            <div class="tile-grid" id="mainGrid">
-
-                <div class="tile tile-stretch">
-                    <div style="height:100%; display:flex; align-items:center;">
-                         <h1 style="margin:0; color: var(--text-main); font-weight: 768; letter-spacing: -2px;">LOGO</h1>
-                    </div>
-                </div>
-
-                <div class="tile tile-ghost"></div>
-
-                <div class="tile tile-std">
-                    <h3>Join Mailing List</h3>
-                    <input type="text" placeholder="Enter your email">
-                    <button id="refButton" class="btn-ref">SUBMIT</button>
-                </div>
-
-                 <div class="tile tile-ghost"></div>
-
-                 <div class="tile tile-std">
-                    <h3>Settings Smooth</h3>
-                    <div class="slider-wrapper">
-                        <span class="slider-label">0</span>
-                        <div class="range-container">
-                            <input type="range" id="advSlider" min="0" max="100" value="50">
-                            <div class="slider-value" id="sliderValue">50</div>
-                        </div>
-                        <span class="slider-label">100</span>
-                    </div>
-                 </div>
-
-                 <div class="tile tile-std">
-                    <h3>Upload File</h3>
-                    <label id="matchLabel" class="file-upload-label btn-match">
-                        CHOOSE FILE
-                        <input type="file" id="fileInput" style="display:none;" onchange="document.getElementById('fileName').textContent = this.files[0] ? this.files[0].name : '...'">
-                    </label>
-                    <span id="fileName" class="file-name-display">...</span>
-                </div>
-
-
-                <div class="tile tile-std">
-                    <h3>Settings Snap</h3>
-                    <img id="snapImage" src="https://placehold.co/64x64/2EC4B6/ffffff?text=0" style="width:64px; height:64px; border-radius: 0; object-fit:cover;">
-                    <div class="slider-wrapper">
-                        <span class="slider-label">0</span>
-                        <div class="range-container">
-                            <input type="range" id="snapSlider" min="0" max="2" step="1" value="0">
-                            <div class="slider-value">0</div>
-                        </div>
-                        <span class="slider-label">2</span>
-                    </div>
-                 </div>
-
-                 <div class="tile tile-stretch">
-                    <h3>Paste text here</h3>
-                    <textarea></textarea>
-                </div>
-
-                <div class="tile tile-std" id="step1">
-                    <h3>Your file is ready!</h3>
-                </div>
-
-                <div class="tile tile-std" id="step2">
-                    <button id="viewButton" class="btn-ref">View File</button>
-                </div>
-
-                <div class="tile tile-std" id="step3">
-                    <button id="againButton" class="btn-ref">Generate Another</button>
-                </div>
-
-            </div>
-        </div>
+      <button
+        id="btnLive"
+        onclick="toggleLiveMode()"
+        style="background: var(--text-main); margin-left:auto; padding:5px 15px;"
+      >
+        LIVE VIEW
+      </button>
     </div>
 
-<script>
-    /**
-     * ==========================================
-     * GROUP 1: SIMULATOR & VIEWPORT CONTROL
-     * ==========================================
-     */
-    const Simulator = {
-        slider: document.getElementById('widthSlider'),
-        frame: document.getElementById('device-frame'),
-        display: document.getElementById('pxDisplay'),
+    <div id="device-frame">
+      <div class="header-group" id="headerGroup">
+        <div class="meta-bar">
+          <div class="meta-left"><a id="metaCredits" href="#">100 Credits</a></div>
+          <div class="meta-right"><a id="metaLogin" href="#">Login</a></div>
+        </div>
 
-        init() {
-            if (this.slider) {
-                this.slider.addEventListener('input', (e) => this.setWidth(e.target.value));
-            }
-            this.setWidth(512); // Default load width
-        },
+        <nav class="nav-bar" id="mainNav">
+          <div class="nav-links" id="navLinks">
+            <div class="mobile-meta-group">
+              <a class="is-credits" id="mobileCredits" href="#">100 Credits</a>
+              <a id="mobileLogin" href="#">Login</a>
+            </div>
 
-        setWidth(width) {
-            this.frame.style.width = width + 'px';
-            this.display.innerText = `${width}px`;
-            this.slider.value = width; // Sync slider
+            <a class="nav-link active" data-nav="Home" href="#">Home</a>
+            <a class="nav-link" data-nav="About" href="#">About</a>
+            <a class="nav-link" data-nav="Blog" href="#">Blog</a>
+            <a class="nav-link" data-nav="Contact" href="#">Contact</a>
+          </div>
 
-            // [Fix] Force arrow update immediately when slider moves
-            if (typeof ArrowSystem !== 'undefined') {
-                ArrowSystem.update();
-            }
-        },
+          <button
+            class="hamburger-btn"
+            id="hamburgerBtn"
+            aria-label="Toggle menu"
+            aria-expanded="false"
+            aria-controls="navLinks"
+          >
+            <span class="hamburger-icon"></span>
+          </button>
+        </nav>
+      </div>
 
-        setMode(mode) {
-            const width = (mode === 'mobile') ? 512 : 1024;
-            this.setWidth(width);
-        },
+      <div class="tile-grid" id="mainGrid">
+        <div class="tile tile-stretch">
+          <div style="height:100%; display:flex; align-items:center;">
+            <h1 style="margin:0; color: var(--text-main); font-weight:768; letter-spacing:-2px;">LOGO</h1>
+          </div>
+        </div>
 
-        toggleLive() {
-            document.body.classList.toggle('view-live');
-            // [Fix] Update arrows after layout shift
-            setTimeout(() => ArrowSystem.update(), 50);
-        }
-    };
+        <div class="tile tile-ghost"></div>
 
-    /**
-     * ==========================================
-     * GROUP 2: UI COMPONENTS & INTERACTION
-     * ==========================================
-     */
-    const UI = {
-        toggleMenu() {
-            const nav = document.getElementById('mainNav');
-            if (nav) nav.classList.toggle('mobile-open');
-        },
+        <div class="tile tile-std">
+          <h3>Join Mailing List</h3>
+          <input id="mailInput" type="text" placeholder="Enter your email">
+          <button id="refButton" class="btn-ref">SUBMIT</button>
+        </div>
 
+        <div class="tile tile-ghost"></div>
+
+        <div class="tile tile-std">
+          <h3>Settings Smooth</h3>
+          <div class="slider-wrapper">
+            <span class="slider-label">0</span>
+            <div class="range-container">
+              <input type="range" id="advSlider" min="0" max="100" value="50">
+              <div class="slider-value" id="sliderValue">50</div>
+            </div>
+            <span class="slider-label">100</span>
+          </div>
+        </div>
+
+        <div class="tile tile-std">
+          <h3>Upload File</h3>
+          <label id="matchLabel" class="file-upload-label btn-match">
+            CHOOSE FILE
+            <input type="file" id="fileInput" style="display:none;">
+          </label>
+          <span id="fileName" class="file-name-display">...</span>
+        </div>
+
+        <div class="tile tile-std">
+          <h3>Settings Snap</h3>
+          <img
+            id="snapImage"
+            src="https://placehold.co/64x64/2EC4B6/ffffff?text=0"
+            style="width:64px; height:64px; border-radius:0; object-fit:cover;"
+            alt="Snap preview"
+          >
+          <div class="slider-wrapper">
+            <span class="slider-label">0</span>
+            <div class="range-container">
+              <input type="range" id="snapSlider" min="0" max="2" step="1" value="0">
+              <div class="slider-value">0</div>
+            </div>
+            <span class="slider-label">2</span>
+          </div>
+        </div>
+
+        <div class="tile tile-stretch">
+          <h3>Paste text here</h3>
+          <textarea id="pasteArea"></textarea>
+        </div>
+
+        <div class="tile tile-std" id="step1">
+          <h3>Your file is ready!</h3>
+        </div>
+
+        <div class="tile tile-std" id="step2">
+          <button id="viewButton" class="btn-ref">View File</button>
+        </div>
+
+        <div class="tile tile-std" id="step3">
+          <button id="againButton" class="btn-ref">Generate Another</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shared JS -->
+  <script src="/static/js/log.js"></script>
+  <script src="/static/js/layout_bus.js"></script>
+  <script src="/static/js/device.js"></script>
+  <script src="/static/js/nav_ui.js"></script>
+  <script src="/static/js/simulator.js"></script>
+
+  <!-- Classic-only JS (kept inline for now) -->
+  <script>
+    (function () {
+      const D = window.Demeza || {};
+      const L = D.Log || console;
+
+      function preventNavDefaultClicks() {
+        const ids = ['metaCredits','metaLogin','mobileCredits','mobileLogin'];
+        ids.forEach((id) => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.addEventListener('click', (e) => {
+            e.preventDefault();
+            L.log('[UI] prevent default (meta link)', { id });
+          });
+        });
+        document.querySelectorAll('.nav-link').forEach((a) => {
+          a.addEventListener('click', (e) => {
+            e.preventDefault();
+            L.log('[UI] prevent default (nav link)', { label: a.getAttribute('data-nav') || a.textContent });
+          });
+        });
+      }
+
+      const ClassicUI = {
         initSliders() {
-            const containers = document.querySelectorAll('.range-container');
-            containers.forEach(container => {
-                const slider = container.querySelector('input[type="range"]');
-                const bubble = container.querySelector('.slider-value');
+          L.log('[Init] ClassicUI.initSliders');
+          document.querySelectorAll('.range-container').forEach((container) => {
+            const slider = container.querySelector('input[type="range"]');
+            const bubble = container.querySelector('.slider-value');
+            if (!slider || !bubble) return;
 
-                if (slider && bubble) {
-                    const updateBubble = (val) => {
-                        const min = parseFloat(slider.min) || 0;
-                        const max = parseFloat(slider.max) || 100;
-                        const percent = ((val - min) * 100) / (max - min);
-                        const offset = 8 - (percent * 0.15);
-                        bubble.textContent = val;
-                        bubble.style.left = `calc(${percent}% + ${offset}px)`;
-                    };
-                    updateBubble(slider.value);
-                    slider.addEventListener('input', (e) => {
-                        updateBubble(e.target.value);
-                        bubble.classList.add('active');
-                    });
-                    const hideBubble = () => bubble.classList.remove('active');
-                    ['change', 'mouseup', 'touchend'].forEach(evt =>
-                        slider.addEventListener(evt, hideBubble)
-                    );
-                }
+            const updateBubble = (val) => {
+              const min = parseFloat(slider.min) || 0;
+              const max = parseFloat(slider.max) || 100;
+              const percent = ((val - min) * 100) / (max - min);
+              const offset = 8 - (percent * 0.15);
+              bubble.textContent = String(val);
+              bubble.style.left = `calc(${percent}% + ${offset}px)`;
+            };
+
+            updateBubble(slider.value);
+
+            slider.addEventListener('input', (e) => {
+              updateBubble(e.target.value);
+              bubble.classList.add('active');
+              L.log('[UI] slider input', { id: slider.id, value: e.target.value });
             });
+
+            const hideBubble = () => bubble.classList.remove('active');
+            ['change', 'mouseup', 'touchend'].forEach((evt) => slider.addEventListener(evt, hideBubble));
+          });
         },
 
         initSnapSlider() {
-            const snapSlider = document.getElementById('snapSlider');
-            const snapImage = document.getElementById('snapImage');
-            const images = {
-                '0': 'https://placehold.co/64x64/2EC4B6/ffffff?text=0',
-                '1': 'https://placehold.co/64x64/FF9F1C/ffffff?text=1',
-                '2': 'https://placehold.co/64x64/333333/ffffff?text=2'
-            };
-            if (snapSlider && snapImage) {
-                snapSlider.addEventListener('input', (e) => {
-                    const val = e.target.value;
-                    if (images[val]) snapImage.src = images[val];
-                });
-            }
-        }
-    };
+          L.log('[Init] ClassicUI.initSnapSlider');
+          const snapSlider = document.getElementById('snapSlider');
+          const snapImage = document.getElementById('snapImage');
+          const images = {
+            '0': 'https://placehold.co/64x64/2EC4B6/ffffff?text=0',
+            '1': 'https://placehold.co/64x64/FF9F1C/ffffff?text=1',
+            '2': 'https://placehold.co/64x64/333333/ffffff?text=2'
+          };
+          if (!snapSlider || !snapImage) {
+            L.warn('[ClassicUI] snapSlider or snapImage missing');
+            return;
+          }
+          snapSlider.addEventListener('input', (e) => {
+            const val = e.target.value;
+            if (images[val]) snapImage.src = images[val];
+            L.log('[UI] snapSlider input', { value: val });
+          });
+        },
 
-    /**
-     * ==========================================
-     * GROUP 3: LAYOUT ENGINE
-     * ==========================================
-     */
-    const Layout = {
+        bindButtonsAndFile() {
+          const refButton = document.getElementById('refButton');
+          const viewButton = document.getElementById('viewButton');
+          const againButton = document.getElementById('againButton');
+          const fileInput = document.getElementById('fileInput');
+          const fileName = document.getElementById('fileName');
+          const mailInput = document.getElementById('mailInput');
+
+          if (refButton) refButton.addEventListener('click', () => {
+            L.log('[UI] submit mailing list', { email: (mailInput?.value || '').trim() });
+          });
+          if (viewButton) viewButton.addEventListener('click', () => L.log('[UI] view file'));
+          if (againButton) againButton.addEventListener('click', () => L.log('[UI] generate another'));
+
+          if (fileInput) {
+            fileInput.addEventListener('change', () => {
+              const name = fileInput.files && fileInput.files[0] ? fileInput.files[0].name : '...';
+              if (fileName) fileName.textContent = name;
+              L.log('[UI] file chosen', { name });
+            });
+          }
+        }
+      };
+
+      const ClassicLayout = {
         syncButtonStyles() {
-            const ref = document.getElementById('refButton');
-            const target = document.getElementById('matchLabel');
-            if (ref && target) {
-                const computed = window.getComputedStyle(ref);
-                ['fontSize', 'fontFamily', 'fontWeight', 'lineHeight', 'height']
-                    .forEach(prop => target.style[prop] = computed[prop]);
-            }
+          const ref = document.getElementById('refButton');
+          const target = document.getElementById('matchLabel');
+          if (!ref || !target) return;
+
+          const computed = window.getComputedStyle(ref);
+          ['fontSize','fontFamily','fontWeight','lineHeight','height']
+            .forEach((prop) => target.style[prop] = computed[prop]);
+
+          L.log('[Layout] syncButtonStyles', { ok: true });
         },
+
         optimizeTextarea() {
-            const txtArea = document.querySelector('.tile textarea');
-            if (!txtArea) return;
-            const tile = txtArea.closest('.tile');
-            const header = tile.querySelector('h3');
-            tile.style.display = 'flex';
-            tile.style.flexDirection = 'column';
-            tile.style.alignItems = 'flex-start';
-            tile.style.textAlign = 'left';
-            txtArea.style.flexGrow = '1';
-            txtArea.style.width = '100%';
-            if (header) {
-                header.style.marginBottom = 'var(--q-16)';
-                header.style.width = '100%';
-            }
+          const txtArea = document.getElementById('pasteArea');
+          if (!txtArea) return;
+
+          const tile = txtArea.closest('.tile');
+          const header = tile ? tile.querySelector('h3') : null;
+          if (!tile) return;
+
+          tile.style.display = 'flex';
+          tile.style.flexDirection = 'column';
+          tile.style.alignItems = 'flex-start';
+          tile.style.textAlign = 'left';
+
+          txtArea.style.flexGrow = '1';
+          txtArea.style.width = '100%';
+
+          if (header) {
+            header.style.marginBottom = 'var(--q-16)';
+            header.style.width = '100%';
+          }
+
+          L.log('[Layout] optimizeTextarea', { ok: true });
         },
-        refresh() {
-            this.syncButtonStyles();
-            this.optimizeTextarea();
+
+        refresh(reason) {
+          L.log('[Layout] refresh', { reason });
+          this.syncButtonStyles();
+          this.optimizeTextarea();
         }
-    };
+      };
 
-    /**
-     * ==========================================
-     * GROUP 4: ARROW SYSTEM (CONFIGURABLE)
-     * ==========================================
-     */
-    const ArrowSystem = {
-        grid: document.getElementById('mainGrid'),
+      const ArrowSystem = {
+        grid: null,
         arrows: [],
-
-        // --- [CONFIG] CONTROL VARIABLES ---
-
-        // Distance in pixels from the emanating tile edge
-        // Positive (+) = Further away | Negative (-) = Closer/Overlap
         nudge: 12,
-
-        // Choose your Icon Style (Uncomment the one you want)
-
-        // 1. Standard Thin Arrow
-        //arrowSVG: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 4 L12 20 M12 20 L5 13 M12 20 L19 13" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-
-        // 2. Bold Chevron
-        // arrowSVG: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>`,
-
-        // 3. Solid Triangle
         arrowSVG: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21l-10-16h20l-10 16z"/></svg>`,
 
-
-        // --- LOGIC ---
-
         init() {
-            if (!this.grid) return;
+          this.grid = document.getElementById('mainGrid');
+          if (!this.grid) {
+            L.warn('[ArrowSystem] mainGrid missing');
+            return;
+          }
 
-            // Clear existing arrows if re-initialized
-            this.arrows.forEach(a => a.element.remove());
-            this.arrows = [];
+          this.arrows.forEach((a) => a.element.remove());
+          this.arrows = [];
 
-            const connections = [
-                { from: 'step1', to: 'step2' },
-                { from: 'step2', to: 'step3' }
-            ];
+          const connections = [
+            { from: 'step1', to: 'step2' },
+            { from: 'step2', to: 'step3' }
+          ];
 
-            connections.forEach(conn => {
-                const elFrom = document.getElementById(conn.from);
-                const elTo = document.getElementById(conn.to);
+          connections.forEach((conn) => {
+            const elFrom = document.getElementById(conn.from);
+            const elTo = document.getElementById(conn.to);
+            if (!elFrom || !elTo) {
+              L.warn('[ArrowSystem] missing tiles', { from: conn.from, to: conn.to });
+              return;
+            }
 
-                if (elFrom && elTo) {
-                    const arrowEl = document.createElement('div');
-                    arrowEl.className = 'floating-arrow';
-                    arrowEl.innerHTML = this.arrowSVG;
+            const arrowEl = document.createElement('div');
+            arrowEl.className = 'floating-arrow';
+            arrowEl.innerHTML = this.arrowSVG;
 
-                    this.grid.style.position = 'relative';
-                    this.grid.appendChild(arrowEl);
+            this.grid.appendChild(arrowEl);
+            this.arrows.push({ element: arrowEl, from: elFrom, to: elTo });
+            L.log('[ArrowSystem] connection added', conn);
+          });
 
-                    this.arrows.push({
-                        element: arrowEl,
-                        from: elFrom,
-                        to: elTo
-                    });
-                }
-            });
+          const ro = new ResizeObserver(() => this.update('ResizeObserver'));
+          ro.observe(this.grid);
 
-            const resizeObserver = new ResizeObserver(() => {
-                this.update();
-            });
-            resizeObserver.observe(this.grid);
-
-            setTimeout(() => this.update(), 100);
+          setTimeout(() => this.update('init:timeout'), 100);
+          this.update('init:immediate');
         },
 
-        update() {
-            if (!this.grid) return;
-            const gridRect = this.grid.getBoundingClientRect();
+        update(reason) {
+          if (!this.grid) return;
+          const gridRect = this.grid.getBoundingClientRect();
 
-            this.arrows.forEach(arrow => {
-                const r1 = arrow.from.getBoundingClientRect();
-                const r2 = arrow.to.getBoundingClientRect();
+          this.arrows.forEach((arrow) => {
+            const r1 = arrow.from.getBoundingClientRect();
+            const r2 = arrow.to.getBoundingClientRect();
 
-                // Calculate Center of Source Tile
-                const c1 = { x: r1.left + r1.width/2, y: r1.top + r1.height/2 };
+            const c1 = { x: r1.left + r1.width / 2, y: r1.top + r1.height / 2 };
+            const isVertical = (r2.top > (r1.bottom - 10));
 
-                // Determine Orientation
-                // If r2 is "below" r1 (with 10px tolerance), it's vertical
-                const isVertical = (r2.top > (r1.bottom - 10));
+            let x, y, rotation;
+            if (isVertical) {
+              x = c1.x;
+              y = r1.bottom + this.nudge;
+              rotation = 0;
+            } else {
+              x = r1.right + this.nudge;
+              y = c1.y;
+              rotation = -90;
+            }
 
-                let x, y, rotation;
+            const finalLeft = x - gridRect.left;
+            const finalTop = y - gridRect.top;
 
-                if (isVertical) {
-                    // Vertical: Snap to Bottom Edge + Nudge
-                    x = c1.x;
-                    y = r1.bottom + this.nudge;
-                    rotation = 0;
-                } else {
-                    // Horizontal: Snap to Right Edge + Nudge
-                    x = r1.right + this.nudge;
-                    y = c1.y;
-                    rotation = -90;
-                }
+            arrow.element.style.left = `${finalLeft - 24}px`;
+            arrow.element.style.top = `${finalTop - 24}px`;
+            arrow.element.style.transform = `rotate(${rotation}deg)`;
+          });
 
-                // Convert to relative coordinates inside the grid
-                const finalLeft = x - gridRect.left;
-                const finalTop = y - gridRect.top;
-
-                // Center the 48x48 arrow container on the calculated point
-                arrow.element.style.left = `${finalLeft - 24}px`;
-                arrow.element.style.top = `${finalTop - 24}px`;
-                arrow.element.style.transform = `rotate(${rotation}deg)`;
-            });
+          L.log('[ArrowSystem] update', { reason, count: this.arrows.length });
         }
-    };
+      };
 
+      window.addEventListener('load', () => {
+        L.log('[Boot] classic.html load');
 
-    /**
-     * ==========================================
-     * INIT & EXPORTS
-     * ==========================================
-     */
-    window.setMode = (m) => Simulator.setMode(m);
-    window.toggleLiveMode = () => Simulator.toggleLive();
-    window.toggleMenu = () => UI.toggleMenu();
+        D.NavUI && D.NavUI.init && D.NavUI.init();
+        D.Simulator && D.Simulator.init && D.Simulator.init();
 
-    window.addEventListener('load', () => {
-        Simulator.init();
-        UI.initSliders();
-        UI.initSnapSlider();
-        Layout.refresh();
+        preventNavDefaultClicks();
+
+        ClassicUI.initSliders();
+        ClassicUI.initSnapSlider();
+        ClassicUI.bindButtonsAndFile();
+
+        ClassicLayout.refresh('load');
         ArrowSystem.init();
 
-        if (typeof UAParser !== 'undefined') {
-            var parser = new UAParser();
-            var result = parser.getResult();
-            if (result.device.type === 'mobile' || result.device.type === 'tablet') {
-                console.log("[Device] Mobile detected.");
-                document.body.classList.add('is-native-mobile');
-                Simulator.toggleLive();
-            }
+        const isMobile = D.Device && D.Device.isNativeMobile && D.Device.isNativeMobile();
+        if (isMobile) {
+          document.body.classList.add('is-native-mobile');
+          L.log('[Device] native mobile detected -> auto live', { isMobile: true });
+          // Start live view on real mobile (like before)
+          window.toggleLiveMode && window.toggleLiveMode();
         }
-    });
+      });
 
-    window.addEventListener('resize', () => {
-        Layout.refresh();
-        ArrowSystem.update();
-    });
-</script>
+      window.addEventListener('resize', () => {
+        ClassicLayout.refresh('window.resize');
+        ArrowSystem.update('window.resize');
+      });
+    })();
+  </script>
 </body>
 </html>

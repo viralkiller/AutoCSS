@@ -148,15 +148,6 @@
       color: var(--accent);
     }
 
-    /* TBA styling */
-    .card.is-tba{
-      border-color: var(--border-med);
-      opacity: 0.95;
-    }
-    .card.is-tba h2{ color: #666; }
-    .card.is-tba .arrow{ color: #888; }
-    .card.is-tba .badge{ opacity: 0.8; }
-
     .footer{
       font-family: monospace;
       font-size: 12px;
@@ -165,14 +156,14 @@
     }
   </style>
 </head>
+
 <body>
   <div class="wrap">
     <div class="titlebar">
       <div>
-        <div class="brand">Demeza AutoCSS</div>
-        <div class="subtitle">Choose a mode</div>
+        <div class="brand">deMeza AutoCSS</div>
+        <div class="subtitle">Choose a common template</div>
       </div>
-      <div class="subtitle" id="bootNote">[BOOT] index.html loaded</div>
     </div>
 
     <div class="grid" aria-label="Mode selection">
@@ -214,15 +205,16 @@
         </div>
       </div>
 
+      <!-- UNLOCKED: no "TBA" styling -->
       <div
-        class="card is-tba"
+        class="card"
         role="button"
         tabindex="0"
         data-home-card="1"
         data-target="/game"
-        aria-label="Open Game (TBA)">
+        aria-label="Open Game">
         <div>
-          <h2>Game (TBA)</h2>
+          <h2>Game</h2>
           <p>
             Game layout (based on Workspace). On mobile, shows “Rotate to play” overlay.
           </p>
@@ -235,11 +227,11 @@
     </div>
 
     <div class="footer">
-      deMeza AutoCSS 2025
+      <span>deMeza AutoCSS </span><span id="footerYear">2025</span>
     </div>
   </div>
 
-  <!-- JS (all in static/js for now) -->
+  <!-- JS -->
   <script src="/static/js/log.js"></script>
   <script src="/static/js/layout_bus.js"></script>
   <script src="/static/js/device.js"></script>
@@ -247,6 +239,13 @@
   <script src="/static/js/index_boot.js"></script>
 
   <script>
+    // Footer year (auto-updates)
+    (function(){
+      const y = new Date().getFullYear();
+      const el = document.getElementById('footerYear');
+      if (el) el.textContent = String(y);
+    })();
+
     // Keyboard support for the cards, with logging.
     (function(){
       const L = window.Demeza && window.Demeza.Log ? window.Demeza.Log : null;
