@@ -33,6 +33,12 @@ def game():
     print("[ROUTE] GET /  → game.html")
     return render_template("game.html")
 
+@app.route("/bake_test")
+def bake_test():
+    # This where we paste the baked code to see if it worked
+    print("[ROUTE] GET /  → bake_test.html")
+    return render_template("bake_test.html")
+
 @app.route("/static/<path:filename>")
 def serve_static(filename):
     print(f"[STATIC] /static/{filename}")

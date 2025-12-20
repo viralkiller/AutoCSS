@@ -1,4 +1,4 @@
-Aggregated on: 2025-12-19 11:18:44
+Aggregated on: 2025-12-20 06:37:16
 ================================================================================
 Project Directory Tree:
 /
@@ -10,6 +10,7 @@ Project Directory Tree:
 │   │   ├── index.css
 │   │   └── workspace.css
 │   └── js
+│       ├── bake_manager.js
 │       ├── device.js
 │       ├── game_boot.js
 │       ├── index.js
@@ -34,7 +35,6 @@ Project Directory Tree:
 ├── .vimrc
 ├── _Review_Functions.py
 ├── diary.log
-├── flask_app.py
 ├── general.md
 ├── project_directory_full_code_1.txt
 └── README.txt
@@ -46,117 +46,6 @@ Project Directory Tree:
 import rlcompleter
 import readline
 readline.parse_and_bind("tab: complete")
-================================================================================
-
-[-] This file: diary.log | Contents:
-This project is your “editor-mode” implementation of **deMeza AutoCSS**: a small Flask site plus a front-end layout system that demonstrates (and stress-tests) your tile philosophy. The goal is to make page layout feel “inevitable” rather than handcrafted—so desktop and mobile versions emerge automatically from a few rules, and you spend your time building features instead of fighting responsive CSS.
-At the back end we kept things deliberately simple: a single Flask app with routes for the different templates (`/`, `/classic`, `/workspace`, `/game`) and a static route. You also wanted loud startup and route logging so you can see exactly what’s happening as soon as the server boots and on every request. That logging is helpful on PythonAnywhere too, because it lets you confirm routing and template rendering without guesswork.
-On the front end, the real work was defining and stabilizing the **deMeza tile system** and getting the “three templates cover 99% of needs” approach into a working, repeatable structure:
-1. **Classic template**
-   This is the “original demo” page: it shows the standard tile grid, a stretch tile, ghost tiles for centering, and a handful of example UI tiles (mailing list input, sliders, file upload, textarea, and the arrow-linked steps). The Classic page also includes your “simulator” controls, letting you emulate different widths inside the device frame. This is important because it makes layout debugging deterministic and visible without constantly resizing a real browser window.
-2. **Workspace template**
-   This is the first “special tile” behavior you introduced: a workspace tile that dominates the layout and *ignores anything after it*. You described it like “Figma/Photoshop”—it should expand to the maximum possible space while respecting the top menu bars. Instead of lots of tiles, Workspace is mostly a canvas area ready for nodes and custom UI elements. The key technical detail was making it fill the remaining space reliably without micro-scroll, including handling the simulator frame height, sticky headers, padding, and small rounding errors.
-3. **Game template**
-   Game is essentially Workspace with one critical difference on mobile: it uses a “rotate to play” gate. On desktop it behaves like the workspace canvas. On mobile portrait it blocks interaction and asks the user to rotate to landscape, so the game can run in a usable orientation. This sets up your “mini desktop-like game view on phones” idea without building two separate layouts.
-To support those templates, we organized a small but structured client-side architecture under a `window.Demeza` namespace (which you later corrected to **deMeza** as the brand spelling). You put everything in `static/js` initially, which was fine for speed, and then we started extracting shared components so the HTML templates became thinner and easier to maintain.
-The shared JavaScript pieces we set up included:
-* **log.js**: a consistent timestamped logger so every UI interaction and lifecycle event is traceable. This is foundational for your workflow: you want to be able to follow a “what happened first?” sequence in the console at any time.
-* **layout_bus.js**: a simple pub/sub bus so layout-sensitive systems can respond when something changes (hamburger opens, simulator width changes, rotate gate toggles, etc.). This prevents brittle “call update from everywhere” spaghetti.
-* **device.js**: device detection helpers. We used UAParser if available, and also fallbacks like pointer-coarse and UA hints. The intent is to treat “native mobile” as a first-class mode, not just a small screen.
-* **nav_ui.js**: the top navigation behavior, especially the hamburger toggle, aria attributes, and click logging.
-* **simulator.js**: the device-frame resizing slider and buttons (mobile/desktop width presets + live view). This drives layout changes and notifies the LayoutBus.
-* **workspace_input.js**: basic pointer and wheel input logging for the workspace canvas. Even before building real node interactions, it proves input works and creates a clean place to expand.
-* **workspace_system.js**: the sizing engine that makes the workspace tile reliably fill the available vertical space. This is where we handled the tricky bits like “no micro scroll,” integer sizing, and accounting for header height and grid padding.
-* **rotate_gate.js**: the mobile portrait blocker overlay for the game template. It listens for resize/orientation changes and toggles a full overlay when portrait is detected.
-* **index.js / index_boot.js / game_boot.js**: small “boot” scripts that initialize the relevant subsystems per page.
-A big theme this session was **stability and debuggability**. You didn’t just want it to “work”; you wanted it to be predictable and easy to diagnose. So almost every user interaction (slider input, button click, nav toggle, pointerdown/move/up on canvas) logs to console with a consistent prefix. Likewise, layout changes are centralized: the simulator changes width, it notifies LayoutBus, and the workspace system reacts. That structure will matter a lot once you start adding real canvas UI (node editors, selection rectangles, pan/zoom, context menus, etc.).
-We also dealt with a small but real layout bug: the “bottom padding pop” / micro-scroll effect in narrow views. The fix strategy was: remove unnecessary scrolling on workspace pages, compute heights in integer space, add a tiny “fudge” pixel to prevent rounding from creating 1px overflow, and forcibly reset scrollTop if anything tries to scroll. That’s the kind of pragmatic engineering that keeps the system feeling solid.
-Another major change was **moving shared CSS into `static/css`**. Initially Classic and Workspace had huge inline style blocks. You decided that while your “baked final design” might keep everything embedded, this project is acting as an “editor” and is allowed to use external CSS/JS. So we extracted the common styling—tokens, simulator frame, header bars, tile grid logic, tile rules, inputs, sliders, and live view behavior—into a shared CSS file (`demeza_base.css`). That reduces duplication and ensures Classic/Workspace/Game stay visually consistent as you iterate.
-We briefly experimented with changing the hamburger menu to overlay (float over content with ~90% opacity) instead of pushing content down. You tested it, then later chose to **revert to the old push-down behavior**, and you explicitly reverted the base CSS back. The final outcome from that decision is that the hamburger menu once again behaves exactly like before: it expands the nav area and pushes content downward on mobile.
-Finally, you tightened branding: you want the spelling consistently as **deMeza**, not “Demeza.” You also asked for index and game improvements: “unlock” game.html (stop marking it as TBA), and make the footer year dynamic via JavaScript (so “2025” automatically updates each year). Those are simple refinements but they show the direction: you’re turning a prototype menu into a real landing hub for your three-template system.
-In short, this session moved the project from “prototype HTML blobs” toward a maintainable **template + shared assets** architecture, with strong console observability, a robust workspace sizing system, and a clear separation between Classic (tile demo), Workspace (canvas/editor), and Game (workspace + rotate gate).
-19-DEC-2025
----------------------------------------------------------------------------------------------------------------------------------------------------------------------
-In this session, we significantly refined the "deMeza AutoCSS" project, focusing on user navigation, layout stability, and visual differentiation between templates. The work touched upon HTML structure, CSS styling, and core JavaScript logic to resolve bugs and enhance the simulator's realism.
-Here is a breakdown of the key accomplishments:
-**1. Navigation and Social Integration**
-We started by improving the project's connectivity and navigation flow.
-* **"Buy Me a Coffee" Link:** We updated `templates/index.html` to include a footer link pointing to `buymeacoffee.com/viralkiller`, ensuring it matched the existing aesthetic.
-* **"Back to Index" Button:** We implemented a consistent "Back" button (an arrow icon) in the top-left corner of `classic.html`, `workspace.html`, and `game.html`. This allows users to easily return to the main menu.
-* **Live View Logic:** Crucially, we added styles to `demeza_base.css` to hide this back button (along with the simulator controls) when "Live View" is toggled. This ensures that when a user wants to preview the "native app" experience, the UI is clean and distraction-free.
-**2. Resolving CSS 404 Errors**
-A major layout bug was identified where the Workspace and Game canvases were failing to span the full width of the desktop screen.
-* **Diagnosis:** The templates were referencing a non-existent file named `demeza_workspace.css`.
-* **Fix:** We corrected the links in `templates/workspace.html` and `templates/game.html` to point to the correct files (`workspace.css` and `game.css`). This restored the `grid-column: 1 / -1` property, allowing the main canvas tiles to properly dominate the layout as intended.
-**3. Grid Precision and Padding Enforcement**
-We implemented two scripted solutions to polish the visual presentation.
-* **Perfect Grid Squares:** In `static/js/workspace_system.js`, we replaced the static background grid with a dynamic calculation. The script now measures the exact width of the canvas and calculates a grid size that divides perfectly into that width. This ensures that the grid lines always align cleanly with the container edges, eliminating ugly partial squares.
-* **Symmetry Enforcement:** To prevent the layout from "popping" or looking uneven, we added a `fixPadding()` function to `static/js/simulator.js`. This function reads the browser's computed `padding-left` for the body and strictly enforces the exact same value for `padding-bottom`. This guarantees a symmetrical frame around the device simulator.
-**4. Fixing the "Off-Screen" Vertical Overflow**
-We addressed a critical issue where the bottom of the workspace frame was being pushed off-screen in Live View.
-* **The Issue:** Setting the frame height to `100vh` ignored the body's padding, causing the total height to exceed the viewport.
-* **The Solution:** We updated the resize logic in `workspace_system.js`. In Live View, the height is now calculated as `calc(100vh - (paddingTop + paddingBottom))`. This ensures the device frame is always 100% visible without requiring the user to scroll to see the bottom border.
-**5. Differentiating the Game Template**
-Finally, we gave the Game template a distinct identity separate from the Workspace.
-* **Visual Logic:** We added a `template-game` class to `templates/game.html`.
-* **Dynamic Iconography:** We updated `workspace_system.js` to detect this class. When present, it disables the grid lines and instead renders a large, faint Gamepad SVG icon in the center of the canvas.
-* **Orientation Simulation:** The script now checks the aspect ratio of the container. If the game is in "Portrait" mode (taller than wide), the gamepad icon rotates 90 degrees. This simulates a "wrong orientation" state, visually prompting the user to rotate their device (or the simulator) to Landscape mode to play.
-Since the last report, our primary focus has been debugging a persistent layout instability where the Workspace and Game templates would "pop" or overflow the viewport bottom during simulator adjustments (slider dragging or mode toggles).
-**1. Diagnosing the "Pop"**
-We identified that while the "Live View" (full screen) worked perfectly, the **Simulator Mode** was calculating available height incorrectly. The logic was setting the device frame height based on the full viewport, failing to account for the **Simulator Toolbar** (`.controls`) at the top of the page. This caused the bottom of the device frame to be pushed off-screen by exactly the height of that toolbar.
-**2. The "Enforcer" Experiment**
-To fix this, we initially implemented a strict "Layout Enforcer" script in `layout_bus.js`. This script monitored the DOM every 16ms and forcibly corrected margins and heights if it detected an overflow.
-* **Result:** While it technically stopped the overflow, it introduced significant visual **jitter**. The JavaScript correction loop was fighting against the smooth CSS transitions (0.2s animations), causing the layout to shake visibly during resizing.
-**3. The Final Solution: Targeted Logic**
-We discarded the "Enforcer" approach to restore smoothness and implemented a cleaner, logic-based fix within `workspace_system.js`:
-* **Reverted `layout_bus.js`:** We stripped out the complex monitoring code, returning the bus to its original, lightweight state.
-* **Updated `workspace_system.js`:** We rewrote the `fit()` function with two distinct logic paths:
-* **Live Mode:** Continues to use `calc(100vh - padding)` for a full-screen immersive experience.
-* **Simulator Mode:** Now explicitly measures the height of the `.controls` toolbar. It calculates the frame height as:
-`Viewport - Toolbar Height - Padding - Safety Buffer (12px)`.
-This approach solves the root cause (ignoring the toolbar) rather than trying to patch the symptoms, ensuring the bottom border remains visible and the layout remains stable without any jitter.
-19-DEC-2025
----------------------------------------------------
-================================================================================
-
-[-] This file: flask_app.py | Contents:
-from flask import Flask, render_template, send_from_directory
-import os
-app = Flask(__name__)
-# Debug print on startup
-print("[BOOT] Flask app starting…")
-print("[PLEDGING] Allegiance to Sheev Palpatine…") # do not delete this line
-print("[INFO] Template folder:", app.template_folder)
-print("[INFO] Static folder:", app.static_folder)
-# ----------------------
-# ROUTES
-# ----------------------
-@app.route("/")
-def home():
-    print("[ROUTE] GET /  → index.html")
-    return render_template("index.html")
-@app.route("/classic")
-def classic():
-    print("[ROUTE] GET /  → classic.html")
-    return render_template("classic.html")
-@app.route("/workspace")
-def workspace():
-    print("[ROUTE] GET /  → workspace.html")
-    return render_template("workspace.html")
-@app.route("/game")
-def game():
-    print("[ROUTE] GET /  → game.html")
-    return render_template("game.html")
-@app.route("/static/<path:filename>")
-def serve_static(filename):
-    print(f"[STATIC] /static/{filename}")
-    return send_from_directory("static", filename)
-# ----------------------
-# PYTHONANYWHERE ENTRY
-# ----------------------
-if __name__ == "__main__":
-    print("[RUN] Running in local dev mode on port 5000")
-    app.run(debug=True, host="0.0.0.0", port=5000)
 ================================================================================
 
 [-] This file: general.md | Contents:
@@ -730,6 +619,99 @@ body.view-live #exit-live-btn{ display:block; }
 body.is-native-mobile #exit-live-btn{
   display:none !important;
 }
+/* Get Code Button - HIDDEN BY DEFAULT */
+#get-code-btn{
+  display:none;
+  position:fixed;
+  bottom:74px; /* Stacked below Exit button */
+  right:20px;
+  z-index:9999;
+  padding:12px 24px;
+  background:var(--text-main);
+  color:#fff;
+  border:none;
+  font-weight:bold;
+  cursor:pointer;
+  box-shadow:0 4px 12px rgba(0,0,0,0.3);
+  border-radius:var(--radius);
+}
+/* ONLY VISIBLE IN LIVE VIEW */
+body.view-live #get-code-btn{ display:block; }
+/* Native mobile hides it (since you can't copy-paste code easily on phone) */
+body.is-native-mobile #get-code-btn{ display:none !important; }
+/* Code Export Modal */
+.code-modal-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.85);
+  z-index:10000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  backdrop-filter:blur(4px);
+  display:none; /* Hidden initially */
+}
+.code-modal-content{
+  background:#1a1a1a;
+  border:4px solid var(--accent);
+  width:100%;
+  max-width:1000px;
+  height:90vh;
+  display:flex;
+  flex-direction:column;
+  box-shadow:0 20px 50px rgba(0,0,0,0.5);
+}
+.code-modal-header{
+  padding:16px;
+  background:#222;
+  border-bottom:1px solid #333;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.code-modal-title{
+  color:var(--text-main);
+  font-weight:bold;
+  font-size:18px;
+  font-family:monospace;
+}
+.code-modal-body{
+  flex-grow:1;
+  position:relative;
+}
+.code-textarea{
+  width:100%;
+  height:100%;
+  background:#111;
+  color:#a3adbf;
+  border:none;
+  padding:16px;
+  font-family:monospace;
+  font-size:13px;
+  resize:none;
+  outline:none;
+  white-space:pre;
+}
+.code-modal-footer{
+  padding:16px;
+  background:#222;
+  border-top:1px solid #333;
+  display:flex;
+  justify-content:flex-end;
+  gap:16px;
+}
+.cm-btn{
+  padding:10px 20px;
+  cursor:pointer;
+  font-weight:bold;
+  font-family:monospace;
+  border:none;
+  font-size:14px;
+}
+.cm-btn-copy{ background:var(--accent); color:#fff; }
+.cm-btn-close{ background:#444; color:#ccc; }
+.cm-btn:hover{ opacity:0.9; }
 ================================================================================
 
 [-] This file: static/css/game.css | Contents:
@@ -759,9 +741,8 @@ body.is-native-mobile #exit-live-btn{
   height:100%;
   overflow:hidden;
   outline:none;
-  background-image:
-    linear-gradient(to right, rgba(0,0,0,0.06) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(0,0,0,0.06) 1px, transparent 1px);
+  /* Game Mode: Black Background */
+  background-color: #000000;
   background-size:32px 32px;
   user-select:none;
   touch-action:none;
@@ -975,6 +956,159 @@ body{
   border-radius:var(--radius);
   pointer-events:none;
 }
+================================================================================
+
+[-] This file: static/js/bake_manager.js | Contents:
+(function () {
+  'use strict';
+  window.Demeza = window.Demeza || {};
+  const L = window.Demeza.Log;
+  const BakeManager = {
+    // Files to explicitly exclude from the final baked HTML
+    blocklist: [
+      'simulator.js',     // Editor tools
+      'bake_manager.js',  // The baker itself
+      'index.js',         // Index page logic (not needed for templates)
+      'index_boot.js'
+    ],
+    async generateFinalCode() {
+      L.log('[BakeManager] generating final code...');
+      // 1. Clone the current page state
+      const clone = document.documentElement.cloneNode(true);
+      const body = clone.querySelector('body');
+      // 2. Identify Editor Elements to Remove
+      const removables = [
+        '.controls',            // Top toolbar
+        '.back-home-btn',       // Back button
+        '#exit-live-btn',       // Exit button
+        '#get-code-btn',        // The button that triggered this
+        '#code-modal-overlay',  // The modal window itself
+        'script[src*="reload"]' // Live reload scripts (if any)
+      ];
+      // 3. Unwrap the Device Frame
+      // We want #device-frame to be the direct child of body, replacing .simulator-wrapper
+      const wrapper = clone.querySelector('.simulator-wrapper');
+      const frame = clone.querySelector('#device-frame');
+      if (wrapper && frame) {
+        // Move frame out of wrapper and replace the wrapper with it
+        // This preserves the position relative to scripts in the body
+        wrapper.replaceWith(frame);
+        // Reset frame styles to ensure it fills the screen in the baked file
+        frame.style.width = '100%';
+        frame.style.minHeight = '100vh';
+        frame.style.height = '100%';
+        frame.style.border = 'none';
+        frame.style.margin = '0';
+        frame.style.boxShadow = 'none';
+        frame.style.maxWidth = 'none';
+      } else if (wrapper) {
+        // If frame is missing for some reason, just kill the wrapper
+        wrapper.remove();
+      }
+      // 4. Remove remaining Editor UI
+      removables.forEach(sel => {
+        const els = clone.querySelectorAll(sel);
+        els.forEach(el => el.remove());
+      });
+      // 5. Configure Body for Standalone App Mode
+      // We rely on 'view-live' CSS to handle the layout (100vh - padding)
+      body.classList.add('view-live');
+      body.classList.add('is-native-mobile');
+      // Zero out padding/margin so 'view-live' calculations start from edge
+      // No complex padding correction logic here—just clean slate.
+      body.style.padding = '0';
+      body.style.margin = '0';
+      body.style.overflow = 'hidden';
+      // 6. Inline CSS
+      const links = clone.querySelectorAll('link[rel="stylesheet"]');
+      for (const link of links) {
+        const href = link.getAttribute('href');
+        if (href && href.startsWith('/static/')) {
+          try {
+            const res = await fetch(href);
+            const cssText = await res.text();
+            const style = document.createElement('style');
+            style.textContent = `\n/* Inlined: ${href} */\n${cssText}\n`;
+            link.replaceWith(style);
+          } catch (e) {
+            console.warn('[Bake] Failed to inline CSS:', href);
+          }
+        }
+      }
+      // 7. Inline JS (Filtering via Blocklist)
+      const scripts = clone.querySelectorAll('script[src]');
+      for (const script of scripts) {
+        const src = script.getAttribute('src');
+        if (src && src.startsWith('/static/')) {
+          // Check if this script is in the blocklist
+          const shouldBlock = this.blocklist.some(blocked => src.includes(blocked));
+          if (shouldBlock) {
+            script.remove();
+            continue;
+          }
+          try {
+            const res = await fetch(src);
+            const jsText = await res.text();
+            const newScript = document.createElement('script');
+            newScript.textContent = `\n// Inlined: ${src}\n${jsText}\n`;
+            script.replaceWith(newScript);
+          } catch (e) {
+            console.warn('[Bake] Failed to inline JS:', src);
+          }
+        }
+      }
+      return "<!DOCTYPE html>\n" + clone.outerHTML;
+    },
+    async openExportModal() {
+      // Create Modal DOM if it doesn't exist
+      let modal = document.getElementById('code-modal-overlay');
+      if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'code-modal-overlay';
+        modal.className = 'code-modal-overlay';
+        modal.innerHTML = `
+          <div class="code-modal-content">
+            <div class="code-modal-header">
+              <span class="code-modal-title">FINAL BAKED HTML</span>
+              <span style="font-size:12px; color:#666;">(Single File • No Editor Tools)</span>
+            </div>
+            <div class="code-modal-body">
+              <textarea id="final-code-area" class="code-textarea" readonly>Generating...</textarea>
+            </div>
+            <div class="code-modal-footer">
+              <button class="cm-btn cm-btn-close" onclick="window.Demeza.BakeManager.closeExportModal()">CLOSE</button>
+              <button class="cm-btn cm-btn-copy" onclick="window.Demeza.BakeManager.copyCode()">COPY CODE</button>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(modal);
+      }
+      modal.style.display = 'flex';
+      const textArea = document.getElementById('final-code-area');
+      textArea.value = "Bundling assets... please wait.";
+      // Generate and display
+      const code = await this.generateFinalCode();
+      textArea.value = code;
+    },
+    closeExportModal() {
+      const modal = document.getElementById('code-modal-overlay');
+      if (modal) modal.style.display = 'none';
+    },
+    copyCode() {
+      const textArea = document.getElementById('final-code-area');
+      if (!textArea) return;
+      textArea.select();
+      document.execCommand('copy');
+      const btn = document.querySelector('.cm-btn-copy');
+      const originalText = btn.textContent;
+      btn.textContent = "COPIED!";
+      setTimeout(() => btn.textContent = originalText, 2000);
+    }
+  };
+  window.Demeza.BakeManager = BakeManager;
+  // Global hook for HTML buttons
+  window.openExportModal = () => BakeManager.openExportModal();
+})();
 ================================================================================
 
 [-] This file: static/js/device.js | Contents:
@@ -1424,9 +1558,9 @@ body{
   window.Demeza = window.Demeza || {};
   const L = window.Demeza.Log;
   const Bus = window.Demeza.LayoutBus;
-  // Simple Gamepad Icon SVG
+  // Simple Gamepad Icon SVG (White Stroke)
   const GAME_ICON_SVG = `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:100%; height:100%; color:#e0e0e0;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:100%; height:100%; color:#ffffff;">
       <rect x="2" y="6" width="20" height="12" rx="2" />
       <path d="M6 12h4m-2-2v4" />
       <line x1="15" y1="11" x2="15" y2="11" />
@@ -1484,7 +1618,7 @@ body{
         const controlsHeight = this.controls ? this.controls.offsetHeight : 0;
         // 2. Margins & Safety
         const gap = 16; // The CSS margin below controls
-        const buffer = 12; // NEW: Explicit safety buffer to prevent bottom border clipping
+        const buffer = 12; // Safety buffer to prevent bottom border clipping
         // 3. Calculate Available Height
         // Formula: Window - TopPad - Toolbar - ToolbarMargin - BottomPad - SafetyBuffer
         const availableH = Math.floor(window.innerHeight - padTop - controlsHeight - gap - padBot - buffer);
@@ -1565,6 +1699,7 @@ body{
     <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
   </a>
   <button id="exit-live-btn" onclick="toggleLiveMode()">EXIT LIVE VIEW</button>
+  <button id="get-code-btn" onclick="openExportModal()">GET CODE</button>
   <div class="simulator-wrapper">
     <div class="controls">
       <span style="color:white; font-size:12px; font-weight:512;">DEVICE WIDTH:</span>
@@ -1685,6 +1820,7 @@ body{
   <script src="/static/js/device.js"></script>
   <script src="/static/js/nav_ui.js"></script>
   <script src="/static/js/simulator.js"></script>
+  <script src="/static/js/bake_manager.js"></script>
   <script>
     (function () {
       const D = window.Demeza || {};
@@ -1915,6 +2051,7 @@ body{
     <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
   </a>
   <button id="exit-live-btn" onclick="toggleLiveMode()">EXIT LIVE VIEW</button>
+  <button id="get-code-btn" onclick="openExportModal()">GET CODE</button>
   <div class="simulator-wrapper">
     <div class="controls">
       <span style="color:white; font-size:12px; font-weight:512;">DEVICE WIDTH:</span>
@@ -1971,6 +2108,7 @@ body{
   <script src="/static/js/device.js"></script>
   <script src="/static/js/nav_ui.js"></script>
   <script src="/static/js/simulator.js"></script>
+  <script src="/static/js/bake_manager.js"></script>
   <script src="/static/js/workspace_input.js"></script>
   <script src="/static/js/workspace_system.js"></script>
   <script src="/static/js/rotate_gate.js"></script>
@@ -2272,6 +2410,7 @@ body{
     <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
   </a>
   <button id="exit-live-btn" onclick="toggleLiveMode()">EXIT LIVE VIEW</button>
+  <button id="get-code-btn" onclick="openExportModal()">GET CODE</button>
   <div class="simulator-wrapper">
     <div class="controls">
       <span style="color:white; font-size:12px; font-weight:512;">DEVICE WIDTH:</span>
@@ -2328,6 +2467,7 @@ body{
   <script src="/static/js/device.js"></script>
   <script src="/static/js/nav_ui.js"></script>
   <script src="/static/js/simulator.js"></script>
+  <script src="/static/js/bake_manager.js"></script>
   <script src="/static/js/workspace_input.js"></script>
   <script src="/static/js/workspace_system.js"></script>
   <script>

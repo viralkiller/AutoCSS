@@ -104,5 +104,58 @@ This approach solves the root cause (ignoring the toolbar) rather than trying to
 
 19-DEC-2025
 ---------------------------------------------------
+Here is the breakdown of changes between the previous `bake_manager.js` and the newly revised version:
+
+### 1. Hardcoded Checks → Scalable Blocklist
+
+*
+**Old:** Used an `if` statement inside the loop to check specifically for `simulator.js` or `bake_manager.js`.
+
+
+* **New:** Implements a strict `blocklist` array (`['simulator.js', 'bake_manager.js', 'index.js', 'index_boot.js']`). This makes it easier to manage excluded files and ensures index-specific logic doesn't pollute the baked templates.
+
+### 2. "Dump to Body" → "Promote Frame"
+
+*
+**Old:** It emptied the `#device-frame` by moving all its children directly into the `<body>` tag and then deleted the frame and wrapper.
+
+
+*
+*Risk:* This destroyed the `#device-frame` ID, which `workspace_system.js` relies on to calculate sizes.
+
+
+
+
+* **New:** It keeps the `#device-frame` element intact. It unwraps it by replacing the `.simulator-wrapper` *with* the `#device-frame`. This ensures scripts looking for `getElementById('device-frame')` still work correctly in the baked file.
+
+### 3. Layout Logic & Padding
+
+*
+**Old:** It removed the `view-live` class and reset the body to `display: block` and `overflow-y: auto`. It relied on standard document flow, which could reintroduce the padding/scroll issues you were fighting.
+
+
+* **New:** It **enforces** the `view-live` and `is-native-mobile` classes on the baked body. It explicitly zeroes out `padding` and `margin` and sets `overflow: hidden`.
+* As requested, all complex padding calculation logic was removed. It now trusts the CSS (which sets height to `100vh` when `view-live` is present) to handle the layout naturally.
+
+
+
+### 4. Cleaner DOM Stripping
+
+*
+**Old:** Manually targeted specific elements like `.controls` and `.back-home-btn`.
+
+
+* **New:** Added `script[src*="reload"]` to the removal list to ensure development tools (like live-reloaders) don't end up in the final export.
+
+### 5. CSS Inlining
+
+*
+**Old:** Simple text replacement.
+
+
+* **New:** Added a comment block `/* Inlined: /static/... */` to the injected CSS for better debugging of the final file.
+
+--------------------------------------
+
 
 
