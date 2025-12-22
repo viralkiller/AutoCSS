@@ -1,6 +1,5 @@
 /* static/css/classic.css */
 /* Classic-only styling */
-
 .floating-arrow {
   position: absolute;
   width: 48px;
@@ -14,15 +13,12 @@
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
   transition: top 0.2s ease, left 0.2s ease, transform 0.2s ease;
 }
-
 .floating-arrow svg {
   width: 100%;
   height: 100%;
   fill: currentColor;
 }
-
 /* --- EDITOR UI (Add/Remove/Drag) --- */
-
 /* CRITICAL: Overrides to ensure consistent positioning */
 .tile, .tile-std, .tile-stretch, .tile-ghost, .tile-add-btn {
   /* Must be relative to anchor the absolute buttons */
@@ -30,14 +26,12 @@
   /* Must be visible so the close button can 'hang' off the corner without clipping */
   overflow: visible !important;
 }
-
 /* Remove Button (Hanging Top Right) */
 .tile-remove-btn {
   position: absolute !important;
   /* Hang off the corner for consistent visual alignment */
   top: -10px !important;
   right: -10px !important;
-
   /* Strict dimensions 20x20 for better touch target */
   width: 20px !important;
   height: 20px !important;
@@ -45,10 +39,10 @@
   min-height: 20px !important;
   max-width: 20px !important;
   max-height: 20px !important;
-
   background: #ff4757;
   color: #fff;
-  border: 2px solid #fff; /* Thicker border to separate from tile content */
+  border: 2px solid #fff;
+  /* Thicker border to separate from tile content */
   border-radius: 50%;
   cursor: pointer;
   z-index: 100;
@@ -60,24 +54,24 @@
   line-height: 1;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   transition: transform 0.15s ease, background 0.15s ease;
-
   /* Anti-flex/stretch safeguards */
   flex: none !important;
   align-self: auto !important;
   margin: 0 !important;
   transform: none !important;
   box-sizing: border-box !important;
+  /* [Fix] Safety overrides to prevent base.css grid rules from capturing the button */
+  grid-row: auto !important;
+  grid-column: auto !important;
+  grid-area: auto !important;
 }
-
 .tile-remove-btn:hover {
   background: #ff6b81;
   transform: scale(1.1) !important;
 }
-
 .tile-remove-btn:active {
   transform: scale(0.95) !important;
 }
-
 /* Add Button (Last Tile) */
 .tile-add-btn {
   border: 4px dashed var(--border-med);
@@ -86,27 +80,25 @@
   display: flex;
   align-items: center;
   justify-content: center;
-
   /* Enforce Square Aspect Ratio */
   aspect-ratio: 1 / 1 !important;
   height: auto !important;
   width: 100%; /* Fill the grid cell */
-
   color: var(--border-med);
   transition: all 0.2s ease;
   position: relative !important;
   box-sizing: border-box;
 }
-
 /* Mobile Tweak: Don't let the square become screen-width massive */
 @media (max-width: 768px) {
   .tile-add-btn {
-    width: 160px !important; /* Fixed size square on mobile */
-    align-self: center; /* Center in the mobile column */
+    width: 160px !important;
+    /* Fixed size square on mobile */
+    align-self: center;
+    /* Center in the mobile column */
     margin: 0 auto;
   }
 }
-
 .tile-add-btn::before {
   content: '+';
   font-size: 64px;
@@ -114,42 +106,36 @@
   line-height: 0;
   margin-bottom: 8px;
 }
-
 .tile-add-btn:hover {
   border-color: var(--accent);
   color: var(--accent);
   background: rgba(255, 159, 28, 0.05);
   transform: translateY(-2px);
 }
-
 .tile-add-btn:active {
   transform: translateY(1px);
 }
-
 /* Drag & Drop States */
 .tile[draggable="true"] {
   cursor: grab;
 }
-
 .tile[draggable="true"]:active {
   cursor: grabbing;
 }
-
 /* Visual feedback when dragging */
 .tile.is-dragging {
   opacity: 0.4;
   border-style: dashed;
   transform: scale(0.95);
 }
-
 /* Visual feedback when hovering over a drop target */
 .tile.drag-over {
   border-color: var(--text-main);
-  background: #e6fffa; /* light teal tint */
+  background: #e6fffa;
+  /* light teal tint */
   transform: scale(1.02);
   z-index: 10;
 }
-
 /* HIDE EDITOR UI IN LIVE VIEW */
 body.view-live .tile-remove-btn,
 body.view-live .tile-add-btn {

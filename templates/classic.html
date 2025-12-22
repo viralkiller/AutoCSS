@@ -299,6 +299,24 @@
           addBtn.setAttribute('title', 'Add New Tile');
           addBtn.onclick = () => this.addTile(grid, addBtn);
           grid.appendChild(addBtn);
+
+          // [Patch] Initial enforcement
+          setTimeout(() => this.enforceButtonPositions(), 50);
+        },
+
+        // [Patch] JS Enforcement to ensure buttons don't get trapped in grid cells
+        enforceButtonPositions() {
+          const btns = document.querySelectorAll('.tile-remove-btn');
+          btns.forEach(btn => {
+            btn.style.position = 'absolute';
+            btn.style.top = '-10px';
+            btn.style.right = '-10px';
+            btn.style.gridRow = 'auto';
+            btn.style.gridColumn = 'auto';
+            btn.style.gridArea = 'auto';
+            btn.style.margin = '0';
+            btn.style.transform = 'none';
+          });
         },
 
         attachEditorUI(tile) {
@@ -334,6 +352,14 @@
              const btn = document.createElement('div');
              btn.className = 'tile-remove-btn';
              btn.innerHTML = '×';
+
+             // [Patch] Immediate inline enforcement
+             btn.style.position = 'absolute';
+             btn.style.top = '-10px';
+             btn.style.right = '-10px';
+             btn.style.gridRow = 'auto'; // Break out of parent grid
+             btn.style.gridColumn = 'auto';
+
              btn.onclick = (e) => {
                e.stopPropagation();
                if(confirm('Delete this tile?')) {
@@ -357,6 +383,8 @@
            grid.insertBefore(div, addBtn);
            ArrowSystem.update('tile.add');
            div.scrollIntoView({ behavior: 'smooth', block: 'center' });
+           // [Patch] Re-enforce
+           this.enforceButtonPositions();
         },
 
         // Drag Handlers
@@ -487,6 +515,9 @@
             arrow.element.style.transform = `rotate(${rotation}deg)`;
           });
           L.log('[ArrowSystem] update', { reason, count: this.arrows.length });
+
+          // [Patch] Also re-enforce buttons whenever layout updates
+          if (TileEditor.enforceButtonPositions) TileEditor.enforceButtonPositions();
         }
       };
 

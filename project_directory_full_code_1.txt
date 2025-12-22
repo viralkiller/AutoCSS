@@ -1,4 +1,4 @@
-Aggregated on: 2025-12-22 06:09:13
+Aggregated on: 2025-12-22 06:22:04
 ================================================================================
 Project Directory Tree:
 /
@@ -65,27 +65,29 @@ Project Directory Tree:
   fill: currentColor;
 }
 /* --- EDITOR UI (Add/Remove/Drag) --- */
-/* CRITICAL: Ensure the tile acts as the anchor for the absolute button.
-   We target all variations of tiles to prevent 'varying' positions.
-*/
+/* CRITICAL: Overrides to ensure consistent positioning */
 .tile, .tile-std, .tile-stretch, .tile-ghost, .tile-add-btn {
+  /* Must be relative to anchor the absolute buttons */
   position: relative !important;
+  /* Must be visible so the close button can 'hang' off the corner without clipping */
+  overflow: visible !important;
 }
-/* Remove Button (Strict 16x16 at Top Right 0) */
+/* Remove Button (Hanging Top Right) */
 .tile-remove-btn {
   position: absolute !important;
-  top: 0 !important;
-  right: 0 !important;
-  /* Strict dimensions to prevent stretching */
-  width: 16px !important;
-  height: 16px !important;
-  min-width: 16px !important;
-  max-width: 16px !important;
-  min-height: 16px !important;
-  max-height: 16px !important;
+  /* Hang off the corner for consistent visual alignment */
+  top: -10px !important;
+  right: -10px !important;
+  /* Strict dimensions 20x20 for better touch target */
+  width: 20px !important;
+  height: 20px !important;
+  min-width: 20px !important;
+  min-height: 20px !important;
+  max-width: 20px !important;
+  max-height: 20px !important;
   background: #ff4757;
   color: #fff;
-  border: 1px solid #fff;
+  border: 2px solid #fff; /* Thicker border to separate from tile content */
   border-radius: 50%;
   cursor: pointer;
   z-index: 100;
@@ -93,15 +95,16 @@ Project Directory Tree:
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 10px; /* Adjusted for smaller 16px size */
+  font-size: 12px;
   line-height: 1;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   transition: transform 0.15s ease, background 0.15s ease;
-  /* Anti-flex safeguards: prevents the button from becoming an oval */
+  /* Anti-flex/stretch safeguards */
   flex: none !important;
   align-self: auto !important;
   margin: 0 !important;
   transform: none !important;
+  box-sizing: border-box !important;
 }
 .tile-remove-btn:hover {
   background: #ff6b81;
@@ -120,18 +123,19 @@ Project Directory Tree:
   justify-content: center;
   /* Enforce Square Aspect Ratio */
   aspect-ratio: 1 / 1 !important;
-  width: auto; /* Allow it to size based on grid/height */
-  height: auto;
+  height: auto !important;
+  width: 100%; /* Fill the grid cell */
   color: var(--border-med);
   transition: all 0.2s ease;
   position: relative !important;
   box-sizing: border-box;
 }
-/* In mobile columns, prevent it from becoming a giant screen-width square */
+/* Mobile Tweak: Don't let the square become screen-width massive */
 @media (max-width: 768px) {
   .tile-add-btn {
-    width: 150px; /* Sensible default for mobile */
-    align-self: center;
+    width: 160px !important; /* Fixed size square on mobile */
+    align-self: center; /* Center in the mobile column */
+    margin: 0 auto;
   }
 }
 .tile-add-btn::before {
@@ -2532,17 +2536,8 @@ body.is-native-mobile #get-code-btn{ display:none !important; }
           </div>
         </div>
         <div class="tile tile-stretch">
-          <h3>Paste text here</h3>
+          <h3>Textarea Input</h3>
           <textarea id="pasteArea"></textarea>
-        </div>
-        <div class="tile tile-std" id="step1">
-          <h3>Your file is ready!</h3>
-        </div>
-        <div class="tile tile-std" id="step2">
-          <button id="viewButton" class="btn-ref">View File</button>
-        </div>
-        <div class="tile tile-std" id="step3">
-          <button id="againButton" class="btn-ref">Generate Another</button>
         </div>
       </div>
     </div>
@@ -2699,6 +2694,20 @@ body.is-native-mobile #get-code-btn{ display:none !important; }
            tile.addEventListener('dragleave', (e) => this.dragLeave(e, tile));
            tile.addEventListener('drop', (e) => this.dragDrop(e, tile));
            tile.addEventListener('dragend', (e) => this.dragEnd(e, tile));
+           // INPUT GUARD: Prevent drag when interacting with sliders/inputs
+           const interactive = tile.querySelectorAll('input, textarea, button, select, label, .slider-wrapper');
+           interactive.forEach(el => {
+             // When mouse enters an interactive element, disable dragging on the parent tile
+             el.addEventListener('mouseenter', () => {
+               tile.setAttribute('draggable', 'false');
+             });
+             // When mouse leaves, re-enable dragging
+             el.addEventListener('mouseleave', () => {
+               tile.setAttribute('draggable', 'true');
+             });
+             // Fallback for touch devices
+             el.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
+           });
            // Close Button (If not present)
            if (!tile.querySelector('.tile-remove-btn')) {
              const btn = document.createElement('div');
@@ -2729,6 +2738,11 @@ body.is-native-mobile #get-code-btn{ display:none !important; }
         },
         // Drag Handlers
         dragStart(e, tile) {
+           // Double check: if attribute is false, stop (though browser shouldn't trigger this)
+           if (tile.getAttribute('draggable') === 'false') {
+             e.preventDefault();
+             return;
+           }
            this.dragSrc = tile;
            e.dataTransfer.effectAllowed = 'move';
            e.dataTransfer.setData('text/html', tile.innerHTML);
