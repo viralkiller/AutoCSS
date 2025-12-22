@@ -1,4 +1,4 @@
-Aggregated on: 2025-12-20 06:37:16
+Aggregated on: 2025-12-22 06:09:13
 ================================================================================
 Project Directory Tree:
 /
@@ -23,6 +23,7 @@ Project Directory Tree:
 │       ├── workspace_input.js
 │       └── workspace_system.js
 ├── templates
+│   ├── bake_test.html
 │   ├── classic.html
 │   ├── game.html
 │   ├── index.html
@@ -39,68 +40,140 @@ Project Directory Tree:
 ├── project_directory_full_code_1.txt
 └── README.txt
 
-4 directories, 32 files
-================================================================================
-
-[-] This file: .pythonstartup.py | Contents:
-import rlcompleter
-import readline
-readline.parse_and_bind("tab: complete")
-================================================================================
-
-[-] This file: general.md | Contents:
-DEMO: https://autocss.pythonanywhere.com
-The |deMeza AutoCSS system| is a new way to design websites that removes the usual headache of maintaining separate desktop and mobile layouts.
-You follow a small set of rules, and the desktop and mobile versions emerge automatically.
-There are three main templates, and together they cover almost every project: Classic, Workspace, and Game.
-Although the templates differ in purpose, they all share the same core tile logic.
-With the exception of the top two menu bars, everything on the page is a 'tile'.
-On mobile, tiles stack vertically. On desktop, tiles flow horizontally. In practice, you don’t design separate layouts at all — you just add tiles.
-Desktop centering is handled in a simple, reliable way. You are only ever allowed a maximum of three tiles per horizontal row.
-This limitation is deliberate: it keeps layouts fast to build and hard to break.
-To center an element on desktop, you place a ghost tile before it and another ghost tile after it.
-Ghost tiles appear on desktop as blank spacers, but disappear entirely on mobile.
-The result is a centered desktop layout that collapses cleanly into a sensible mobile stack.
-Normal tiles automatically center and arrange their contents in a pleasing way depending on how many UI items they contain.
-A set of ready-made normal tiles is provided for common needs such as mailing list signup, sliders, file upload, text areas, and other standard inputs.
-The stretch tile is used when you want something to span the full row on desktop.
-On mobile it behaves like a normal square tile, but on desktop it expands to occupy the width of three tiles.
-This makes it ideal for banner areas, hero content, or wide information panels.
-The workspace tile is a special case.
-It ignores any tiles that come after it and expands to fill the available screen space, similar to a Figma or Photoshop canvas.
-This workspace area is then ready to receive your custom UI elements, nodes, and interactive components.
-Finally, the game tile is similar to the workspace tile, but optimized for play. On desktop it behaves like a normal full workspace.
-On mobile, instead of trying to squeeze the experience into portrait, the user is prompted to rotate the device.
-This ensures that the game runs in a landscape layout that matches the desktop feel.
-These three templates all use the same core tile logic and should cover 99% of your design needs.
-Coming soon: a live page editor that lets you add, remove, and reorder tiles in real time,
-plus a “Generate Final Code” button that outputs a clean, single-page HTML/CSS/JS build of your layout, ready to deploy immediately.
-ADDITIONAL NOTES:
-The website is in essence a sort of demo and 'editor', and is therefore allowed separate JS and CSS files (usually we prefer HTML/CSS/JS all on the same page).
-However the final 'baked' design that the user exports should have the HTML/CSS/JS code all in one file i.e. index.html
-This is to make life easy, they just upload the file to their server and point to it, without having to setup dir trees and such.
+4 directories, 33 files
 ================================================================================
 
 [-] This file: static/css/classic.css | Contents:
 /* static/css/classic.css */
 /* Classic-only styling */
-.floating-arrow{
-  position:absolute;
-  width:48px;
-  height:48px;
-  pointer-events:none;
-  z-index:50;
-  color:var(--accent);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  filter:drop-shadow(0 2px 4px rgba(0,0,0,0.1));
-  transition:top 0.2s ease, left 0.2s ease, transform 0.2s ease;
+.floating-arrow {
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  pointer-events: none;
+  z-index: 50;
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  transition: top 0.2s ease, left 0.2s ease, transform 0.2s ease;
 }
-.floating-arrow svg{
-  width:100%;
-  height:100%;
-  fill:currentColor;
+.floating-arrow svg {
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+}
+/* --- EDITOR UI (Add/Remove/Drag) --- */
+/* CRITICAL: Ensure the tile acts as the anchor for the absolute button.
+   We target all variations of tiles to prevent 'varying' positions.
+*/
+.tile, .tile-std, .tile-stretch, .tile-ghost, .tile-add-btn {
+  position: relative !important;
+}
+/* Remove Button (Strict 16x16 at Top Right 0) */
+.tile-remove-btn {
+  position: absolute !important;
+  top: 0 !important;
+  right: 0 !important;
+  /* Strict dimensions to prevent stretching */
+  width: 16px !important;
+  height: 16px !important;
+  min-width: 16px !important;
+  max-width: 16px !important;
+  min-height: 16px !important;
+  max-height: 16px !important;
+  background: #ff4757;
+  color: #fff;
+  border: 1px solid #fff;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 10px; /* Adjusted for smaller 16px size */
+  line-height: 1;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  transition: transform 0.15s ease, background 0.15s ease;
+  /* Anti-flex safeguards: prevents the button from becoming an oval */
+  flex: none !important;
+  align-self: auto !important;
+  margin: 0 !important;
+  transform: none !important;
+}
+.tile-remove-btn:hover {
+  background: #ff6b81;
+  transform: scale(1.1) !important;
+}
+.tile-remove-btn:active {
+  transform: scale(0.95) !important;
+}
+/* Add Button (Last Tile) */
+.tile-add-btn {
+  border: 4px dashed var(--border-med);
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Enforce Square Aspect Ratio */
+  aspect-ratio: 1 / 1 !important;
+  width: auto; /* Allow it to size based on grid/height */
+  height: auto;
+  color: var(--border-med);
+  transition: all 0.2s ease;
+  position: relative !important;
+  box-sizing: border-box;
+}
+/* In mobile columns, prevent it from becoming a giant screen-width square */
+@media (max-width: 768px) {
+  .tile-add-btn {
+    width: 150px; /* Sensible default for mobile */
+    align-self: center;
+  }
+}
+.tile-add-btn::before {
+  content: '+';
+  font-size: 64px;
+  font-weight: 700;
+  line-height: 0;
+  margin-bottom: 8px;
+}
+.tile-add-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(255, 159, 28, 0.05);
+  transform: translateY(-2px);
+}
+.tile-add-btn:active {
+  transform: translateY(1px);
+}
+/* Drag & Drop States */
+.tile[draggable="true"] {
+  cursor: grab;
+}
+.tile[draggable="true"]:active {
+  cursor: grabbing;
+}
+/* Visual feedback when dragging */
+.tile.is-dragging {
+  opacity: 0.4;
+  border-style: dashed;
+  transform: scale(0.95);
+}
+/* Visual feedback when hovering over a drop target */
+.tile.drag-over {
+  border-color: var(--text-main);
+  background: #e6fffa; /* light teal tint */
+  transform: scale(1.02);
+  z-index: 10;
+}
+/* HIDE EDITOR UI IN LIVE VIEW */
+body.view-live .tile-remove-btn,
+body.view-live .tile-add-btn {
+  display: none !important;
 }
 ================================================================================
 
@@ -968,101 +1041,103 @@ body{
     blocklist: [
       'simulator.js',     // Editor tools
       'bake_manager.js',  // The baker itself
-      'index.js',         // Index page logic (not needed for templates)
-      'index_boot.js'
+      'index.js',         // Index page logic
+      'index_boot.js',
+      'ua-parser.min.js'  // Optional: keep if needed, but often bloat
     ],
     async generateFinalCode() {
-      L.log('[BakeManager] generating final code...');
+      L.log('[BakeManager] Starting generation sequence...');
       // 1. Clone the current page state
       const clone = document.documentElement.cloneNode(true);
       const body = clone.querySelector('body');
-      // 2. Identify Editor Elements to Remove
-      const removables = [
-        '.controls',            // Top toolbar
-        '.back-home-btn',       // Back button
-        '#exit-live-btn',       // Exit button
-        '#get-code-btn',        // The button that triggered this
-        '#code-modal-overlay',  // The modal window itself
-        'script[src*="reload"]' // Live reload scripts (if any)
-      ];
-      // 3. Unwrap the Device Frame
-      // We want #device-frame to be the direct child of body, replacing .simulator-wrapper
+      // 2. Extract and Unwrap Device Frame
       const wrapper = clone.querySelector('.simulator-wrapper');
       const frame = clone.querySelector('#device-frame');
       if (wrapper && frame) {
-        // Move frame out of wrapper and replace the wrapper with it
-        // This preserves the position relative to scripts in the body
-        wrapper.replaceWith(frame);
-        // Reset frame styles to ensure it fills the screen in the baked file
+        L.log('[BakeManager] Unwrapping #device-frame from simulator');
+        // Move frame to root of body
+        body.insertBefore(frame, wrapper);
+        wrapper.remove();
+        // 3. Clean Frame Styles for Production
+        frame.style.cssText = ""; // Clear all simulator-injected inline styles
         frame.style.width = '100%';
         frame.style.minHeight = '100vh';
-        frame.style.height = '100%';
         frame.style.border = 'none';
-        frame.style.margin = '0';
         frame.style.boxShadow = 'none';
-        frame.style.maxWidth = 'none';
-      } else if (wrapper) {
-        // If frame is missing for some reason, just kill the wrapper
-        wrapper.remove();
+        frame.style.resize = 'none'; // Critical: remove resize handle
       }
-      // 4. Remove remaining Editor UI
+      // 4. Identify and Remove Editor Elements
+      const removables = [
+        '.controls',
+        '.back-home-btn',
+        '#exit-live-btn',
+        '#get-code-btn',
+        '#code-modal-overlay',
+        '.workspace-hint',      // Remove editor-only hints
+        '.tile-remove-btn',     // Remove editor buttons (New)
+        '.tile-add-btn',        // Remove add button tile (New)
+        'script[src*="reload"]' // Generic live-reload
+      ];
       removables.forEach(sel => {
         const els = clone.querySelectorAll(sel);
+        L.log(`[BakeManager] Removing editor element: ${sel} (${els.length} found)`);
         els.forEach(el => el.remove());
       });
-      // 5. Configure Body for Standalone App Mode
-      // We rely on 'view-live' CSS to handle the layout (100vh - padding)
+      // 5. Production Class Injection
+      body.classList.remove('rotate-blocked'); // Ensure state is clean
       body.classList.add('view-live');
       body.classList.add('is-native-mobile');
-      // Zero out padding/margin so 'view-live' calculations start from edge
-      // No complex padding correction logic here—just clean slate.
       body.style.padding = '0';
       body.style.margin = '0';
-      body.style.overflow = 'hidden';
-      // 6. Inline CSS
+      // 6. Inline CSS Assets
       const links = clone.querySelectorAll('link[rel="stylesheet"]');
       for (const link of links) {
         const href = link.getAttribute('href');
-        if (href && href.startsWith('/static/')) {
+        if (href && (href.startsWith('/static/') || href.startsWith('static/'))) {
           try {
+            L.log(`[BakeManager] Inlining CSS: ${href}`);
             const res = await fetch(href);
-            const cssText = await res.text();
+            let cssText = await res.text();
             const style = document.createElement('style');
             style.textContent = `\n/* Inlined: ${href} */\n${cssText}\n`;
             link.replaceWith(style);
           } catch (e) {
-            console.warn('[Bake] Failed to inline CSS:', href);
+            L.err(`[BakeManager] CSS Inlining failed: ${href}`, e);
           }
         }
       }
-      // 7. Inline JS (Filtering via Blocklist)
+      // 7. Inline JS Assets
       const scripts = clone.querySelectorAll('script[src]');
       for (const script of scripts) {
         const src = script.getAttribute('src');
-        if (src && src.startsWith('/static/')) {
-          // Check if this script is in the blocklist
-          const shouldBlock = this.blocklist.some(blocked => src.includes(blocked));
-          if (shouldBlock) {
-            script.remove();
-            continue;
-          }
+        if (!src) continue;
+        const isLocal = src.startsWith('/static/') || src.startsWith('static/');
+        const isBlocked = this.blocklist.some(blocked => src.includes(blocked));
+        if (isBlocked) {
+          L.log(`[BakeManager] Blocking script: ${src}`);
+          script.remove();
+          continue;
+        }
+        if (isLocal) {
           try {
+            L.log(`[BakeManager] Inlining JS: ${src}`);
             const res = await fetch(src);
             const jsText = await res.text();
             const newScript = document.createElement('script');
             newScript.textContent = `\n// Inlined: ${src}\n${jsText}\n`;
             script.replaceWith(newScript);
           } catch (e) {
-            console.warn('[Bake] Failed to inline JS:', src);
+            L.err(`[BakeManager] JS Inlining failed: ${src}`, e);
           }
         }
       }
+      L.log('[BakeManager] Generation complete.');
       return "<!DOCTYPE html>\n" + clone.outerHTML;
     },
     async openExportModal() {
-      // Create Modal DOM if it doesn't exist
       let modal = document.getElementById('code-modal-overlay');
       if (!modal) {
+        L.log('[BakeManager] Creating export modal UI');
         modal = document.createElement('div');
         modal.id = 'code-modal-overlay';
         modal.className = 'code-modal-overlay';
@@ -1070,10 +1145,10 @@ body{
           <div class="code-modal-content">
             <div class="code-modal-header">
               <span class="code-modal-title">FINAL BAKED HTML</span>
-              <span style="font-size:12px; color:#666;">(Single File • No Editor Tools)</span>
+              <span style="font-size:12px; color:#666;">(Single File • Standalone)</span>
             </div>
             <div class="code-modal-body">
-              <textarea id="final-code-area" class="code-textarea" readonly>Generating...</textarea>
+              <textarea id="final-code-area" class="code-textarea" readonly>Bundling assets...</textarea>
             </div>
             <div class="code-modal-footer">
               <button class="cm-btn cm-btn-close" onclick="window.Demeza.BakeManager.closeExportModal()">CLOSE</button>
@@ -1084,15 +1159,17 @@ body{
         document.body.appendChild(modal);
       }
       modal.style.display = 'flex';
-      const textArea = document.getElementById('final-code-area');
-      textArea.value = "Bundling assets... please wait.";
-      // Generate and display
+      L.log('[UI] Modal opened');
       const code = await this.generateFinalCode();
-      textArea.value = code;
+      const textArea = document.getElementById('final-code-area');
+      if (textArea) textArea.value = code;
     },
     closeExportModal() {
       const modal = document.getElementById('code-modal-overlay');
-      if (modal) modal.style.display = 'none';
+      if (modal) {
+        modal.style.display = 'none';
+        L.log('[UI] Modal closed');
+      }
     },
     copyCode() {
       const textArea = document.getElementById('final-code-area');
@@ -1102,11 +1179,11 @@ body{
       const btn = document.querySelector('.cm-btn-copy');
       const originalText = btn.textContent;
       btn.textContent = "COPIED!";
+      L.log('[UI] Code copied to clipboard');
       setTimeout(() => btn.textContent = originalText, 2000);
     }
   };
   window.Demeza.BakeManager = BakeManager;
-  // Global hook for HTML buttons
   window.openExportModal = () => BakeManager.openExportModal();
 })();
 ================================================================================
@@ -1680,6 +1757,661 @@ body{
 })();
 ================================================================================
 
+[-] This file: templates/bake_test.html | Contents:
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>deMeza AutoCSS | Workspace Template</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+/* Inlined: /static/css/demeza_base.css */
+/* static/css/demeza_base.css */
+/* Shared editor-mode styling */
+:root{
+  /* Palette */
+  --bg-color: #f4f4f9;
+  --tile-bg: #ffffff;
+  --accent: #FF9F1C;
+  --text-main: #2EC4B6;
+  --text-dark: #333;
+  --nav-dark: #222;
+  --border-light: #ebeff5;
+  --border-med: #a3adbf;
+  /* Spacing */
+  --q-4: 4px;
+  --q-8: 8px;
+  --q-16: 16px;
+  --q-24: 24px;
+  --q-32: 32px;
+  --q-48: 48px;
+  /* Mappings */
+  --gap: var(--q-16);
+  --padding: var(--q-16);
+  /* Square aesthetic */
+  --radius: 0px;
+}
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Nunito', sans-serif;
+}
+body{
+  background-color:#1a1a1a;
+  color:#eee;
+  margin:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  min-height:100vh;
+}
+/* Simulator wrapper */
+.simulator-wrapper{
+  width:100%;
+  max-width:1200px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  align-content:center;
+  padding-top:var(--q-24);
+}
+.controls{
+  margin-bottom:var(--q-16);
+  background:#333;
+  padding:var(--q-16);
+  border-radius:var(--radius);
+  display:flex;
+  gap:var(--q-16);
+  align-items:center;
+  flex-wrap:wrap;
+  border:1px solid #444;
+  width:min(1200px, 100%);
+}
+.controls button{
+  border:none;
+  background:#555;
+  color:#fff;
+  border-radius:var(--radius);
+  cursor:pointer;
+  font-family:monospace;
+}
+.controls button:hover{ background:#666; }
+/* Back to Home Button */
+.back-home-btn{
+  position:fixed;
+  top:8px;
+  left:8px;
+  width:32px;
+  height:32px;
+  background:#333;
+  border:1px solid #444;
+  border-radius:var(--radius);
+  color:var(--accent);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+  z-index:500;
+  transition:background 0.2s ease, transform 0.1s ease;
+  cursor:pointer;
+}
+.back-home-btn:hover{ background:#444; }
+.back-home-btn:active{ transform:scale(1); }
+.back-home-btn svg{
+  width:16px;
+  height:16px;
+  fill:currentColor;
+}
+/* Device frame */
+#device-frame{
+  background-color:var(--bg-color);
+  color:var(--text-dark);
+  width:512px;
+  min-height:768px;
+  transition:width 0.256s ease;
+  position:relative;
+  overflow-y:auto;
+  overflow-x:hidden;
+  box-shadow:0 0 48px rgba(0,0,0,0.48);
+  resize:horizontal;
+  container-type:inline-size;
+  border:4px solid #111;
+}
+/* Header group */
+.header-group{
+  position:sticky;
+  top:0;
+  z-index:100;
+  background-color:var(--tile-bg);
+  border-bottom:4px solid var(--accent);
+  display:flex;
+  flex-direction:column;
+  width:100%;
+}
+/* Meta bar */
+.meta-bar{
+  height:32px;
+  background-color:var(--nav-dark);
+  color:#ccc;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 var(--padding);
+  font-size:16px;
+  letter-spacing:0.48px;
+}
+.meta-left{ font-weight:400; color:var(--accent); }
+.meta-left a{ text-decoration:none; cursor:pointer; }
+.meta-left a:hover{ text-decoration:underline; }
+.meta-right{
+  font-weight:600;
+  display:flex;
+  gap:var(--q-16);
+  align-items:center;
+}
+.meta-right a{ color:#eee; text-decoration:none; cursor:pointer; }
+.meta-right a:hover{ color:#fff; text-decoration:underline; }
+/* Nav bar */
+.nav-bar{
+  min-height:var(--q-48);
+  padding:0 var(--padding);
+  background-color:var(--tile-bg);
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  position:relative;
+}
+.nav-links{
+  display:flex;
+  gap:var(--q-24);
+  width:100%;
+  align-items:center;
+}
+.nav-link{
+  font-weight:600;
+  color:var(--text-dark);
+  text-decoration:none;
+  cursor:pointer;
+  font-size:16px;
+  line-height:var(--q-48);
+}
+.nav-link:hover{ text-decoration:underline; }
+.nav-link.active{
+  color:var(--text-main);
+  text-decoration:underline;
+}
+.mobile-meta-group{ display:none; }
+.hamburger-btn{
+  display:none;
+  background:none;
+  border:none;
+  cursor:pointer;
+  padding:var(--q-8);
+  position:absolute;
+  top:0;
+  right:var(--q-8);
+  height:var(--q-48);
+  z-index:101;
+}
+.hamburger-icon{
+  width:24px;
+  height:4px;
+  background:#333;
+  position:relative;
+  display:block;
+}
+.hamburger-icon::before,
+.hamburger-icon::after{
+  content:'';
+  position:absolute;
+  left:0;
+  width:24px;
+  height:4px;
+  background:#333;
+}
+.hamburger-icon::before{ top:-8px; }
+.hamburger-icon::after{ top:8px; }
+/* Mobile logic via container query */
+@container (max-width: 599px){
+  .meta-bar{ display:none; }
+  .nav-links{
+    display:none;
+    flex-direction:column;
+    width:100%;
+    margin-top:var(--q-48);
+    gap:0;
+    align-items:flex-start;
+  }
+  .hamburger-btn{ display:flex; align-items:center; }
+  .nav-bar.mobile-open .nav-links{ display:flex; }
+  .nav-bar.mobile-open{ flex-wrap:wrap; }
+  .mobile-meta-group{
+    display:flex;
+    flex-direction:column;
+    width:100%;
+    border-bottom:4px solid var(--border-med);
+  }
+  .nav-link,
+  .mobile-meta-group a{
+    width:100%;
+    padding:var(--q-16) var(--q-4);
+    border-bottom:4px solid var(--border-light);
+    font-size:16px;
+    font-weight:400;
+    color:var(--text-dark);
+    line-height:1.2;
+    text-decoration:none;
+    cursor:pointer;
+    display:block;
+  }
+  .nav-link:last-child{ border-bottom:none; }
+  .mobile-meta-group a:last-child{ border-bottom:none; }
+  .nav-link:hover,
+  .mobile-meta-group a:hover{
+    background-color:#fafafa;
+    text-decoration:none;
+  }
+  .nav-link.active{ text-decoration:none; }
+  .mobile-meta-group a.is-credits{
+    color:var(--accent);
+    font-weight:700;
+  }
+}
+/* Tile grid */
+.tile-grid{
+  display:grid;
+  padding:var(--padding);
+  gap:var(--gap);
+  grid-template-columns:1fr;
+  width:100%;
+  position:relative;
+  min-height:0;
+}
+@container (min-width: 600px){
+  .tile-grid{ grid-template-columns:repeat(3, 1fr); }
+}
+/* Tile base */
+.tile{
+  background-color:var(--tile-bg);
+  border-radius:var(--radius);
+  padding:var(--q-24);
+  border:4px solid var(--accent);
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  align-items:center;
+  text-align:center;
+  overflow:hidden;
+  box-shadow:0 4px 8px rgba(0,0,0,0.05);
+  transition:all 0.256s ease;
+  position:relative;
+  gap:var(--q-4);
+}
+.tile-std{ aspect-ratio:1 / 1; }
+.tile > :only-child{ margin:auto; }
+/* 2 items */
+.tile:has(> :last-child:nth-child(2)){
+  display:grid;
+  grid-template-columns:1fr;
+  grid-template-rows:repeat(9, 1fr);
+  gap:0;
+  justify-items:center;
+  align-items:center;
+}
+.tile:has(> :last-child:nth-child(2)) > *{ margin:0; width:100%; }
+.tile:has(> :last-child:nth-child(2)) > :nth-child(1){ grid-row:4; }
+.tile:has(> :last-child:nth-child(2)) > :nth-child(2){ grid-row:6; }
+/* 3 items */
+.tile:has(> :last-child:nth-child(3)){
+  display:grid;
+  grid-template-columns:1fr;
+  grid-template-rows:repeat(9, 1fr);
+  gap:0;
+  justify-items:center;
+  align-items:center;
+}
+.tile:has(> :last-child:nth-child(3)) > *{ margin:0; width:100%; }
+.tile:has(> :last-child:nth-child(3)) > :nth-child(1){ grid-row:3; }
+.tile:has(> :last-child:nth-child(3)) > :nth-child(2){ grid-row:5; }
+.tile:has(> :last-child:nth-child(3)) > :nth-child(3){ grid-row:7; }
+/* 4+ items fallback */
+.tile:has(> :nth-child(4)){
+  justify-content:space-evenly;
+  gap:0;
+}
+/* Stretch tile */
+.tile-stretch{
+  aspect-ratio:1 / 1;
+  border-color:var(--text-main);
+}
+@container (min-width: 600px){
+  .tile-stretch{
+    grid-column:1 / -1;
+    aspect-ratio:3 / 1;
+  }
+}
+.tile-stretch img{
+  height:100%;
+  width:auto;
+  object-fit:contain;
+}
+/* Ghost tile */
+.tile-ghost{
+  display:none;
+  border:4px dashed #ccc;
+  background:transparent;
+  opacity:0.256;
+  aspect-ratio:1 / 1;
+}
+@container (min-width: 600px){
+  .tile-ghost{ display:flex; }
+}
+/* Common tile UI */
+.tile h3{ margin:0; font-weight:700; }
+.tile input[type="text"],
+.tile textarea{
+  width:100%;
+  padding:var(--q-16);
+  border:4px solid #ddd;
+  border-radius:var(--radius);
+  background:#fafafa;
+}
+.tile textarea{
+  resize:none;
+  font-family:'Nunito', sans-serif;
+  height:auto;
+}
+.tile button{
+  width:100%;
+  padding:var(--q-16);
+  background-color:var(--text-main);
+  color:#fff;
+  border:none;
+  border-radius:var(--radius);
+  font-weight:700;
+  letter-spacing:1px;
+  cursor:pointer;
+  box-shadow:0 4px 0 rgba(0,0,0,0.1);
+  font-size:14px;
+}
+.tile button:active{
+  transform:translateY(4px);
+  box-shadow:0 4px 0 rgba(0,0,0,0.1);
+}
+/* Sliders */
+.slider-wrapper{
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:var(--q-8);
+}
+.range-container{
+  position:relative;
+  flex-grow:1;
+  display:flex;
+  align-items:center;
+}
+.slider-label{
+  font-family:monospace;
+  font-size:14px;
+  color:var(--text-dark);
+  font-weight:700;
+}
+/* Slider bubble */
+.slider-value{
+  position:absolute;
+  bottom:100%;
+  left:50%;
+  transform:translateX(-50%) translateY(10px);
+  background:var(--accent);
+  color:#fff;
+  padding:2px 8px;
+  font-size:12px;
+  font-weight:bold;
+  font-family:monospace;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 0.2s ease, transform 0.2s ease;
+  border-radius:var(--radius);
+  z-index:10;
+}
+.slider-value.active{
+  opacity:1;
+  transform:translateX(-50%) translateY(-14px);
+}
+/* Range input */
+input[type="range"]{
+  width:100% !important;
+  margin:0;
+  -webkit-appearance:none;
+  background:transparent;
+  cursor:grab;
+}
+input[type="range"]:active{ cursor:grabbing; }
+input[type="range"]::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  height:16px;
+  width:16px;
+  background:var(--accent);
+  margin-top:-6px;
+  border-radius:0;
+  transition:transform 0.1s;
+}
+input[type="range"]:active::-webkit-slider-thumb{
+  transform:scale(1.2);
+}
+input[type="range"]::-webkit-slider-runnable-track{
+  width:100%;
+  height:4px;
+  background:#ddd;
+}
+/* File upload label */
+.file-upload-label{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  padding:var(--q-16);
+  background-color:var(--text-main);
+  color:#fff;
+  text-align:center;
+  font-weight:700;
+  letter-spacing:1px;
+  cursor:pointer;
+  box-shadow:0 4px 0 rgba(0,0,0,0.1);
+  border-radius:var(--radius);
+  margin:0;
+  font-size:14px;
+  box-sizing:border-box;
+}
+.file-upload-label:active{
+  transform:translateY(4px);
+  box-shadow:0 4px 0 rgba(0,0,0,0.1);
+}
+.file-name-display{
+  font-size:13px;
+  color:#888;
+  font-family:monospace;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  max-width:100%;
+}
+/* Live view button */
+#exit-live-btn{
+  display:none;
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  z-index:9999;
+  padding:12px 24px;
+  background:#e74c3c;
+  color:#fff;
+  border:none;
+  font-weight:bold;
+  cursor:pointer;
+  box-shadow:0 4px 12px rgba(0,0,0,0.3);
+  border-radius:var(--radius);
+}
+body.view-live{
+  background-color:var(--bg-color);
+  display:block;
+}
+body.view-live .controls{ display:none; }
+body.view-live .back-home-btn{ display:none; }
+body.view-live .simulator-wrapper{
+  padding:0;
+  max-width:none;
+  width:100%;
+  display:block;
+}
+body.view-live #device-frame{
+  width:100% !important;
+  height:auto;
+  min-height:100vh;
+  border:none;
+  box-shadow:none;
+  resize:none;
+}
+body.view-live #exit-live-btn{ display:block; }
+/* Native mobile hides exit */
+body.is-native-mobile #exit-live-btn{
+  display:none !important;
+}
+/* Get Code Button - HIDDEN BY DEFAULT */
+#get-code-btn{
+  display:none;
+  position:fixed;
+  bottom:74px; /* Stacked below Exit button */
+  right:20px;
+  z-index:9999;
+  padding:12px 24px;
+  background:var(--text-main);
+  color:#fff;
+  border:none;
+  font-weight:bold;
+  cursor:pointer;
+  box-shadow:0 4px 12px rgba(0,0,0,0.3);
+  border-radius:var(--radius);
+}
+/* ONLY VISIBLE IN LIVE VIEW */
+body.view-live #get-code-btn{ display:block; }
+/* Native mobile hides it (since you can't copy-paste code easily on phone) */
+body.is-native-mobile #get-code-btn{ display:none !important; }
+/* Code Export Modal */
+.code-modal-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.85);
+  z-index:10000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  backdrop-filter:blur(4px);
+  display:none; /* Hidden initially */
+}
+.code-modal-content{
+  background:#1a1a1a;
+  border:4px solid var(--accent);
+  width:100%;
+  max-width:1000px;
+  height:90vh;
+  display:flex;
+  flex-direction:column;
+  box-shadow:0 20px 50px rgba(0,0,0,0.5);
+}
+.code-modal-header{
+  padding:16px;
+  background:#222;
+  border-bottom:1px solid #333;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.code-modal-title{
+  color:var(--text-main);
+  font-weight:bold;
+  font-size:18px;
+  font-family:monospace;
+}
+.code-modal-body{
+  flex-grow:1;
+  position:relative;
+}
+.code-textarea{
+  width:100%;
+  height:100%;
+  background:#111;
+  color:#a3adbf;
+  border:none;
+  padding:16px;
+  font-family:monospace;
+  font-size:13px;
+  resize:none;
+  outline:none;
+  white-space:pre;
+}
+.code-modal-footer{
+  padding:16px;
+  background:#222;
+  border-top:1px solid #333;
+  display:flex;
+  justify-content:flex-end;
+  gap:16px;
+}
+.cm-btn{
+  padding:10px 20px;
+  cursor:pointer;
+  font-weight:bold;
+  font-family:monospace;
+  border:none;
+  font-size:14px;
+}
+.cm-btn-copy{ background:var(--accent); color:#fff; }
+.cm-btn-close{ background:#444; color:#ccc; }
+.cm-btn:hover{ opacity:0.9; }
+</style>
+  <style>
+/* Inlined: /static/css/workspace.css */
+/* static/css/workspace.css */
+/* Workspace-only styling */
+#device-frame.has-workspace{
+  overflow-y:hidden;
+  overscroll-behavior:none;
+}
+.tile-workspace{
+  grid-column:1 / -1;
+  padding:0;
+  border-color:var(--text-main);
+  align-items:stretch;
+  justify-content:stretch;
+  text-align:left;
+  background:var(--tile-bg);
+  min-height:0;
+}
+/* Workspace dominates */
+.tile-workspace ~ .tile{
+  display:none !important;
+}
+#workspaceCanvas{
+  position:relative;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  outline:none;
+  background-image:
+    linear-gradient(to right, rgba(0,0,0,0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0,0,0,0.06) 1px, transparent 1px);
+  background-size:32px 32px;
+
+... (truncated, 37 more lines omitted; post cap: truncate_lines=650)
+================================================================================
+
 [-] This file: templates/classic.html | Contents:
 <!DOCTYPE html>
 <html lang="en">
@@ -1941,6 +2673,94 @@ body{
           this.optimizeTextarea();
         }
       };
+      // --- NEW TILE EDITOR LOGIC ---
+      const TileEditor = {
+        dragSrc: null,
+        init() {
+          const grid = document.getElementById('mainGrid');
+          if (!grid) return;
+          // Attach to existing tiles
+          Array.from(grid.children).forEach(t => this.attachEditorUI(t));
+          // Create Add Button
+          const addBtn = document.createElement('div');
+          addBtn.className = 'tile tile-add-btn';
+          addBtn.setAttribute('title', 'Add New Tile');
+          addBtn.onclick = () => this.addTile(grid, addBtn);
+          grid.appendChild(addBtn);
+        },
+        attachEditorUI(tile) {
+           // Skip special UI elements
+           if (tile.classList.contains('tile-add-btn') || tile.classList.contains('floating-arrow')) return;
+           // Draggable Events
+           tile.setAttribute('draggable', 'true');
+           tile.addEventListener('dragstart', (e) => this.dragStart(e, tile));
+           tile.addEventListener('dragenter', (e) => this.dragEnter(e, tile));
+           tile.addEventListener('dragover', (e) => this.dragOver(e, tile));
+           tile.addEventListener('dragleave', (e) => this.dragLeave(e, tile));
+           tile.addEventListener('drop', (e) => this.dragDrop(e, tile));
+           tile.addEventListener('dragend', (e) => this.dragEnd(e, tile));
+           // Close Button (If not present)
+           if (!tile.querySelector('.tile-remove-btn')) {
+             const btn = document.createElement('div');
+             btn.className = 'tile-remove-btn';
+             btn.innerHTML = '×';
+             btn.onclick = (e) => {
+               e.stopPropagation();
+               if(confirm('Delete this tile?')) {
+                 tile.remove();
+                 ArrowSystem.update('tile.remove');
+               }
+             };
+             tile.appendChild(btn);
+           }
+        },
+        addTile(grid, addBtn) {
+           const div = document.createElement('div');
+           div.className = 'tile tile-std';
+           div.innerHTML = `
+             <h3>New Tile</h3>
+             <input type="text" placeholder="Content...">
+             <button>ACTION</button>
+           `;
+           this.attachEditorUI(div);
+           grid.insertBefore(div, addBtn);
+           ArrowSystem.update('tile.add');
+           div.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        },
+        // Drag Handlers
+        dragStart(e, tile) {
+           this.dragSrc = tile;
+           e.dataTransfer.effectAllowed = 'move';
+           e.dataTransfer.setData('text/html', tile.innerHTML);
+           tile.classList.add('is-dragging');
+        },
+        dragOver(e) {
+           if (e.preventDefault) e.preventDefault();
+           e.dataTransfer.dropEffect = 'move';
+           return false;
+        },
+        dragEnter(e, tile) {
+           tile.classList.add('drag-over');
+        },
+        dragLeave(e, tile) {
+           tile.classList.remove('drag-over');
+        },
+        dragDrop(e, targetTile) {
+           e.stopPropagation();
+           if (this.dragSrc !== targetTile) {
+               // Reorder logic: Drop targetTile means we want to place dragSrc before targetTile
+               const parent = targetTile.parentNode;
+               parent.insertBefore(this.dragSrc, targetTile);
+               ArrowSystem.update('tile.reorder');
+           }
+           return false;
+        },
+        dragEnd(e, tile) {
+           tile.classList.remove('is-dragging');
+           const grid = document.getElementById('mainGrid');
+           Array.from(grid.children).forEach(c => c.classList.remove('drag-over'));
+        }
+      };
       const ArrowSystem = {
         grid: null,
         arrows: [],
@@ -1952,8 +2772,17 @@ body{
             L.warn('[ArrowSystem] mainGrid missing');
             return;
           }
+          this.refreshArrows(); // Initial Setup
+          const ro = new ResizeObserver(() => this.update('ResizeObserver'));
+          ro.observe(this.grid);
+          setTimeout(() => this.update('init:timeout'), 100);
+          this.update('init:immediate');
+        },
+        refreshArrows() {
+          // Clear old arrows
           this.arrows.forEach((a) => a.element.remove());
           this.arrows = [];
+          // Definitions of connections
           const connections = [
             { from: 'step1', to: 'step2' },
             { from: 'step2', to: 'step3' }
@@ -1961,26 +2790,28 @@ body{
           connections.forEach((conn) => {
             const elFrom = document.getElementById(conn.from);
             const elTo = document.getElementById(conn.to);
-            if (!elFrom || !elTo) {
-              L.warn('[ArrowSystem] missing tiles', { from: conn.from, to: conn.to });
-              return;
-            }
+            // Silent fail if tiles deleted
+            if (!elFrom || !elTo) return;
             const arrowEl = document.createElement('div');
             arrowEl.className = 'floating-arrow';
             arrowEl.innerHTML = this.arrowSVG;
             this.grid.appendChild(arrowEl);
             this.arrows.push({ element: arrowEl, from: elFrom, to: elTo });
-            L.log('[ArrowSystem] connection added', conn);
           });
-          const ro = new ResizeObserver(() => this.update('ResizeObserver'));
-          ro.observe(this.grid);
-          setTimeout(() => this.update('init:timeout'), 100);
-          this.update('init:immediate');
         },
         update(reason) {
           if (!this.grid) return;
+          // Re-check connections in case of deletion
+          if (reason.startsWith('tile')) this.refreshArrows();
           const gridRect = this.grid.getBoundingClientRect();
           this.arrows.forEach((arrow) => {
+            // Safe check again
+            if (!document.body.contains(arrow.from) || !document.body.contains(arrow.to)) {
+               arrow.element.style.display = 'none';
+               return;
+            } else {
+               arrow.element.style.display = 'flex';
+            }
             const r1 = arrow.from.getBoundingClientRect();
             const r2 = arrow.to.getBoundingClientRect();
             const c1 = { x: r1.left + r1.width / 2, y: r1.top + r1.height / 2 };
@@ -2013,12 +2844,13 @@ body{
         ClassicUI.initSnapSlider();
         ClassicUI.bindButtonsAndFile();
         ClassicLayout.refresh('load');
+        // Init editor features
+        TileEditor.init();
         ArrowSystem.init();
         const isMobile = D.Device && D.Device.isNativeMobile && D.Device.isNativeMobile();
         if (isMobile) {
           document.body.classList.add('is-native-mobile');
           L.log('[Device] native mobile detected -> auto live', { isMobile: true });
-          // Start live view on real mobile (like before)
           window.toggleLiveMode && window.toggleLiveMode();
         }
       });

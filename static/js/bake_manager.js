@@ -47,6 +47,8 @@
         '#get-code-btn',
         '#code-modal-overlay',
         '.workspace-hint',      // Remove editor-only hints
+        '.tile-remove-btn',     // Remove editor buttons (New)
+        '.tile-add-btn',        // Remove add button tile (New)
         'script[src*="reload"]' // Generic live-reload
       ];
 
@@ -72,7 +74,6 @@
             L.log(`[BakeManager] Inlining CSS: ${href}`);
             const res = await fetch(href);
             let cssText = await res.text();
-
             const style = document.createElement('style');
             style.textContent = `\n/* Inlined: ${href} */\n${cssText}\n`;
             link.replaceWith(style);
@@ -139,7 +140,6 @@
         `;
         document.body.appendChild(modal);
       }
-
       modal.style.display = 'flex';
       L.log('[UI] Modal opened');
 
@@ -161,7 +161,6 @@
       if (!textArea) return;
       textArea.select();
       document.execCommand('copy');
-
       const btn = document.querySelector('.cm-btn-copy');
       const originalText = btn.textContent;
       btn.textContent = "COPIED!";

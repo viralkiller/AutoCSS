@@ -15,8 +15,10 @@
   <a href="/" class="back-home-btn" aria-label="Back to Index">
     <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
   </a>
+
   <button id="exit-live-btn" onclick="toggleLiveMode()">EXIT LIVE VIEW</button>
   <button id="get-code-btn" onclick="openExportModal()">GET CODE</button>
+
   <div class="simulator-wrapper">
     <div class="controls">
       <span style="color:white; font-size:12px; font-weight:512;">DEVICE WIDTH:</span>
@@ -29,8 +31,10 @@
         style="width:200px !important;"
       />
       <span id="pxDisplay" style="color:white; font-family:monospace; font-size:12px;">400px</span>
+
       <button id="btnMobile" onclick="setMode('mobile')" style="padding:5px 15px;">MOBILE</button>
       <button id="btnDesktop" onclick="setMode('desktop')" style="padding:5px 15px;">DESKTOP</button>
+
       <button
         id="btnLive"
         onclick="toggleLiveMode()"
@@ -39,6 +43,7 @@
         LIVE VIEW
       </button>
     </div>
+
     <div id="device-frame">
       <div class="header-group" id="headerGroup">
         <div class="meta-bar">
@@ -67,19 +72,24 @@
           </button>
         </nav>
       </div>
+
       <div class="tile-grid" id="mainGrid">
         <div class="tile tile-stretch">
           <div style="height:100%; display:flex; align-items:center;">
             <h1 style="margin:0; color: var(--text-main); font-weight:768; letter-spacing:-2px;">LOGO</h1>
           </div>
         </div>
+
         <div class="tile tile-ghost"></div>
+
         <div class="tile tile-std">
           <h3>Join Mailing List</h3>
           <input id="mailInput" type="text" placeholder="Enter your email">
           <button id="refButton" class="btn-ref">SUBMIT</button>
         </div>
+
         <div class="tile tile-ghost"></div>
+
         <div class="tile tile-std">
           <h3>Settings Smooth</h3>
           <div class="slider-wrapper">
@@ -91,6 +101,7 @@
             <span class="slider-label">100</span>
           </div>
         </div>
+
         <div class="tile tile-std">
           <h3>Upload File</h3>
           <label id="matchLabel" class="file-upload-label btn-match">
@@ -99,6 +110,7 @@
           </label>
           <span id="fileName" class="file-name-display">...</span>
         </div>
+
         <div class="tile tile-std">
           <h3>Settings Snap</h3>
           <img
@@ -116,22 +128,16 @@
             <span class="slider-label">2</span>
           </div>
         </div>
+
         <div class="tile tile-stretch">
-          <h3>Paste text here</h3>
+          <h3>Textarea Input</h3>
           <textarea id="pasteArea"></textarea>
         </div>
-        <div class="tile tile-std" id="step1">
-          <h3>Your file is ready!</h3>
-        </div>
-        <div class="tile tile-std" id="step2">
-          <button id="viewButton" class="btn-ref">View File</button>
-        </div>
-        <div class="tile tile-std" id="step3">
-          <button id="againButton" class="btn-ref">Generate Another</button>
-        </div>
+
       </div>
     </div>
   </div>
+
   <script src="/static/js/log.js"></script>
   <script src="/static/js/layout_bus.js"></script>
   <script src="/static/js/device.js"></script>
@@ -142,6 +148,7 @@
     (function () {
       const D = window.Demeza || {};
       const L = D.Log || console;
+
       function preventNavDefaultClicks() {
         const ids = ['metaCredits','metaLogin','mobileCredits','mobileLogin'];
         ids.forEach((id) => {
@@ -152,6 +159,7 @@
             L.log('[UI] prevent default (meta link)', { id });
           });
         });
+
         document.querySelectorAll('.nav-link').forEach((a) => {
           a.addEventListener('click', (e) => {
             e.preventDefault();
@@ -159,6 +167,7 @@
           });
         });
       }
+
       const ClassicUI = {
         initSliders() {
           L.log('[Init] ClassicUI.initSliders');
@@ -166,6 +175,7 @@
             const slider = container.querySelector('input[type="range"]');
             const bubble = container.querySelector('.slider-value');
             if (!slider || !bubble) return;
+
             const updateBubble = (val) => {
               const min = parseFloat(slider.min) || 0;
               const max = parseFloat(slider.max) || 100;
@@ -174,16 +184,19 @@
               bubble.textContent = String(val);
               bubble.style.left = `calc(${percent}% + ${offset}px)`;
             };
+
             updateBubble(slider.value);
             slider.addEventListener('input', (e) => {
               updateBubble(e.target.value);
               bubble.classList.add('active');
               L.log('[UI] slider input', { id: slider.id, value: e.target.value });
             });
+
             const hideBubble = () => bubble.classList.remove('active');
             ['change', 'mouseup', 'touchend'].forEach((evt) => slider.addEventListener(evt, hideBubble));
           });
         },
+
         initSnapSlider() {
           L.log('[Init] ClassicUI.initSnapSlider');
           const snapSlider = document.getElementById('snapSlider');
@@ -193,16 +206,19 @@
             '1': 'https://placehold.co/64x64/FF9F1C/ffffff?text=1',
             '2': 'https://placehold.co/64x64/333333/ffffff?text=2'
           };
+
           if (!snapSlider || !snapImage) {
             L.warn('[ClassicUI] snapSlider or snapImage missing');
             return;
           }
+
           snapSlider.addEventListener('input', (e) => {
             const val = e.target.value;
             if (images[val]) snapImage.src = images[val];
             L.log('[UI] snapSlider input', { value: val });
           });
         },
+
         bindButtonsAndFile() {
           const refButton = document.getElementById('refButton');
           const viewButton = document.getElementById('viewButton');
@@ -210,11 +226,13 @@
           const fileInput = document.getElementById('fileInput');
           const fileName = document.getElementById('fileName');
           const mailInput = document.getElementById('mailInput');
+
           if (refButton) refButton.addEventListener('click', () => {
             L.log('[UI] submit mailing list', { email: (mailInput?.value || '').trim() });
           });
           if (viewButton) viewButton.addEventListener('click', () => L.log('[UI] view file'));
           if (againButton) againButton.addEventListener('click', () => L.log('[UI] generate another'));
+
           if (fileInput) {
             fileInput.addEventListener('change', () => {
               const name = fileInput.files && fileInput.files[0] ? fileInput.files[0].name : '...';
@@ -224,6 +242,7 @@
           }
         }
       };
+
       const ClassicLayout = {
         syncButtonStyles() {
           const ref = document.getElementById('refButton');
@@ -234,74 +253,221 @@
             .forEach((prop) => target.style[prop] = computed[prop]);
           L.log('[Layout] syncButtonStyles', { ok: true });
         },
+
         optimizeTextarea() {
           const txtArea = document.getElementById('pasteArea');
           if (!txtArea) return;
           const tile = txtArea.closest('.tile');
           const header = tile ? tile.querySelector('h3') : null;
+
           if (!tile) return;
           tile.style.display = 'flex';
           tile.style.flexDirection = 'column';
           tile.style.alignItems = 'flex-start';
           tile.style.textAlign = 'left';
+
           txtArea.style.flexGrow = '1';
           txtArea.style.width = '100%';
+
           if (header) {
             header.style.marginBottom = 'var(--q-16)';
             header.style.width = '100%';
           }
           L.log('[Layout] optimizeTextarea', { ok: true });
         },
+
         refresh(reason) {
           L.log('[Layout] refresh', { reason });
           this.syncButtonStyles();
           this.optimizeTextarea();
         }
       };
+
+      // --- NEW TILE EDITOR LOGIC ---
+      const TileEditor = {
+        dragSrc: null,
+        init() {
+          const grid = document.getElementById('mainGrid');
+          if (!grid) return;
+
+          // Attach to existing tiles
+          Array.from(grid.children).forEach(t => this.attachEditorUI(t));
+
+          // Create Add Button
+          const addBtn = document.createElement('div');
+          addBtn.className = 'tile tile-add-btn';
+          addBtn.setAttribute('title', 'Add New Tile');
+          addBtn.onclick = () => this.addTile(grid, addBtn);
+          grid.appendChild(addBtn);
+        },
+
+        attachEditorUI(tile) {
+           // Skip special UI elements
+           if (tile.classList.contains('tile-add-btn') || tile.classList.contains('floating-arrow')) return;
+
+           // Draggable Events
+           tile.setAttribute('draggable', 'true');
+           tile.addEventListener('dragstart', (e) => this.dragStart(e, tile));
+           tile.addEventListener('dragenter', (e) => this.dragEnter(e, tile));
+           tile.addEventListener('dragover', (e) => this.dragOver(e, tile));
+           tile.addEventListener('dragleave', (e) => this.dragLeave(e, tile));
+           tile.addEventListener('drop', (e) => this.dragDrop(e, tile));
+           tile.addEventListener('dragend', (e) => this.dragEnd(e, tile));
+
+           // INPUT GUARD: Prevent drag when interacting with sliders/inputs
+           const interactive = tile.querySelectorAll('input, textarea, button, select, label, .slider-wrapper');
+           interactive.forEach(el => {
+             // When mouse enters an interactive element, disable dragging on the parent tile
+             el.addEventListener('mouseenter', () => {
+               tile.setAttribute('draggable', 'false');
+             });
+             // When mouse leaves, re-enable dragging
+             el.addEventListener('mouseleave', () => {
+               tile.setAttribute('draggable', 'true');
+             });
+             // Fallback for touch devices
+             el.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
+           });
+
+           // Close Button (If not present)
+           if (!tile.querySelector('.tile-remove-btn')) {
+             const btn = document.createElement('div');
+             btn.className = 'tile-remove-btn';
+             btn.innerHTML = '×';
+             btn.onclick = (e) => {
+               e.stopPropagation();
+               if(confirm('Delete this tile?')) {
+                 tile.remove();
+                 ArrowSystem.update('tile.remove');
+               }
+             };
+             tile.appendChild(btn);
+           }
+        },
+
+        addTile(grid, addBtn) {
+           const div = document.createElement('div');
+           div.className = 'tile tile-std';
+           div.innerHTML = `
+             <h3>New Tile</h3>
+             <input type="text" placeholder="Content...">
+             <button>ACTION</button>
+           `;
+           this.attachEditorUI(div);
+           grid.insertBefore(div, addBtn);
+           ArrowSystem.update('tile.add');
+           div.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        },
+
+        // Drag Handlers
+        dragStart(e, tile) {
+           // Double check: if attribute is false, stop (though browser shouldn't trigger this)
+           if (tile.getAttribute('draggable') === 'false') {
+             e.preventDefault();
+             return;
+           }
+
+           this.dragSrc = tile;
+           e.dataTransfer.effectAllowed = 'move';
+           e.dataTransfer.setData('text/html', tile.innerHTML);
+           tile.classList.add('is-dragging');
+        },
+        dragOver(e) {
+           if (e.preventDefault) e.preventDefault();
+           e.dataTransfer.dropEffect = 'move';
+           return false;
+        },
+        dragEnter(e, tile) {
+           tile.classList.add('drag-over');
+        },
+        dragLeave(e, tile) {
+           tile.classList.remove('drag-over');
+        },
+        dragDrop(e, targetTile) {
+           e.stopPropagation();
+           if (this.dragSrc !== targetTile) {
+               // Reorder logic: Drop targetTile means we want to place dragSrc before targetTile
+               const parent = targetTile.parentNode;
+               parent.insertBefore(this.dragSrc, targetTile);
+               ArrowSystem.update('tile.reorder');
+           }
+           return false;
+        },
+        dragEnd(e, tile) {
+           tile.classList.remove('is-dragging');
+           const grid = document.getElementById('mainGrid');
+           Array.from(grid.children).forEach(c => c.classList.remove('drag-over'));
+        }
+      };
+
       const ArrowSystem = {
         grid: null,
         arrows: [],
         nudge: 12,
         arrowSVG: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21l-10-16h20l-10 16z"/></svg>`,
+
         init() {
           this.grid = document.getElementById('mainGrid');
           if (!this.grid) {
             L.warn('[ArrowSystem] mainGrid missing');
             return;
           }
-          this.arrows.forEach((a) => a.element.remove());
-          this.arrows = [];
-          const connections = [
-            { from: 'step1', to: 'step2' },
-            { from: 'step2', to: 'step3' }
-          ];
-          connections.forEach((conn) => {
-            const elFrom = document.getElementById(conn.from);
-            const elTo = document.getElementById(conn.to);
-            if (!elFrom || !elTo) {
-              L.warn('[ArrowSystem] missing tiles', { from: conn.from, to: conn.to });
-              return;
-            }
-            const arrowEl = document.createElement('div');
-            arrowEl.className = 'floating-arrow';
-            arrowEl.innerHTML = this.arrowSVG;
-            this.grid.appendChild(arrowEl);
-            this.arrows.push({ element: arrowEl, from: elFrom, to: elTo });
-            L.log('[ArrowSystem] connection added', conn);
-          });
+
+          this.refreshArrows(); // Initial Setup
+
           const ro = new ResizeObserver(() => this.update('ResizeObserver'));
           ro.observe(this.grid);
           setTimeout(() => this.update('init:timeout'), 100);
           this.update('init:immediate');
         },
+
+        refreshArrows() {
+          // Clear old arrows
+          this.arrows.forEach((a) => a.element.remove());
+          this.arrows = [];
+
+          // Definitions of connections
+          const connections = [
+            { from: 'step1', to: 'step2' },
+            { from: 'step2', to: 'step3' }
+          ];
+
+          connections.forEach((conn) => {
+            const elFrom = document.getElementById(conn.from);
+            const elTo = document.getElementById(conn.to);
+
+            // Silent fail if tiles deleted
+            if (!elFrom || !elTo) return;
+
+            const arrowEl = document.createElement('div');
+            arrowEl.className = 'floating-arrow';
+            arrowEl.innerHTML = this.arrowSVG;
+            this.grid.appendChild(arrowEl);
+            this.arrows.push({ element: arrowEl, from: elFrom, to: elTo });
+          });
+        },
+
         update(reason) {
           if (!this.grid) return;
+          // Re-check connections in case of deletion
+          if (reason.startsWith('tile')) this.refreshArrows();
+
           const gridRect = this.grid.getBoundingClientRect();
           this.arrows.forEach((arrow) => {
+            // Safe check again
+            if (!document.body.contains(arrow.from) || !document.body.contains(arrow.to)) {
+               arrow.element.style.display = 'none';
+               return;
+            } else {
+               arrow.element.style.display = 'flex';
+            }
+
             const r1 = arrow.from.getBoundingClientRect();
             const r2 = arrow.to.getBoundingClientRect();
+
             const c1 = { x: r1.left + r1.width / 2, y: r1.top + r1.height / 2 };
             const isVertical = (r2.top > (r1.bottom - 10));
+
             let x, y, rotation;
             if (isVertical) {
               x = c1.x;
@@ -312,8 +478,10 @@
               y = c1.y;
               rotation = -90;
             }
+
             const finalLeft = x - gridRect.left;
             const finalTop = y - gridRect.top;
+
             arrow.element.style.left = `${finalLeft - 24}px`;
             arrow.element.style.top = `${finalTop - 24}px`;
             arrow.element.style.transform = `rotate(${rotation}deg)`;
@@ -321,24 +489,30 @@
           L.log('[ArrowSystem] update', { reason, count: this.arrows.length });
         }
       };
+
       window.addEventListener('load', () => {
         L.log('[Boot] classic.html load');
         D.NavUI && D.NavUI.init && D.NavUI.init();
         D.Simulator && D.Simulator.init && D.Simulator.init();
+
         preventNavDefaultClicks();
         ClassicUI.initSliders();
         ClassicUI.initSnapSlider();
         ClassicUI.bindButtonsAndFile();
         ClassicLayout.refresh('load');
+
+        // Init editor features
+        TileEditor.init();
         ArrowSystem.init();
+
         const isMobile = D.Device && D.Device.isNativeMobile && D.Device.isNativeMobile();
         if (isMobile) {
           document.body.classList.add('is-native-mobile');
           L.log('[Device] native mobile detected -> auto live', { isMobile: true });
-          // Start live view on real mobile (like before)
           window.toggleLiveMode && window.toggleLiveMode();
         }
       });
+
       window.addEventListener('resize', () => {
         ClassicLayout.refresh('window.resize');
         ArrowSystem.update('window.resize');
