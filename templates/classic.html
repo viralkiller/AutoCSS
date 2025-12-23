@@ -146,7 +146,7 @@
 
       <div class="tile-grid" id="mainGrid">
         <div class="tile tile-stretch">
-          <div style="height:100%; width:100%; display:flex; align-items:center; justify-content:center;">
+          <div style="flex-grow:1; width:100%; display:flex; align-items:center; justify-content:center;">
             <h1 style="margin:0; color: var(--text-main); font-weight:768; letter-spacing:-2px;">LOGO</h1>
           </div>
         </div>
@@ -332,7 +332,7 @@
           L.log('[Layout] syncButtonStyles', { ok: true });
         },
 
-        // [Updated] Refactored to work on ALL textareas in tiles, not just one ID.
+        // [Updated] Automatically fills Textarea tiles using logic instead of inline styles
         optimizeTextarea() {
           const textareas = document.querySelectorAll('.tile textarea');
           textareas.forEach(txtArea => {
@@ -347,8 +347,6 @@
 
             txtArea.style.flexGrow = '1';
             txtArea.style.width = '100%';
-            // Optional: reset resize if desired, but user asked for "how it was before"
-            // txtArea.style.resize = 'none';
 
             if (header) {
               header.style.marginBottom = 'var(--q-16)';
@@ -379,10 +377,10 @@
                   <button>SUBMIT</button>
                 </div>`;
             case 'Logo':
-              // [Center Fixed] Full height/width flex wrapper with centering
+              // [Center Fixed] Using flex-grow:1 ensures it fills vertical space
               return `
                 <div class="tile tile-stretch">
-                  <div style="height:100%; width:100%; display:flex; align-items:center; justify-content:center;">
+                  <div style="flex-grow:1; width:100%; display:flex; align-items:center; justify-content:center;">
                     <h1 style="margin:0; color: var(--text-main); font-weight:768; letter-spacing:-2px;">LOGO</h1>
                   </div>
                 </div>`;
@@ -414,8 +412,7 @@
                   </div>
                 </div>`;
             case 'Textarea Input':
-              // [Restored] Exact structure as original tile (no inline styles).
-              // ClassicLayout.optimizeTextarea will handle the styling.
+              // [Restored] Structure matches original; Layout JS handles sizing
               return `
                 <div class="tile tile-stretch">
                   <h3>Textarea Input</h3>
@@ -488,7 +485,7 @@
             this.enforceButtonPositions();
             ClassicUI.initSliders();
             ClassicUI.initSnapSlider();
-            ClassicLayout.optimizeTextarea(); // Fix the layout for new textarea tiles
+            ClassicLayout.optimizeTextarea();
           }
         },
 
@@ -537,10 +534,9 @@
 
              btn.onclick = (e) => {
                e.stopPropagation();
-               if(confirm('Delete this tile?')) {
-                 tile.remove();
-                 ArrowSystem.update('tile.remove');
-               }
+               // [Updated] Immediate deletion without confirmation
+               tile.remove();
+               ArrowSystem.update('tile.remove');
              };
              tile.appendChild(btn);
            }
