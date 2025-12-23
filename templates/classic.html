@@ -146,8 +146,8 @@
 
       <div class="tile-grid" id="mainGrid">
         <div class="tile tile-stretch">
-          <div style="flex-grow:1; width:100%; display:flex; align-items:center; justify-content:center;">
-            <h1 style="margin:0; color: var(--text-main); font-weight:768; letter-spacing:-2px;">LOGO</h1>
+          <div style="flex-grow:1; width:100%; display:flex; align-items:center; justify-content:center; align-content:center;">
+            <div><h1 style="margin:0; color: var(--text-main); font-weight:768; letter-spacing:-2px;">LOGO</h1></div>
           </div>
         </div>
 
@@ -332,7 +332,6 @@
           L.log('[Layout] syncButtonStyles', { ok: true });
         },
 
-        // [Updated] Automatically fills Textarea tiles using logic instead of inline styles
         optimizeTextarea() {
           const textareas = document.querySelectorAll('.tile textarea');
           textareas.forEach(txtArea => {
@@ -377,10 +376,10 @@
                   <button>SUBMIT</button>
                 </div>`;
             case 'Logo':
-              // [Center Fixed] Using flex-grow:1 ensures it fills vertical space
+              // [UPDATED] Added align-content:center here as well
               return `
                 <div class="tile tile-stretch">
-                  <div style="flex-grow:1; width:100%; display:flex; align-items:center; justify-content:center;">
+                  <div style="flex-grow:1; width:100%; display:flex; align-items:center; justify-content:center; align-content:center;">
                     <h1 style="margin:0; color: var(--text-main); font-weight:768; letter-spacing:-2px;">LOGO</h1>
                   </div>
                 </div>`;
@@ -412,7 +411,6 @@
                   </div>
                 </div>`;
             case 'Textarea Input':
-              // [Restored] Structure matches original; Layout JS handles sizing
               return `
                 <div class="tile tile-stretch">
                   <h3>Textarea Input</h3>
@@ -534,7 +532,7 @@
 
              btn.onclick = (e) => {
                e.stopPropagation();
-               // [Updated] Immediate deletion without confirmation
+               // Immediate deletion
                tile.remove();
                ArrowSystem.update('tile.remove');
              };
