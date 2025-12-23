@@ -11,38 +11,49 @@
   <link rel="stylesheet" href="/static/css/demeza_base.css">
   <link rel="stylesheet" href="/static/css/workspace.css">
   <style>
-    /* --- TOP BAR & LAYOUT FIXES --- */
+    /* --- TOP BAR & LAYOUT FIXES (Synced with Classic) --- */
 
-    /* 1. Body: Reset padding but KEEP default centering */
+    /* 1. Body: Reset padding */
     body {
       padding-top: 0 !important;
     }
 
-    /* 2. Top Bar (Controls): Fixed to top, full width */
-    /* NOTE: The HTML for this is now loaded via Jinja include */
+    /* 2. Top Bar (Controls): Fixed top, full width, precise padding */
     .controls {
       position: fixed !important;
       top: 0;
       left: 0;
-      width: 100vw !important; /* Force full viewport width */
+      width: 100vw !important;
       max-width: none !important;
-      height: 64px;
+      height: 68px; /* 16px pad + 36px btn + 16px pad */
       z-index: 5000;
       margin: 0 !important;
       border-radius: 0 !important;
       border: none !important;
       border-bottom: 2px solid #444 !important;
       background: #2b2b2b !important;
-      padding: 0 20px !important;
+
       display: flex;
       align-items: center;
-      gap: 16px;
+      justify-content: space-between;
+      padding: 0 16px !important;
+
       box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
 
-    /* 3. Integrated Back Button (inside the included bar) */
+    /* 3. Center Group: Absolutely centered */
+    .sim-center-group {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    /* 4. Buttons (Back & Live View) */
     .back-home-btn {
-      position: static !important; /* Sits naturally in flow */
+      position: static !important;
       transform: none !important;
       border: 1px solid #555 !important;
       background: #222 !important;
@@ -55,23 +66,27 @@
       background: #444 !important;
     }
 
-    /* 4. Simulator Wrapper: Push down & ensure centering */
-    .simulator-wrapper {
-      padding-top: 80px !important; /* 64px bar + 16px buffer */
-      width: 100% !important;
-      max-width: none !important; /* Allow spanning full width to fix centering */
-      display: flex;
-      justify-content: center; /* Horizontally center the frame */
+    #btnLive {
+      height: 36px !important;
+      margin: 0 !important;
     }
 
-    /* 5. LIVE VIEW FIX: Remove the top padding glitch */
+    /* 5. Simulator Wrapper: Push down by header height + buffer */
+    .simulator-wrapper {
+      padding-top: 84px !important; /* 68px bar + 16px buffer */
+      width: 100% !important;
+      max-width: none !important;
+      display: flex;
+      justify-content: center;
+    }
+
+    /* 6. LIVE VIEW FIX */
     body.view-live .simulator-wrapper {
       padding-top: 0 !important;
     }
   </style>
 </head>
 <body>
-
   <button id="exit-live-btn" onclick="toggleLiveMode()">EXIT LIVE VIEW</button>
   <button id="get-code-btn" onclick="openExportModal()">GET CODE</button>
 
