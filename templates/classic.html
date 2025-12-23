@@ -10,6 +10,63 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/UAParser.js/1.0.35/ua-parser.min.js"></script>
   <link rel="stylesheet" href="/static/css/demeza_base.css" />
   <link rel="stylesheet" href="/static/css/classic.css" />
+  <style>
+    /* Add Menu Styles */
+    .add-menu-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 10000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+    .add-menu-content {
+      background: var(--tile-bg);
+      border: 4px solid var(--accent);
+      padding: 24px;
+      width: min(400px, 90%);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+    .add-menu-title {
+      color: var(--text-dark);
+      font-weight: 700;
+      font-size: 20px;
+      margin-bottom: 8px;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .menu-btn {
+      padding: 12px;
+      background: var(--text-main);
+      color: white;
+      border: none;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: left;
+      font-family: monospace;
+      font-size: 14px;
+      transition: transform 0.1s, background 0.1s;
+    }
+    .menu-btn:hover {
+      background: var(--accent);
+      transform: translateX(4px);
+    }
+    .menu-btn-close {
+      background: #444;
+      margin-top: 8px;
+      text-align: center;
+    }
+    .menu-btn-close:hover {
+      background: #666;
+      transform: none;
+    }
+  </style>
 </head>
 <body>
   <a href="/" class="back-home-btn" aria-label="Back to Index">
@@ -18,6 +75,20 @@
 
   <button id="exit-live-btn" onclick="toggleLiveMode()">EXIT LIVE VIEW</button>
   <button id="get-code-btn" onclick="openExportModal()">GET CODE</button>
+
+  <div id="addTileMenu" class="add-menu-overlay">
+    <div class="add-menu-content">
+      <div class="add-menu-title">Select Tile Type</div>
+      <button class="menu-btn" onclick="TileEditor.insertFromMenu('Ghost')">Ghost</button>
+      <button class="menu-btn" onclick="TileEditor.insertFromMenu('Mail List')">Mail List</button>
+      <button class="menu-btn" onclick="TileEditor.insertFromMenu('Logo')">Logo</button>
+      <button class="menu-btn" onclick="TileEditor.insertFromMenu('Settings Smooth')">Settings Smooth</button>
+      <button class="menu-btn" onclick="TileEditor.insertFromMenu('Settings Snap')">Settings Snap</button>
+      <button class="menu-btn" onclick="TileEditor.insertFromMenu('Textarea Input')">Textarea Input</button>
+      <button class="menu-btn" onclick="TileEditor.insertFromMenu('File Upload')">File Upload</button>
+      <button class="menu-btn menu-btn-close" onclick="TileEditor.closeMenu()">CANCEL</button>
+    </div>
+  </div>
 
   <div class="simulator-wrapper">
     <div class="controls">
@@ -75,7 +146,7 @@
 
       <div class="tile-grid" id="mainGrid">
         <div class="tile tile-stretch">
-          <div style="height:100%; display:flex; align-items:center;">
+          <div style="height:100%; width:100%; display:flex; align-items:center; justify-content:center;">
             <h1 style="margin:0; color: var(--text-main); font-weight:768; letter-spacing:-2px;">LOGO</h1>
           </div>
         </div>
@@ -111,18 +182,18 @@
           <span id="fileName" class="file-name-display">...</span>
         </div>
 
-        <div class="tile tile-std">
+        <div class="tile tile-std tile-snap-logic">
           <h3>Settings Snap</h3>
           <img
-            id="snapImage"
             src="https://placehold.co/64x64/2EC4B6/ffffff?text=0"
+            class="snap-target-img"
             style="width:64px; height:64px; border-radius:0; object-fit:cover;"
             alt="Snap preview"
           >
           <div class="slider-wrapper">
             <span class="slider-label">0</span>
             <div class="range-container">
-              <input type="range" id="snapSlider" min="0" max="2" step="1" value="0">
+              <input type="range" class="snap-input" min="0" max="2" step="1" value="0">
               <div class="slider-value">0</div>
             </div>
             <span class="slider-label">2</span>
@@ -172,6 +243,9 @@
         initSliders() {
           L.log('[Init] ClassicUI.initSliders');
           document.querySelectorAll('.range-container').forEach((container) => {
+            if (container.classList.contains('is-init')) return;
+            container.classList.add('is-init');
+
             const slider = container.querySelector('input[type="range"]');
             const bubble = container.querySelector('.slider-value');
             if (!slider || !bubble) return;
@@ -198,24 +272,28 @@
         },
 
         initSnapSlider() {
-          L.log('[Init] ClassicUI.initSnapSlider');
-          const snapSlider = document.getElementById('snapSlider');
-          const snapImage = document.getElementById('snapImage');
+          L.log('[Init] ClassicUI.initSnapSlider [Class-Based]');
           const images = {
             '0': 'https://placehold.co/64x64/2EC4B6/ffffff?text=0',
             '1': 'https://placehold.co/64x64/FF9F1C/ffffff?text=1',
             '2': 'https://placehold.co/64x64/333333/ffffff?text=2'
           };
 
-          if (!snapSlider || !snapImage) {
-            L.warn('[ClassicUI] snapSlider or snapImage missing');
-            return;
-          }
+          // Find all snap tiles that haven't been initialized
+          document.querySelectorAll('.tile-snap-logic').forEach(tile => {
+            if (tile.classList.contains('is-snap-init')) return;
+            tile.classList.add('is-snap-init');
 
-          snapSlider.addEventListener('input', (e) => {
-            const val = e.target.value;
-            if (images[val]) snapImage.src = images[val];
-            L.log('[UI] snapSlider input', { value: val });
+            const img = tile.querySelector('img');
+            const input = tile.querySelector('input[type="range"]');
+
+            if (!img || !input) return;
+
+            input.addEventListener('input', (e) => {
+              const val = e.target.value;
+              if (images[val]) img.src = images[val];
+              L.log('[UI] snapSlider input', { value: val });
+            });
           });
         },
 
@@ -254,26 +332,30 @@
           L.log('[Layout] syncButtonStyles', { ok: true });
         },
 
+        // [Updated] Refactored to work on ALL textareas in tiles, not just one ID.
         optimizeTextarea() {
-          const txtArea = document.getElementById('pasteArea');
-          if (!txtArea) return;
-          const tile = txtArea.closest('.tile');
-          const header = tile ? tile.querySelector('h3') : null;
+          const textareas = document.querySelectorAll('.tile textarea');
+          textareas.forEach(txtArea => {
+            const tile = txtArea.closest('.tile');
+            if (!tile) return;
+            const header = tile.querySelector('h3');
 
-          if (!tile) return;
-          tile.style.display = 'flex';
-          tile.style.flexDirection = 'column';
-          tile.style.alignItems = 'flex-start';
-          tile.style.textAlign = 'left';
+            tile.style.display = 'flex';
+            tile.style.flexDirection = 'column';
+            tile.style.alignItems = 'flex-start';
+            tile.style.textAlign = 'left';
 
-          txtArea.style.flexGrow = '1';
-          txtArea.style.width = '100%';
+            txtArea.style.flexGrow = '1';
+            txtArea.style.width = '100%';
+            // Optional: reset resize if desired, but user asked for "how it was before"
+            // txtArea.style.resize = 'none';
 
-          if (header) {
-            header.style.marginBottom = 'var(--q-16)';
-            header.style.width = '100%';
-          }
-          L.log('[Layout] optimizeTextarea', { ok: true });
+            if (header) {
+              header.style.marginBottom = 'var(--q-16)';
+              header.style.width = '100%';
+            }
+          });
+          L.log('[Layout] optimizeTextarea', { count: textareas.length });
         },
 
         refresh(reason) {
@@ -283,9 +365,83 @@
         }
       };
 
+      // --- TEMPLATE GENERATOR ---
+      const TileTemplates = {
+        get(type) {
+          switch(type) {
+            case 'Ghost':
+              return `<div class="tile tile-ghost"></div>`;
+            case 'Mail List':
+              return `
+                <div class="tile tile-std">
+                  <h3>Join Mailing List</h3>
+                  <input type="text" placeholder="Enter your email">
+                  <button>SUBMIT</button>
+                </div>`;
+            case 'Logo':
+              // [Center Fixed] Full height/width flex wrapper with centering
+              return `
+                <div class="tile tile-stretch">
+                  <div style="height:100%; width:100%; display:flex; align-items:center; justify-content:center;">
+                    <h1 style="margin:0; color: var(--text-main); font-weight:768; letter-spacing:-2px;">LOGO</h1>
+                  </div>
+                </div>`;
+            case 'Settings Smooth':
+              return `
+                <div class="tile tile-std">
+                  <h3>Settings Smooth</h3>
+                  <div class="slider-wrapper">
+                    <span class="slider-label">0</span>
+                    <div class="range-container">
+                      <input type="range" min="0" max="100" value="50">
+                      <div class="slider-value">50</div>
+                    </div>
+                    <span class="slider-label">100</span>
+                  </div>
+                </div>`;
+            case 'Settings Snap':
+              return `
+                <div class="tile tile-std tile-snap-logic">
+                  <h3>Settings Snap</h3>
+                  <img src="https://placehold.co/64x64/2EC4B6/ffffff?text=0" style="width:64px; height:64px; border-radius:0; object-fit:cover;">
+                  <div class="slider-wrapper">
+                    <span class="slider-label">0</span>
+                    <div class="range-container">
+                      <input type="range" min="0" max="2" step="1" value="0">
+                      <div class="slider-value">0</div>
+                    </div>
+                    <span class="slider-label">2</span>
+                  </div>
+                </div>`;
+            case 'Textarea Input':
+              // [Restored] Exact structure as original tile (no inline styles).
+              // ClassicLayout.optimizeTextarea will handle the styling.
+              return `
+                <div class="tile tile-stretch">
+                  <h3>Textarea Input</h3>
+                  <textarea></textarea>
+                </div>`;
+            case 'File Upload':
+              return `
+                <div class="tile tile-std">
+                  <h3>Upload File</h3>
+                  <label class="file-upload-label btn-match">
+                    CHOOSE FILE
+                    <input type="file" style="display:none;" onchange="this.parentElement.nextElementSibling.textContent = this.files[0]?.name || '...'">
+                  </label>
+                  <span class="file-name-display">...</span>
+                </div>`;
+            default:
+              return `<div class="tile tile-std"><h3>Unknown</h3></div>`;
+          }
+        }
+      };
+
       // --- NEW TILE EDITOR LOGIC ---
       const TileEditor = {
         dragSrc: null,
+        addBtnRef: null,
+
         init() {
           const grid = document.getElementById('mainGrid');
           if (!grid) return;
@@ -297,14 +453,45 @@
           const addBtn = document.createElement('div');
           addBtn.className = 'tile tile-add-btn';
           addBtn.setAttribute('title', 'Add New Tile');
-          addBtn.onclick = () => this.addTile(grid, addBtn);
+          addBtn.onclick = () => this.openMenu(addBtn);
           grid.appendChild(addBtn);
+          this.addBtnRef = addBtn;
 
-          // [Patch] Initial enforcement
+          // Initial enforcement
           setTimeout(() => this.enforceButtonPositions(), 50);
         },
 
-        // [Patch] JS Enforcement to ensure buttons don't get trapped in grid cells
+        openMenu(btn) {
+          const menu = document.getElementById('addTileMenu');
+          if (menu) menu.style.display = 'flex';
+        },
+        closeMenu() {
+          const menu = document.getElementById('addTileMenu');
+          if (menu) menu.style.display = 'none';
+        },
+        insertFromMenu(type) {
+          this.closeMenu();
+          const grid = document.getElementById('mainGrid');
+          if (!grid || !this.addBtnRef) return;
+
+          const tempDiv = document.createElement('div');
+          tempDiv.innerHTML = TileTemplates.get(type);
+          const newTile = tempDiv.firstElementChild;
+
+          if (newTile) {
+            this.attachEditorUI(newTile);
+            grid.insertBefore(newTile, this.addBtnRef);
+            ArrowSystem.update('tile.add');
+            newTile.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            // Apply Layout fixes to the new tile
+            this.enforceButtonPositions();
+            ClassicUI.initSliders();
+            ClassicUI.initSnapSlider();
+            ClassicLayout.optimizeTextarea(); // Fix the layout for new textarea tiles
+          }
+        },
+
         enforceButtonPositions() {
           const btns = document.querySelectorAll('.tile-remove-btn');
           btns.forEach(btn => {
@@ -320,10 +507,8 @@
         },
 
         attachEditorUI(tile) {
-           // Skip special UI elements
            if (tile.classList.contains('tile-add-btn') || tile.classList.contains('floating-arrow')) return;
 
-           // Draggable Events
            tile.setAttribute('draggable', 'true');
            tile.addEventListener('dragstart', (e) => this.dragStart(e, tile));
            tile.addEventListener('dragenter', (e) => this.dragEnter(e, tile));
@@ -332,32 +517,22 @@
            tile.addEventListener('drop', (e) => this.dragDrop(e, tile));
            tile.addEventListener('dragend', (e) => this.dragEnd(e, tile));
 
-           // INPUT GUARD: Prevent drag when interacting with sliders/inputs
            const interactive = tile.querySelectorAll('input, textarea, button, select, label, .slider-wrapper');
            interactive.forEach(el => {
-             // When mouse enters an interactive element, disable dragging on the parent tile
-             el.addEventListener('mouseenter', () => {
-               tile.setAttribute('draggable', 'false');
-             });
-             // When mouse leaves, re-enable dragging
-             el.addEventListener('mouseleave', () => {
-               tile.setAttribute('draggable', 'true');
-             });
-             // Fallback for touch devices
+             el.addEventListener('mouseenter', () => tile.setAttribute('draggable', 'false'));
+             el.addEventListener('mouseleave', () => tile.setAttribute('draggable', 'true'));
              el.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
            });
 
-           // Close Button (If not present)
            if (!tile.querySelector('.tile-remove-btn')) {
              const btn = document.createElement('div');
              btn.className = 'tile-remove-btn';
              btn.innerHTML = '×';
 
-             // [Patch] Immediate inline enforcement
              btn.style.position = 'absolute';
              btn.style.top = '-10px';
              btn.style.right = '-10px';
-             btn.style.gridRow = 'auto'; // Break out of parent grid
+             btn.style.gridRow = 'auto';
              btn.style.gridColumn = 'auto';
 
              btn.onclick = (e) => {
@@ -371,30 +546,11 @@
            }
         },
 
-        addTile(grid, addBtn) {
-           const div = document.createElement('div');
-           div.className = 'tile tile-std';
-           div.innerHTML = `
-             <h3>New Tile</h3>
-             <input type="text" placeholder="Content...">
-             <button>ACTION</button>
-           `;
-           this.attachEditorUI(div);
-           grid.insertBefore(div, addBtn);
-           ArrowSystem.update('tile.add');
-           div.scrollIntoView({ behavior: 'smooth', block: 'center' });
-           // [Patch] Re-enforce
-           this.enforceButtonPositions();
-        },
-
-        // Drag Handlers
         dragStart(e, tile) {
-           // Double check: if attribute is false, stop (though browser shouldn't trigger this)
            if (tile.getAttribute('draggable') === 'false') {
              e.preventDefault();
              return;
            }
-
            this.dragSrc = tile;
            e.dataTransfer.effectAllowed = 'move';
            e.dataTransfer.setData('text/html', tile.innerHTML);
@@ -414,7 +570,6 @@
         dragDrop(e, targetTile) {
            e.stopPropagation();
            if (this.dragSrc !== targetTile) {
-               // Reorder logic: Drop targetTile means we want to place dragSrc before targetTile
                const parent = targetTile.parentNode;
                parent.insertBefore(this.dragSrc, targetTile);
                ArrowSystem.update('tile.reorder');
@@ -428,6 +583,9 @@
         }
       };
 
+      // EXPOSE GLOBALLY for inline HTML handlers
+      window.TileEditor = TileEditor;
+
       const ArrowSystem = {
         grid: null,
         arrows: [],
@@ -440,9 +598,7 @@
             L.warn('[ArrowSystem] mainGrid missing');
             return;
           }
-
-          this.refreshArrows(); // Initial Setup
-
+          this.refreshArrows();
           const ro = new ResizeObserver(() => this.update('ResizeObserver'));
           ro.observe(this.grid);
           setTimeout(() => this.update('init:timeout'), 100);
@@ -450,23 +606,16 @@
         },
 
         refreshArrows() {
-          // Clear old arrows
           this.arrows.forEach((a) => a.element.remove());
           this.arrows = [];
-
-          // Definitions of connections
           const connections = [
             { from: 'step1', to: 'step2' },
             { from: 'step2', to: 'step3' }
           ];
-
           connections.forEach((conn) => {
             const elFrom = document.getElementById(conn.from);
             const elTo = document.getElementById(conn.to);
-
-            // Silent fail if tiles deleted
             if (!elFrom || !elTo) return;
-
             const arrowEl = document.createElement('div');
             arrowEl.className = 'floating-arrow';
             arrowEl.innerHTML = this.arrowSVG;
@@ -477,25 +626,19 @@
 
         update(reason) {
           if (!this.grid) return;
-          // Re-check connections in case of deletion
           if (reason.startsWith('tile')) this.refreshArrows();
-
           const gridRect = this.grid.getBoundingClientRect();
           this.arrows.forEach((arrow) => {
-            // Safe check again
             if (!document.body.contains(arrow.from) || !document.body.contains(arrow.to)) {
                arrow.element.style.display = 'none';
                return;
             } else {
                arrow.element.style.display = 'flex';
             }
-
             const r1 = arrow.from.getBoundingClientRect();
             const r2 = arrow.to.getBoundingClientRect();
-
             const c1 = { x: r1.left + r1.width / 2, y: r1.top + r1.height / 2 };
             const isVertical = (r2.top > (r1.bottom - 10));
-
             let x, y, rotation;
             if (isVertical) {
               x = c1.x;
@@ -506,17 +649,13 @@
               y = c1.y;
               rotation = -90;
             }
-
             const finalLeft = x - gridRect.left;
             const finalTop = y - gridRect.top;
-
             arrow.element.style.left = `${finalLeft - 24}px`;
             arrow.element.style.top = `${finalTop - 24}px`;
             arrow.element.style.transform = `rotate(${rotation}deg)`;
           });
           L.log('[ArrowSystem] update', { reason, count: this.arrows.length });
-
-          // [Patch] Also re-enforce buttons whenever layout updates
           if (TileEditor.enforceButtonPositions) TileEditor.enforceButtonPositions();
         }
       };
@@ -532,7 +671,6 @@
         ClassicUI.bindButtonsAndFile();
         ClassicLayout.refresh('load');
 
-        // Init editor features
         TileEditor.init();
         ArrowSystem.init();
 
