@@ -45,4 +45,21 @@ The website is in essence a sort of demo and 'editor', and is therefore allowed 
 However the final 'baked' design that the user exports should have the HTML/CSS/JS code all in one file i.e. index.html
 This is to make life easy, they just upload the file to their server and point to it, without having to setup dir trees and such.
 
+[Tile Item Alignment Rules]
+
+Every div item within a tile is considered 1 element within that tile.
+If there is only a single item, align it perfectly centered within the tile, i.e. place it on top of the center of that square, centered
+in both horizontal and vertical directions.
+
+If there are two items within the tile, imagine it consisting of 7 even rows. The items will go on rows 3 and 5. So 1,2,[3],4,[5],6,7. Everything centered horizontally.
+
+If there are three items within the tile, same as above but 1,[2],3,[4],5,[6],7, they will occupy 2,4,6 slots.
+
+More than three items, we ignore the 7 rows and just spread them evenly across the vertical axis.
+
+
+
+
+
+
 

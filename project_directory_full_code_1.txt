@@ -1,4 +1,4 @@
-Aggregated on: 2025-12-22 06:22:04
+Aggregated on: 2025-12-23 01:42:25
 ================================================================================
 Project Directory Tree:
 /
@@ -41,6 +41,46 @@ Project Directory Tree:
 └── README.txt
 
 4 directories, 33 files
+================================================================================
+
+[-] This file: general.md | Contents:
+DEMO: https://autocss.pythonanywhere.com
+The |deMeza AutoCSS system| is a new way to design websites that removes the usual headache of maintaining separate desktop and mobile layouts.
+You follow a small set of rules, and the desktop and mobile versions emerge automatically.
+There are three main templates, and together they cover almost every project: Classic, Workspace, and Game.
+Although the templates differ in purpose, they all share the same core tile logic.
+With the exception of the top two menu bars, everything on the page is a 'tile'.
+On mobile, tiles stack vertically. On desktop, tiles flow horizontally. In practice, you don’t design separate layouts at all — you just add tiles.
+Desktop centering is handled in a simple, reliable way. You are only ever allowed a maximum of three tiles per horizontal row.
+This limitation is deliberate: it keeps layouts fast to build and hard to break.
+To center an element on desktop, you place a ghost tile before it and another ghost tile after it.
+Ghost tiles appear on desktop as blank spacers, but disappear entirely on mobile.
+The result is a centered desktop layout that collapses cleanly into a sensible mobile stack.
+Normal tiles automatically center and arrange their contents in a pleasing way depending on how many UI items they contain.
+A set of ready-made normal tiles is provided for common needs such as mailing list signup, sliders, file upload, text areas, and other standard inputs.
+The stretch tile is used when you want something to span the full row on desktop.
+On mobile it behaves like a normal square tile, but on desktop it expands to occupy the width of three tiles.
+This makes it ideal for banner areas, hero content, or wide information panels.
+The workspace tile is a special case.
+It ignores any tiles that come after it and expands to fill the available screen space, similar to a Figma or Photoshop canvas.
+This workspace area is then ready to receive your custom UI elements, nodes, and interactive components.
+Finally, the game tile is similar to the workspace tile, but optimized for play. On desktop it behaves like a normal full workspace.
+On mobile, instead of trying to squeeze the experience into portrait, the user is prompted to rotate the device.
+This ensures that the game runs in a landscape layout that matches the desktop feel.
+These three templates all use the same core tile logic and should cover 99% of your design needs.
+Coming soon: a live page editor that lets you add, remove, and reorder tiles in real time,
+plus a “Generate Final Code” button that outputs a clean, single-page HTML/CSS/JS build of your layout, ready to deploy immediately.
+ADDITIONAL NOTES:
+The website is in essence a sort of demo and 'editor', and is therefore allowed separate JS and CSS files (usually we prefer HTML/CSS/JS all on the same page).
+However the final 'baked' design that the user exports should have the HTML/CSS/JS code all in one file i.e. index.html
+This is to make life easy, they just upload the file to their server and point to it, without having to setup dir trees and such.
+[Tile Item Alignment Rules]
+Every div item within a tile is considered 1 element within that tile.
+If there is only a single item, align it perfectly centered within the tile, i.e. place it on top of the center of that square, centered
+in both horizontal and vertical directions.
+If there are two items within the tile, imagine it consisting of 7 even rows. The items will go on rows 3 and 5. So 1,2,[3],4,[5],6,7. Everything centered horizontally.
+If there are three items within the tile, same as above but 1,[2],3,[4],5,[6],7, they will occupy 2,4,6 slots.
+More than three items, we ignore the 7 rows and just spread them evenly across the vertical axis.
 ================================================================================
 
 [-] This file: static/css/classic.css | Contents:
@@ -87,7 +127,8 @@ Project Directory Tree:
   max-height: 20px !important;
   background: #ff4757;
   color: #fff;
-  border: 2px solid #fff; /* Thicker border to separate from tile content */
+  border: 2px solid #fff;
+  /* Thicker border to separate from tile content */
   border-radius: 50%;
   cursor: pointer;
   z-index: 100;
@@ -105,6 +146,10 @@ Project Directory Tree:
   margin: 0 !important;
   transform: none !important;
   box-sizing: border-box !important;
+  /* [Fix] Safety overrides to prevent base.css grid rules from capturing the button */
+  grid-row: auto !important;
+  grid-column: auto !important;
+  grid-area: auto !important;
 }
 .tile-remove-btn:hover {
   background: #ff6b81;
@@ -133,8 +178,10 @@ Project Directory Tree:
 /* Mobile Tweak: Don't let the square become screen-width massive */
 @media (max-width: 768px) {
   .tile-add-btn {
-    width: 160px !important; /* Fixed size square on mobile */
-    align-self: center; /* Center in the mobile column */
+    width: 160px !important;
+    /* Fixed size square on mobile */
+    align-self: center;
+    /* Center in the mobile column */
     margin: 0 auto;
   }
 }
@@ -170,7 +217,8 @@ Project Directory Tree:
 /* Visual feedback when hovering over a drop target */
 .tile.drag-over {
   border-color: var(--text-main);
-  background: #e6fffa; /* light teal tint */
+  background: #e6fffa;
+  /* light teal tint */
   transform: scale(1.02);
   z-index: 10;
 }
@@ -2429,16 +2477,133 @@ body.is-native-mobile #get-code-btn{ display:none !important; }
   <script src="https://cdnjs.cloudflare.com/ajax/libs/UAParser.js/1.0.35/ua-parser.min.js"></script>
   <link rel="stylesheet" href="/static/css/demeza_base.css" />
   <link rel="stylesheet" href="/static/css/classic.css" />
+  <style>
+    /* --- NEW TOP BAR LAYOUT ENFORCEMENT --- */
+    /* 1. Reset Body Spacing for Full Width Bar */
+    body {
+      padding-top: 0 !important;
+      align-items: flex-start !important; /* Stop centering vertical, let normal flow happen */
+    }
+    /* 2. Pin Controls to Top (The "Simulator Bar") */
+    .controls {
+      position: fixed !important;
+      top: 0;
+      left: 0;
+      width: 100vw !important;
+      max-width: none !important; /* Override base constraints */
+      height: 64px; /* Fixed height for easy math */
+      z-index: 5000;
+      margin: 0 !important;
+      border-radius: 0 !important;
+      border: none !important;
+      border-bottom: 2px solid #444 !important;
+      background: #2b2b2b !important;
+      padding: 0 20px !important;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    /* 3. Integrate Back Button into Bar */
+    .back-home-btn {
+      position: static !important; /* No longer fixed floating */
+      transform: none !important;
+      border: 1px solid #555 !important;
+      background: #222 !important;
+      height: 36px !important;
+      width: 36px !important;
+      min-width: 36px; /* Prevent crushing */
+      margin: 0 !important; /* Flex gap handles spacing */
+    }
+    .back-home-btn:hover {
+      background: #444 !important;
+    }
+    /* 4. Push Simulator Down so it isn't hidden by the bar */
+    .simulator-wrapper {
+      padding-top: 80px !important; /* 64px bar + 16px gap */
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+    /* Add Menu Styles (Kept from previous) */
+    .add-menu-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 10000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+    .add-menu-content {
+      background: var(--tile-bg);
+      border: 4px solid var(--accent);
+      padding: 24px;
+      width: min(400px, 90%);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+    .add-menu-title {
+      color: var(--text-dark);
+      font-weight: 700;
+      font-size: 20px;
+      margin-bottom: 8px;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .menu-btn {
+      padding: 12px;
+      background: var(--text-main);
+      color: white;
+      border: none;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: left;
+      font-family: monospace;
+      font-size: 14px;
+      transition: transform 0.1s, background 0.1s;
+    }
+    .menu-btn:hover {
+      background: var(--accent);
+      transform: translateX(4px);
+    }
+    .menu-btn-close {
+      background: #444;
+      margin-top: 8px;
+      text-align: center;
+    }
+    .menu-btn-close:hover {
+      background: #666;
+      transform: none;
+    }
+  </style>
 </head>
 <body>
-  <a href="/" class="back-home-btn" aria-label="Back to Index">
-    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-  </a>
   <button id="exit-live-btn" onclick="toggleLiveMode()">EXIT LIVE VIEW</button>
   <button id="get-code-btn" onclick="openExportModal()">GET CODE</button>
+  <div id="addTileMenu" class="add-menu-overlay">
+    <div class="add-menu-content">
+      <div class="add-menu-title">Select Tile Type</div>
+      <button class="menu-btn" onclick="TileEditor.insertFromMenu('Ghost')">Ghost</button>
+      <button class="menu-btn" onclick="TileEditor.insertFromMenu('Mail List')">Mail List</button>
+      <button class="menu-btn" onclick="TileEditor.insertFromMenu('Logo')">Logo</button>
+      <button class="menu-btn" onclick="TileEditor.insertFromMenu('Settings Smooth')">Settings Smooth</button>
+      <button class="menu-btn" onclick="TileEditor.insertFromMenu('Settings Snap')">Settings Snap</button>
+      <button class="menu-btn" onclick="TileEditor.insertFromMenu('Textarea Input')">Textarea Input</button>
+      <button class="menu-btn" onclick="TileEditor.insertFromMenu('File Upload')">File Upload</button>
+      <button class="menu-btn menu-btn-close" onclick="TileEditor.closeMenu()">CANCEL</button>
+    </div>
+  </div>
   <div class="simulator-wrapper">
     <div class="controls">
-      <span style="color:white; font-size:12px; font-weight:512;">DEVICE WIDTH:</span>
+      <a href="/" class="back-home-btn" aria-label="Back to Index">
+        <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      </a>
+      <span style="color:white; font-size:12px; font-weight:512; white-space:nowrap;">DEVICE WIDTH:</span>
       <input
         type="range"
         id="widthSlider"
@@ -2447,7 +2612,7 @@ body.is-native-mobile #get-code-btn{ display:none !important; }
         value="400"
         style="width:200px !important;"
       />
-      <span id="pxDisplay" style="color:white; font-family:monospace; font-size:12px;">400px</span>
+      <span id="pxDisplay" style="color:white; font-family:monospace; font-size:12px; width:45px;">400px</span>
       <button id="btnMobile" onclick="setMode('mobile')" style="padding:5px 15px;">MOBILE</button>
       <button id="btnDesktop" onclick="setMode('desktop')" style="padding:5px 15px;">DESKTOP</button>
       <button
@@ -2488,7 +2653,7 @@ body.is-native-mobile #get-code-btn{ display:none !important; }
       </div>
       <div class="tile-grid" id="mainGrid">
         <div class="tile tile-stretch">
-          <div style="height:100%; display:flex; align-items:center;">
+          <div style="flex-grow:1; width:100%; display:flex; align-items:center; justify-content:center; align-content:center;">
             <h1 style="margin:0; color: var(--text-main); font-weight:768; letter-spacing:-2px;">LOGO</h1>
           </div>
         </div>
@@ -2518,18 +2683,18 @@ body.is-native-mobile #get-code-btn{ display:none !important; }
           </label>
           <span id="fileName" class="file-name-display">...</span>
         </div>
-        <div class="tile tile-std">
+        <div class="tile tile-std tile-snap-logic">
           <h3>Settings Snap</h3>
           <img
-            id="snapImage"
             src="https://placehold.co/64x64/2EC4B6/ffffff?text=0"
+            class="snap-target-img"
             style="width:64px; height:64px; border-radius:0; object-fit:cover;"
             alt="Snap preview"
           >
           <div class="slider-wrapper">
             <span class="slider-label">0</span>
             <div class="range-container">
-              <input type="range" id="snapSlider" min="0" max="2" step="1" value="0">
+              <input type="range" class="snap-input" min="0" max="2" step="1" value="0">
               <div class="slider-value">0</div>
             </div>
             <span class="slider-label">2</span>
@@ -2573,6 +2738,8 @@ body.is-native-mobile #get-code-btn{ display:none !important; }
         initSliders() {
           L.log('[Init] ClassicUI.initSliders');
           document.querySelectorAll('.range-container').forEach((container) => {
+            if (container.classList.contains('is-init')) return;
+            container.classList.add('is-init');
             const slider = container.querySelector('input[type="range"]');
             const bubble = container.querySelector('.slider-value');
             if (!slider || !bubble) return;
@@ -2595,22 +2762,24 @@ body.is-native-mobile #get-code-btn{ display:none !important; }
           });
         },
         initSnapSlider() {
-          L.log('[Init] ClassicUI.initSnapSlider');
-          const snapSlider = document.getElementById('snapSlider');
-          const snapImage = document.getElementById('snapImage');
+          L.log('[Init] ClassicUI.initSnapSlider [Class-Based]');
           const images = {
             '0': 'https://placehold.co/64x64/2EC4B6/ffffff?text=0',
             '1': 'https://placehold.co/64x64/FF9F1C/ffffff?text=1',
             '2': 'https://placehold.co/64x64/333333/ffffff?text=2'
           };
-          if (!snapSlider || !snapImage) {
-            L.warn('[ClassicUI] snapSlider or snapImage missing');
-            return;
-          }
-          snapSlider.addEventListener('input', (e) => {
-            const val = e.target.value;
-            if (images[val]) snapImage.src = images[val];
-            L.log('[UI] snapSlider input', { value: val });
+          // Find all snap tiles that haven't been initialized
+          document.querySelectorAll('.tile-snap-logic').forEach(tile => {
+            if (tile.classList.contains('is-snap-init')) return;
+            tile.classList.add('is-snap-init');
+            const img = tile.querySelector('img');
+            const input = tile.querySelector('input[type="range"]');
+            if (!img || !input) return;
+            input.addEventListener('input', (e) => {
+              const val = e.target.value;
+              if (images[val]) img.src = images[val];
+              L.log('[UI] snapSlider input', { value: val });
+            });
           });
         },
         bindButtonsAndFile() {
@@ -2645,22 +2814,23 @@ body.is-native-mobile #get-code-btn{ display:none !important; }
           L.log('[Layout] syncButtonStyles', { ok: true });
         },
         optimizeTextarea() {
-          const txtArea = document.getElementById('pasteArea');
-          if (!txtArea) return;
-          const tile = txtArea.closest('.tile');
-          const header = tile ? tile.querySelector('h3') : null;
-          if (!tile) return;
-          tile.style.display = 'flex';
-          tile.style.flexDirection = 'column';
-          tile.style.alignItems = 'flex-start';
-          tile.style.textAlign = 'left';
-          txtArea.style.flexGrow = '1';
-          txtArea.style.width = '100%';
-          if (header) {
-            header.style.marginBottom = 'var(--q-16)';
-            header.style.width = '100%';
-          }
-          L.log('[Layout] optimizeTextarea', { ok: true });
+          const textareas = document.querySelectorAll('.tile textarea');
+          textareas.forEach(txtArea => {
+            const tile = txtArea.closest('.tile');
+            if (!tile) return;
+            const header = tile.querySelector('h3');
+            tile.style.display = 'flex';
+            tile.style.flexDirection = 'column';
+            tile.style.alignItems = 'flex-start';
+            tile.style.textAlign = 'left';
+            txtArea.style.flexGrow = '1';
+            txtArea.style.width = '100%';
+            if (header) {
+              header.style.marginBottom = 'var(--q-16)';
+              header.style.width = '100%';
+            }
+          });
+          L.log('[Layout] optimizeTextarea', { count: textareas.length });
         },
         refresh(reason) {
           L.log('[Layout] refresh', { reason });
@@ -2668,9 +2838,78 @@ body.is-native-mobile #get-code-btn{ display:none !important; }
           this.optimizeTextarea();
         }
       };
+      // --- TEMPLATE GENERATOR ---
+      const TileTemplates = {
+        get(type) {
+          switch(type) {
+            case 'Ghost':
+              return `<div class="tile tile-ghost"></div>`;
+            case 'Mail List':
+              return `
+                <div class="tile tile-std">
+                  <h3>Join Mailing List</h3>
+                  <input type="text" placeholder="Enter your email">
+                  <button>SUBMIT</button>
+                </div>`;
+            case 'Logo':
+              return `
+                <div class="tile tile-stretch">
+                  <div style="flex-grow:1; width:100%; display:flex; align-items:center; justify-content:center; align-content:center;">
+                    <h1 style="margin:0; color: var(--text-main); font-weight:768; letter-spacing:-2px;">LOGO</h1>
+                  </div>
+                </div>`;
+            case 'Settings Smooth':
+              return `
+                <div class="tile tile-std">
+                  <h3>Settings Smooth</h3>
+                  <div class="slider-wrapper">
+                    <span class="slider-label">0</span>
+                    <div class="range-container">
+                      <input type="range" min="0" max="100" value="50">
+                      <div class="slider-value">50</div>
+                    </div>
+                    <span class="slider-label">100</span>
+                  </div>
+                </div>`;
+            case 'Settings Snap':
+              return `
+                <div class="tile tile-std tile-snap-logic">
+                  <h3>Settings Snap</h3>
+                  <img src="https://placehold.co/64x64/2EC4B6/ffffff?text=0" style="width:64px; height:64px; border-radius:0; object-fit:cover;">
+                  <div class="slider-wrapper">
+                    <span class="slider-label">0</span>
+                    <div class="range-container">
+                      <input type="range" min="0" max="2" step="1" value="0">
+                      <div class="slider-value">0</div>
+                    </div>
+                    <span class="slider-label">2</span>
+                  </div>
+                </div>`;
+            case 'Textarea Input':
+              return `
+                <div class="tile tile-stretch">
+                  <h3>Textarea Input</h3>
+                  <textarea></textarea>
+                </div>`;
+            case 'File Upload':
+              return `
+                <div class="tile tile-std">
+                  <h3>Upload File</h3>
+                  <label class="file-upload-label btn-match">
+                    CHOOSE FILE
+                    <input type="file" style="display:none;" onchange="this.parentElement.nextElementSibling.textContent = this.files[0]?.name || '...'">
+                  </label>
+                  <span class="file-name-display">...</span>
+                </div>`;
+            default:
+              return `<div class="tile tile-std"><h3>Unknown</h3></div>`;
+          }
+        }
+      };
       // --- NEW TILE EDITOR LOGIC ---
       const TileEditor = {
         dragSrc: null,
+        addBtnRef: null,
         init() {
           const grid = document.getElementById('mainGrid');
           if (!grid) return;
@@ -2680,13 +2919,54 @@ body.is-native-mobile #get-code-btn{ display:none !important; }
           const addBtn = document.createElement('div');
           addBtn.className = 'tile tile-add-btn';
           addBtn.setAttribute('title', 'Add New Tile');
-          addBtn.onclick = () => this.addTile(grid, addBtn);
+          addBtn.onclick = () => this.openMenu(addBtn);
           grid.appendChild(addBtn);
+          this.addBtnRef = addBtn;
+          // Initial enforcement
+          setTimeout(() => this.enforceButtonPositions(), 50);
+        },
+        openMenu(btn) {
+          const menu = document.getElementById('addTileMenu');
+          if (menu) menu.style.display = 'flex';
+        },
+        closeMenu() {
+          const menu = document.getElementById('addTileMenu');
+          if (menu) menu.style.display = 'none';
+        },
+        insertFromMenu(type) {
+          this.closeMenu();
+          const grid = document.getElementById('mainGrid');
+          if (!grid || !this.addBtnRef) return;
+          const tempDiv = document.createElement('div');
+          tempDiv.innerHTML = TileTemplates.get(type);
+          const newTile = tempDiv.firstElementChild;
+          if (newTile) {
+            this.attachEditorUI(newTile);
+            grid.insertBefore(newTile, this.addBtnRef);
+            ArrowSystem.update('tile.add');
+            newTile.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Apply Layout fixes to the new tile
+            this.enforceButtonPositions();
+            ClassicUI.initSliders();
+            ClassicUI.initSnapSlider();
+            ClassicLayout.optimizeTextarea();
+          }
+        },
+        enforceButtonPositions() {
+          const btns = document.querySelectorAll('.tile-remove-btn');
+          btns.forEach(btn => {
+            btn.style.position = 'absolute';
+            btn.style.top = '-10px';
+            btn.style.right = '-10px';
+            btn.style.gridRow = 'auto';
+            btn.style.gridColumn = 'auto';
+            btn.style.gridArea = 'auto';
+            btn.style.margin = '0';
+            btn.style.transform = 'none';
+          });
         },
         attachEditorUI(tile) {
-           // Skip special UI elements
            if (tile.classList.contains('tile-add-btn') || tile.classList.contains('floating-arrow')) return;
-           // Draggable Events
            tile.setAttribute('draggable', 'true');
            tile.addEventListener('dragstart', (e) => this.dragStart(e, tile));
            tile.addEventListener('dragenter', (e) => this.dragEnter(e, tile));
@@ -2694,51 +2974,31 @@ body.is-native-mobile #get-code-btn{ display:none !important; }
            tile.addEventListener('dragleave', (e) => this.dragLeave(e, tile));
            tile.addEventListener('drop', (e) => this.dragDrop(e, tile));
            tile.addEventListener('dragend', (e) => this.dragEnd(e, tile));
-           // INPUT GUARD: Prevent drag when interacting with sliders/inputs
            const interactive = tile.querySelectorAll('input, textarea, button, select, label, .slider-wrapper');
            interactive.forEach(el => {
-             // When mouse enters an interactive element, disable dragging on the parent tile
-             el.addEventListener('mouseenter', () => {
-               tile.setAttribute('draggable', 'false');
-             });
-             // When mouse leaves, re-enable dragging
-             el.addEventListener('mouseleave', () => {
-               tile.setAttribute('draggable', 'true');
-             });
-             // Fallback for touch devices
+             el.addEventListener('mouseenter', () => tile.setAttribute('draggable', 'false'));
+             el.addEventListener('mouseleave', () => tile.setAttribute('draggable', 'true'));
              el.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
            });
-           // Close Button (If not present)
            if (!tile.querySelector('.tile-remove-btn')) {
              const btn = document.createElement('div');
              btn.className = 'tile-remove-btn';
              btn.innerHTML = '×';
+             btn.style.position = 'absolute';
+             btn.style.top = '-10px';
+             btn.style.right = '-10px';
+             btn.style.gridRow = 'auto';
+             btn.style.gridColumn = 'auto';
              btn.onclick = (e) => {
                e.stopPropagation();
-               if(confirm('Delete this tile?')) {
-                 tile.remove();
-                 ArrowSystem.update('tile.remove');
-               }
+               // Immediate deletion
+               tile.remove();
+               ArrowSystem.update('tile.remove');
              };
              tile.appendChild(btn);
            }
         },
-        addTile(grid, addBtn) {
-           const div = document.createElement('div');
-           div.className = 'tile tile-std';
-           div.innerHTML = `
-             <h3>New Tile</h3>
-             <input type="text" placeholder="Content...">
-             <button>ACTION</button>
-           `;
-           this.attachEditorUI(div);
-           grid.insertBefore(div, addBtn);
-           ArrowSystem.update('tile.add');
-           div.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        },
-        // Drag Handlers
         dragStart(e, tile) {
-           // Double check: if attribute is false, stop (though browser shouldn't trigger this)
            if (tile.getAttribute('draggable') === 'false') {
              e.preventDefault();
              return;
@@ -2762,7 +3022,6 @@ body.is-native-mobile #get-code-btn{ display:none !important; }
         dragDrop(e, targetTile) {
            e.stopPropagation();
            if (this.dragSrc !== targetTile) {
-               // Reorder logic: Drop targetTile means we want to place dragSrc before targetTile
                const parent = targetTile.parentNode;
                parent.insertBefore(this.dragSrc, targetTile);
                ArrowSystem.update('tile.reorder');
@@ -2775,6 +3034,8 @@ body.is-native-mobile #get-code-btn{ display:none !important; }
            Array.from(grid.children).forEach(c => c.classList.remove('drag-over'));
         }
       };
+      // EXPOSE GLOBALLY for inline HTML handlers
+      window.TileEditor = TileEditor;
       const ArrowSystem = {
         grid: null,
         arrows: [],
@@ -2786,17 +3047,15 @@ body.is-native-mobile #get-code-btn{ display:none !important; }
             L.warn('[ArrowSystem] mainGrid missing');
             return;
           }
-          this.refreshArrows(); // Initial Setup
+          this.refreshArrows();
           const ro = new ResizeObserver(() => this.update('ResizeObserver'));
           ro.observe(this.grid);
           setTimeout(() => this.update('init:timeout'), 100);
           this.update('init:immediate');
         },
         refreshArrows() {
-          // Clear old arrows
           this.arrows.forEach((a) => a.element.remove());
           this.arrows = [];
-          // Definitions of connections
           const connections = [
             { from: 'step1', to: 'step2' },
             { from: 'step2', to: 'step3' }
@@ -2804,7 +3063,6 @@ body.is-native-mobile #get-code-btn{ display:none !important; }
           connections.forEach((conn) => {
             const elFrom = document.getElementById(conn.from);
             const elTo = document.getElementById(conn.to);
-            // Silent fail if tiles deleted
             if (!elFrom || !elTo) return;
             const arrowEl = document.createElement('div');
             arrowEl.className = 'floating-arrow';
@@ -2815,11 +3073,9 @@ body.is-native-mobile #get-code-btn{ display:none !important; }
         },
         update(reason) {
           if (!this.grid) return;
-          // Re-check connections in case of deletion
           if (reason.startsWith('tile')) this.refreshArrows();
           const gridRect = this.grid.getBoundingClientRect();
           this.arrows.forEach((arrow) => {
-            // Safe check again
             if (!document.body.contains(arrow.from) || !document.body.contains(arrow.to)) {
                arrow.element.style.display = 'none';
                return;
@@ -2843,39 +3099,7 @@ body.is-native-mobile #get-code-btn{ display:none !important; }
             const finalLeft = x - gridRect.left;
             const finalTop = y - gridRect.top;
             arrow.element.style.left = `${finalLeft - 24}px`;
-            arrow.element.style.top = `${finalTop - 24}px`;
-            arrow.element.style.transform = `rotate(${rotation}deg)`;
-          });
-          L.log('[ArrowSystem] update', { reason, count: this.arrows.length });
-        }
-      };
-      window.addEventListener('load', () => {
-        L.log('[Boot] classic.html load');
-        D.NavUI && D.NavUI.init && D.NavUI.init();
-        D.Simulator && D.Simulator.init && D.Simulator.init();
-        preventNavDefaultClicks();
-        ClassicUI.initSliders();
-        ClassicUI.initSnapSlider();
-        ClassicUI.bindButtonsAndFile();
-        ClassicLayout.refresh('load');
-        // Init editor features
-        TileEditor.init();
-        ArrowSystem.init();
-        const isMobile = D.Device && D.Device.isNativeMobile && D.Device.isNativeMobile();
-        if (isMobile) {
-          document.body.classList.add('is-native-mobile');
-          L.log('[Device] native mobile detected -> auto live', { isMobile: true });
-          window.toggleLiveMode && window.toggleLiveMode();
-        }
-      });
-      window.addEventListener('resize', () => {
-        ClassicLayout.refresh('window.resize');
-        ArrowSystem.update('window.resize');
-      });
-    })();
-  </script>
-</body>
-</html>
+... (truncated, 38 more lines omitted; early cap: max_lines_per_file)
 ================================================================================
 
 [-] This file: templates/game.html | Contents:
