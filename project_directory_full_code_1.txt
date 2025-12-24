@@ -1,4 +1,4 @@
-Aggregated on: 2025-12-23 09:20:21
+Aggregated on: 2025-12-24 01:54:03
 ================================================================================
 Project Directory Tree:
 /
@@ -2469,6 +2469,14 @@ body.is-native-mobile #get-code-btn{ display:none !important; }
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-SBHTGJBKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-SBHTGJBKKV');
+</script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>deMeza AutoCSS | Classic Template</title>
@@ -3083,25 +3091,21 @@ body.is-native-mobile #get-code-btn{ display:none !important; }
             const r1 = arrow.from.getBoundingClientRect();
             const r2 = arrow.to.getBoundingClientRect();
             const c1 = { x: r1.left + r1.width / 2, y: r1.top + r1.height / 2 };
-            const isVertical = (r2.top > (r1.bottom - 10));
-            let x, y, rotation;
-            if (isVertical) {
-              x = c1.x;
-              y = r1.bottom + this.nudge;
-              rotation = 0;
-            } else {
-              x = r1.right + this.nudge;
-              y = c1.y;
-              rotation = -90;
-            }
-            const finalLeft = x - gridRect.left;
-... (truncated, 40 more lines omitted; early cap: max_lines_per_file)
+... (truncated, 52 more lines omitted; early cap: max_lines_per_file)
 ================================================================================
 
 [-] This file: templates/game.html | Contents:
 <!DOCTYPE html>
 <html lang="en">
 <head>
+      <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-SBHTGJBKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-SBHTGJBKKV');
+</script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>deMeza AutoCSS | Game Template</title>
@@ -3261,13 +3265,27 @@ body.is-native-mobile #get-code-btn{ display:none !important; }
 <!DOCTYPE html>
 <html lang="en">
 <head>
+      <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-SBHTGJBKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-SBHTGJBKKV');
+</script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>deMeza AutoCSS | Never design a separate mobile and desktop version ever again!</title>
+  <meta name="description" content="deMeza AutoCSS: The ultimate responsive design framework. Eliminate separate mobile and desktop workflows with our unified tile-based layout engine." />
+  <meta name="keywords" content="Responsive Design, Mobile-First, CSS Framework, Web Design, UI Kit, Cross-Platform, AutoCSS, Layout Engine" />
+  <title>deMeza AutoCSS | The Unified Responsive Layout Engine</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
+    /* CORE THEME & VARIABLES
+      ----------------------
+      Unified color palette for high-contrast, accessible UI.
+    */
     :root{
       --bg-color: #f4f4f9;
       --tile-bg: #ffffff;
@@ -3277,6 +3295,7 @@ body.is-native-mobile #get-code-btn{ display:none !important; }
       --nav-dark: #222;
       --border-light: #ebeff5;
       --border-med: #a3adbf;
+      /* Spacing Quantizers */
       --q-4: 4px;
       --q-8: 8px;
       --q-16: 16px;
@@ -3285,11 +3304,11 @@ body.is-native-mobile #get-code-btn{ display:none !important; }
       --q-48: 48px;
       --gap: var(--q-16);
       --padding: var(--q-16);
-      --radius: 0px;
+      --radius: 0px; /* Sharp, modern industrial look */
     }
     * { margin:0; padding:0; box-sizing:border-box; font-family:'Nunito', sans-serif; }
     body{
-      background-color:#1a1a1a;
+      background-color:#1a1a1a; /* Dark theme default for editor feel */
       color:#eee;
       margin:0;
       min-height:100vh;
@@ -3304,6 +3323,7 @@ body.is-native-mobile #get-code-btn{ display:none !important; }
       flex-direction:column;
       gap: var(--q-16);
     }
+    /* HEADER / TITLEBAR */
     .titlebar{
       display:flex;
       align-items:baseline;
@@ -3322,18 +3342,22 @@ body.is-native-mobile #get-code-btn{ display:none !important; }
     }
     .subtitle{
       font-family: monospace;
-      font-size: 12px;
+      font-size: 13px;
       color: #cfcfcf;
-      opacity: 0.85;
+      opacity: 0.9;
+      max-width: 600px;
     }
+    /* GRID LAYOUT ENGINE */
     .grid{
       display:grid;
       grid-template-columns: 1fr;
       gap: var(--gap);
     }
+    /* Desktop Breakpoint: Switches from Stack to Grid */
     @media (min-width: 760px){
       .grid{ grid-template-columns: repeat(3, 1fr); }
     }
+    /* INTERACTIVE CARDS */
     .card{
       background: var(--tile-bg);
       color: var(--text-dark);
@@ -3342,34 +3366,56 @@ body.is-native-mobile #get-code-btn{ display:none !important; }
       padding: var(--q-24);
       cursor: pointer;
       user-select: none;
-      transition: transform 0.12s ease;
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
       display:flex;
       flex-direction:column;
       gap: var(--q-16);
-      min-height: 220px;
+      min-height: 240px; /* Slight increase for copy */
       justify-content:space-between;
       box-shadow: 0 6px 18px rgba(0,0,0,0.28);
       outline: none;
+      position: relative;
     }
-    .card:hover{ transform: translateY(-2px); }
-    .card:active{ transform: translateY(1px); }
+    .card:hover{
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.35);
+    }
+    .card:active{
+      transform: translateY(1px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.20);
+    }
+    .card:focus-visible {
+      box-shadow: 0 0 0 4px white, 0 0 0 8px var(--accent);
+    }
     .card h2{
       margin: 0;
       font-size: 22px;
+      font-weight: 800;
       letter-spacing: -0.5px;
       color: var(--text-main);
+      text-transform: uppercase;
     }
     .card p{
       margin: 0;
       font-size: 14px;
-      line-height: 1.45;
-      opacity: 0.9;
+      line-height: 1.5;
+      color: #444;
+      font-weight: 600;
     }
+    .card .small-print {
+      font-size: 12px;
+      font-weight: 400;
+      color: #666;
+      margin-top: 8px;
+    }
+    /* BADGES */
     .badge-row{
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap: var(--q-16);
+      border-top: 1px solid rgba(0,0,0,0.05);
+      padding-top: 12px;
     }
     .badge{
       display:inline-flex;
@@ -3379,23 +3425,28 @@ body.is-native-mobile #get-code-btn{ display:none !important; }
       border: 2px solid rgba(0,0,0,0.12);
       background: rgba(255,255,255,0.92);
       font-family: monospace;
-      font-size: 12px;
+      font-size: 11px;
       color: #111;
       border-radius: var(--radius);
+      text-transform: uppercase;
+      font-weight: 700;
     }
     .arrow{
       font-family: monospace;
       font-weight: 900;
       color: var(--accent);
+      font-size: 18px;
     }
+    /* FOOTER */
     .footer{
       font-family: monospace;
       font-size: 12px;
       opacity: 0.65;
       padding: 0 var(--q-4);
       display: flex;
-      gap: 8px;
+      gap: 12px;
       align-items: center;
+      flex-wrap: wrap;
     }
     .footer a:hover {
       text-decoration: underline;
@@ -3408,25 +3459,30 @@ body.is-native-mobile #get-code-btn{ display:none !important; }
     <div class="titlebar">
       <div>
         <div class="brand">deMeza AutoCSS</div>
-        <div class="subtitle" style="margin-top:8px;">Never design a separate mobile and desktop version ever again!</div>
+        <div class="subtitle" style="margin-top:8px;">
+          The <strong>Unified Responsive Framework</strong>. Merge mobile and desktop workflows into a single, intelligent codebase.
+        </div>
       </div>
     </div>
-    <div class="grid" aria-label="Mode selection">
+    <div class="grid" aria-label="Template selection">
       <div
         class="card"
         role="button"
         tabindex="0"
         data-home-card="1"
         data-target="/classic"
-        aria-label="Open Classic">
+        aria-label="Open Classic Layout Engine">
         <div>
-          <h2>Classic</h2>
+          <h2>Classic Architecture</h2>
           <p>
-            The original AutoCSS tile layout with standard tiles and simulator controls.
+            Standard responsive dashboarding.
+          </p>
+          <p class="small-print">
+            Features our proprietary Ghost Tile logic for auto-centering and rapid SaaS UI development without media queries.
           </p>
         </div>
         <div class="badge-row">
-          <span class="badge">Route: /classic</span>
+          <span class="badge">Stack: GRID / FLEX</span>
           <span class="arrow">→</span>
         </div>
       </div>
@@ -3436,15 +3492,18 @@ body.is-native-mobile #get-code-btn{ display:none !important; }
         tabindex="0"
         data-home-card="1"
         data-target="/workspace"
-        aria-label="Open Workspace">
+        aria-label="Open Workspace Environment">
         <div>
-          <h2>Workspace</h2>
+          <h2>Pro Workspace</h2>
           <p>
-            Full-width workspace tile that dominates the layout, ready for nodes and canvas UI.
+            Full-screen application canvas.
+          </p>
+          <p class="small-print">
+            Ideal for Node Editors, IDEs, and Graphic Tools. Dominates the viewport on desktop while remaining touch-optimized on mobile.
           </p>
         </div>
         <div class="badge-row">
-          <span class="badge">Route: /workspace</span>
+          <span class="badge">Stack: CANVAS UI</span>
           <span class="arrow">→</span>
         </div>
       </div>
@@ -3454,23 +3513,30 @@ body.is-native-mobile #get-code-btn{ display:none !important; }
         tabindex="0"
         data-home-card="1"
         data-target="/game"
-        aria-label="Open Game">
+        aria-label="Open Game Viewport">
         <div>
-          <h2>Game</h2>
+          <h2>Game Engine</h2>
           <p>
-            Game layout (based on Workspace). On mobile, shows “Rotate to play” overlay.
+            Adaptive immersive viewport.
+          </p>
+          <p class="small-print">
+            Includes "Rotate-to-Play" mobile enforcement. Zero-config cross-platform deployment for HTML5 gaming.
           </p>
         </div>
         <div class="badge-row">
-          <span class="badge">Route: /game</span>
+          <span class="badge">Stack: WEBGL READY</span>
           <span class="arrow">→</span>
         </div>
       </div>
     </div>
     <div class="footer">
-      <span>deMeza AutoCSS</span><span id="footerYear">2025</span>
+      <span>deMeza AutoCSS &copy; <span id="footerYear">2025</span></span>
       <span>|</span>
-      <a href="https://www.buymeacoffee.com/viralkiller" target="_blank" style="color:inherit; text-decoration:none;">
+      <span>Rapid UI Prototyping</span>
+      <span>|</span>
+      <span>Single-File Deployment</span>
+      <span>|</span>
+      <a href="https://www.buymeacoffee.com/viralkiller" target="_blank" style="color:inherit; text-decoration:none; font-weight:bold;">
         ☕ Buy me a coffee
       </a>
     </div>
@@ -3481,29 +3547,53 @@ body.is-native-mobile #get-code-btn{ display:none !important; }
   <script src="/static/js/index.js"></script>
   <script src="/static/js/index_boot.js"></script>
   <script>
-    // Footer year (auto-updates)
+    /*
+      INLINE LOGIC:
+      Handles simple UI updates (Footer Year) and Keyboard Navigation logging.
+    */
+    // Auto-update copyright year
     (function(){
       const y = new Date().getFullYear();
       const el = document.getElementById('footerYear');
       if (el) el.textContent = String(y);
     })();
-    // Keyboard support for the cards, with logging.
+    // Advanced Keyboard Support & Event Logging
     (function(){
       const L = window.Demeza && window.Demeza.Log ? window.Demeza.Log : null;
       const log = L ? L.log : console.log;
       document.querySelectorAll('[data-home-card]').forEach((card) => {
+        // Accessibility: Allow keyboard activation (Enter/Space)
         card.addEventListener('keydown', (e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
             const target = card.getAttribute('data-target') || '';
-            log('[UI] home card key activate', { key: e.key, target });
+            log('[UI] Navigation Triggered', {
+              method: 'Keyboard',
+              key: e.key,
+              target: target,
+              timestamp: Date.now()
+            });
             if (target) window.location.href = target;
           } else {
-            log('[UI] home card keydown', { key: e.key });
+            // Log interaction attempts for debugging flow
+            log('[UI] Key Interaction', { key: e.key, element: 'Card' });
           }
         });
+        // Click Logging is handled by generic listeners, but we add specific intent logging here if needed
+        card.addEventListener('click', (e) => {
+           const target = card.getAttribute('data-target') || '';
+           log('[UI] Navigation Triggered', {
+              method: 'Pointer/Touch',
+              target: target,
+              coordinates: { x: e.clientX, y: e.clientY }
+            });
+            if (target) window.location.href = target;
+        });
       });
-      log('[Init] index.html inline keybinds ready');
+      log('[System] Index.html Ready', {
+        status: 'Interactive',
+        cards: document.querySelectorAll('.card').length
+      });
     })();
   </script>
 </body>
@@ -3543,6 +3633,14 @@ body.is-native-mobile #get-code-btn{ display:none !important; }
 <!DOCTYPE html>
 <html lang="en">
 <head>
+      <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-SBHTGJBKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-SBHTGJBKKV');
+</script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>deMeza AutoCSS | Workspace Template</title>

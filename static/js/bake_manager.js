@@ -2,7 +2,6 @@
   'use strict';
   window.Demeza = window.Demeza || {};
   const L = window.Demeza.Log;
-
   const BakeManager = {
     // Files to explicitly exclude from the final baked HTML
     blocklist: [
@@ -10,35 +9,31 @@
       'bake_manager.js',  // The baker itself
       'index.js',         // Index page logic
       'index_boot.js',
-      'ua-parser.min.js'  // Optional: keep if needed, but often bloat
+      'ua-parser.min.js'
+      // Optional: keep if needed, but often bloat
     ],
-
     async generateFinalCode() {
       L.log('[BakeManager] Starting generation sequence...');
-
       // 1. Clone the current page state
       const clone = document.documentElement.cloneNode(true);
       const body = clone.querySelector('body');
-
       // 2. Extract and Unwrap Device Frame
       const wrapper = clone.querySelector('.simulator-wrapper');
       const frame = clone.querySelector('#device-frame');
-
       if (wrapper && frame) {
         L.log('[BakeManager] Unwrapping #device-frame from simulator');
         // Move frame to root of body
         body.insertBefore(frame, wrapper);
         wrapper.remove();
-
         // 3. Clean Frame Styles for Production
-        frame.style.cssText = ""; // Clear all simulator-injected inline styles
+        frame.style.cssText = "";
+        // Clear all simulator-injected inline styles
         frame.style.width = '100%';
         frame.style.minHeight = '100vh';
         frame.style.border = 'none';
         frame.style.boxShadow = 'none';
         frame.style.resize = 'none'; // Critical: remove resize handle
       }
-
       // 4. Identify and Remove Editor Elements
       const removables = [
         '.controls',
@@ -49,22 +44,21 @@
         '.workspace-hint',      // Remove editor-only hints
         '.tile-remove-btn',     // Remove editor buttons (New)
         '.tile-add-btn',        // Remove add button tile (New)
-        'script[src*="reload"]' // Generic live-reload
+        'script[src*="reload"]', // Generic live-reload
+        'script[src*="googletagmanager"]' // [NEW] Remove GA External
       ];
-
       removables.forEach(sel => {
         const els = clone.querySelectorAll(sel);
         L.log(`[BakeManager] Removing editor element: ${sel} (${els.length} found)`);
         els.forEach(el => el.remove());
       });
-
       // 5. Production Class Injection
-      body.classList.remove('rotate-blocked'); // Ensure state is clean
+      body.classList.remove('rotate-blocked');
+      // Ensure state is clean
       body.classList.add('view-live');
       body.classList.add('is-native-mobile');
       body.style.padding = '0';
       body.style.margin = '0';
-
       // 6. Inline CSS Assets
       const links = clone.querySelectorAll('link[rel="stylesheet"]');
       for (const link of links) {
@@ -82,40 +76,43 @@
           }
         }
       }
-
       // 7. Inline JS Assets
-      const scripts = clone.querySelectorAll('script[src]');
+      const scripts = clone.querySelectorAll('script');
       for (const script of scripts) {
-        const src = script.getAttribute('src');
-        if (!src) continue;
-
-        const isLocal = src.startsWith('/static/') || src.startsWith('static/');
-        const isBlocked = this.blocklist.some(blocked => src.includes(blocked));
-
-        if (isBlocked) {
-          L.log(`[BakeManager] Blocking script: ${src}`);
-          script.remove();
-          continue;
+        // [NEW] Check for inline GA tags or other forbidden content
+        if (script.textContent && (script.textContent.includes('gtag(') || script.textContent.includes('googletagmanager'))) {
+             L.log('[BakeManager] Blocking inline GA script');
+             script.remove();
+             continue;
         }
 
-        if (isLocal) {
-          try {
-            L.log(`[BakeManager] Inlining JS: ${src}`);
-            const res = await fetch(src);
-            const jsText = await res.text();
-            const newScript = document.createElement('script');
-            newScript.textContent = `\n// Inlined: ${src}\n${jsText}\n`;
-            script.replaceWith(newScript);
-          } catch (e) {
-            L.err(`[BakeManager] JS Inlining failed: ${src}`, e);
+        const src = script.getAttribute('src');
+        // Handle external scripts
+        if (src) {
+          const isLocal = src.startsWith('/static/') || src.startsWith('static/');
+          const isBlocked = this.blocklist.some(blocked => src.includes(blocked));
+          if (isBlocked) {
+            L.log(`[BakeManager] Blocking script: ${src}`);
+            script.remove();
+            continue;
+          }
+          if (isLocal) {
+            try {
+              L.log(`[BakeManager] Inlining JS: ${src}`);
+              const res = await fetch(src);
+              const jsText = await res.text();
+              const newScript = document.createElement('script');
+              newScript.textContent = `\n// Inlined: ${src}\n${jsText}\n`;
+              script.replaceWith(newScript);
+            } catch (e) {
+              L.err(`[BakeManager] JS Inlining failed: ${src}`, e);
+            }
           }
         }
       }
-
       L.log('[BakeManager] Generation complete.');
       return "<!DOCTYPE html>\n" + clone.outerHTML;
     },
-
     async openExportModal() {
       let modal = document.getElementById('code-modal-overlay');
       if (!modal) {
@@ -142,12 +139,10 @@
       }
       modal.style.display = 'flex';
       L.log('[UI] Modal opened');
-
       const code = await this.generateFinalCode();
       const textArea = document.getElementById('final-code-area');
       if (textArea) textArea.value = code;
     },
-
     closeExportModal() {
       const modal = document.getElementById('code-modal-overlay');
       if (modal) {
@@ -155,7 +150,6 @@
         L.log('[UI] Modal closed');
       }
     },
-
     copyCode() {
       const textArea = document.getElementById('final-code-area');
       if (!textArea) return;
@@ -168,7 +162,6 @@
       setTimeout(() => btn.textContent = originalText, 2000);
     }
   };
-
   window.Demeza.BakeManager = BakeManager;
   window.openExportModal = () => BakeManager.openExportModal();
 })();
