@@ -1,4 +1,4 @@
-Aggregated on: 2025-12-23 01:42:25
+Aggregated on: 2025-12-23 09:20:21
 ================================================================================
 Project Directory Tree:
 /
@@ -27,6 +27,7 @@ Project Directory Tree:
 │   ├── classic.html
 │   ├── game.html
 │   ├── index.html
+│   ├── simulator_bar.html
 │   └── workspace.html
 ├── .bashrc
 ├── .gitconfig
@@ -40,7 +41,7 @@ Project Directory Tree:
 ├── project_directory_full_code_1.txt
 └── README.txt
 
-4 directories, 33 files
+4 directories, 34 files
 ================================================================================
 
 [-] This file: general.md | Contents:
@@ -2478,54 +2479,74 @@ body.is-native-mobile #get-code-btn{ display:none !important; }
   <link rel="stylesheet" href="/static/css/demeza_base.css" />
   <link rel="stylesheet" href="/static/css/classic.css" />
   <style>
-    /* --- NEW TOP BAR LAYOUT ENFORCEMENT --- */
-    /* 1. Reset Body Spacing for Full Width Bar */
+    /* --- TOP BAR & LAYOUT FIXES --- */
+    /* 1. Body: Reset padding */
     body {
       padding-top: 0 !important;
-      align-items: flex-start !important; /* Stop centering vertical, let normal flow happen */
     }
-    /* 2. Pin Controls to Top (The "Simulator Bar") */
+    /* 2. Top Bar (Controls): Fixed top, full width, precise padding */
     .controls {
       position: fixed !important;
       top: 0;
       left: 0;
       width: 100vw !important;
-      max-width: none !important; /* Override base constraints */
-      height: 64px; /* Fixed height for easy math */
+      max-width: none !important;
+      /* Height 68px calculates to exactly 16px padding above/below a 36px button */
+      height: 68px;
       z-index: 5000;
       margin: 0 !important;
       border-radius: 0 !important;
       border: none !important;
       border-bottom: 2px solid #444 !important;
       background: #2b2b2b !important;
-      padding: 0 20px !important;
+      /* Flex Layout for Left/Right/Center */
+      display: flex;
+      align-items: center;
+      justify-content: space-between; /* Pushes Back/Live to edges */
+      padding: 0 16px !important; /* Enforces 16px left/right gap */
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    /* 3. Center Group: Absolutely centered in the viewport */
+    .sim-center-group {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
       display: flex;
       align-items: center;
       gap: 16px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
-    /* 3. Integrate Back Button into Bar */
+    /* 4. Buttons (Back & Live View) */
     .back-home-btn {
-      position: static !important; /* No longer fixed floating */
+      position: static !important;
       transform: none !important;
       border: 1px solid #555 !important;
       background: #222 !important;
       height: 36px !important;
       width: 36px !important;
-      min-width: 36px; /* Prevent crushing */
-      margin: 0 !important; /* Flex gap handles spacing */
+      min-width: 36px;
+      margin: 0 !important;
     }
     .back-home-btn:hover {
       background: #444 !important;
     }
-    /* 4. Push Simulator Down so it isn't hidden by the bar */
+    /* Live View Button Height Sync */
+    #btnLive {
+      height: 36px !important;
+      margin: 0 !important; /* Reset auto margins */
+    }
+    /* 5. Simulator Wrapper: Push down by header height + buffer */
     .simulator-wrapper {
-      padding-top: 80px !important; /* 64px bar + 16px gap */
-      width: 100%;
+      padding-top: 84px !important; /* 68px bar + 16px buffer */
+      width: 100% !important;
+      max-width: none !important;
       display: flex;
       justify-content: center;
     }
-    /* Add Menu Styles (Kept from previous) */
+    /* 6. LIVE VIEW FIX: Remove the top padding */
+    body.view-live .simulator-wrapper {
+      padding-top: 0 !important;
+    }
+    /* Add Menu Styles */
     .add-menu-overlay {
       position: fixed;
       inset: 0;
@@ -2599,30 +2620,7 @@ body.is-native-mobile #get-code-btn{ display:none !important; }
     </div>
   </div>
   <div class="simulator-wrapper">
-    <div class="controls">
-      <a href="/" class="back-home-btn" aria-label="Back to Index">
-        <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-      </a>
-      <span style="color:white; font-size:12px; font-weight:512; white-space:nowrap;">DEVICE WIDTH:</span>
-      <input
-        type="range"
-        id="widthSlider"
-        min="320"
-        max="1280"
-        value="400"
-        style="width:200px !important;"
-      />
-      <span id="pxDisplay" style="color:white; font-family:monospace; font-size:12px; width:45px;">400px</span>
-      <button id="btnMobile" onclick="setMode('mobile')" style="padding:5px 15px;">MOBILE</button>
-      <button id="btnDesktop" onclick="setMode('desktop')" style="padding:5px 15px;">DESKTOP</button>
-      <button
-        id="btnLive"
-        onclick="toggleLiveMode()"
-        style="background: var(--text-main); margin-left:auto; padding:5px 15px;"
-      >
-        LIVE VIEW
-      </button>
-    </div>
+    {% include 'simulator_bar.html' %}
     <div id="device-frame">
       <div class="header-group" id="headerGroup">
         <div class="meta-bar">
@@ -2665,6 +2663,14 @@ body.is-native-mobile #get-code-btn{ display:none !important; }
         </div>
         <div class="tile tile-ghost"></div>
         <div class="tile tile-std">
+          <h3>Upload File</h3>
+          <label id="matchLabel" class="file-upload-label btn-match">
+            CHOOSE FILE
+            <input type="file" id="fileInput" style="display:none;">
+          </label>
+          <span id="fileName" class="file-name-display">...</span>
+        </div>
+                <div class="tile tile-std">
           <h3>Settings Smooth</h3>
           <div class="slider-wrapper">
             <span class="slider-label">0</span>
@@ -2674,14 +2680,6 @@ body.is-native-mobile #get-code-btn{ display:none !important; }
             </div>
             <span class="slider-label">100</span>
           </div>
-        </div>
-        <div class="tile tile-std">
-          <h3>Upload File</h3>
-          <label id="matchLabel" class="file-upload-label btn-match">
-            CHOOSE FILE
-            <input type="file" id="fileInput" style="display:none;">
-          </label>
-          <span id="fileName" class="file-name-display">...</span>
         </div>
         <div class="tile tile-std tile-snap-logic">
           <h3>Settings Snap</h3>
@@ -3097,9 +3095,7 @@ body.is-native-mobile #get-code-btn{ display:none !important; }
               rotation = -90;
             }
             const finalLeft = x - gridRect.left;
-            const finalTop = y - gridRect.top;
-            arrow.element.style.left = `${finalLeft - 24}px`;
-... (truncated, 38 more lines omitted; early cap: max_lines_per_file)
+... (truncated, 40 more lines omitted; early cap: max_lines_per_file)
 ================================================================================
 
 [-] This file: templates/game.html | Contents:
@@ -3115,6 +3111,72 @@ body.is-native-mobile #get-code-btn{ display:none !important; }
   <script src="https://cdnjs.cloudflare.com/ajax/libs/UAParser.js/1.0.35/ua-parser.min.js"></script>
   <link rel="stylesheet" href="/static/css/demeza_base.css">
   <link rel="stylesheet" href="/static/css/game.css">
+  <style>
+    /* --- TOP BAR & LAYOUT FIXES (Synced with Classic) --- */
+    /* 1. Body: Reset padding */
+    body {
+      padding-top: 0 !important;
+    }
+    /* 2. Top Bar (Controls): Fixed top, full width, precise padding */
+    .controls {
+      position: fixed !important;
+      top: 0;
+      left: 0;
+      width: 100vw !important;
+      max-width: none !important;
+      height: 68px; /* 16px pad + 36px btn + 16px pad */
+      z-index: 5000;
+      margin: 0 !important;
+      border-radius: 0 !important;
+      border: none !important;
+      border-bottom: 2px solid #444 !important;
+      background: #2b2b2b !important;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px !important;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    /* 3. Center Group: Absolutely centered */
+    .sim-center-group {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    /* 4. Buttons (Back & Live View) */
+    .back-home-btn {
+      position: static !important;
+      transform: none !important;
+      border: 1px solid #555 !important;
+      background: #222 !important;
+      height: 36px !important;
+      width: 36px !important;
+      min-width: 36px;
+      margin: 0 !important;
+    }
+    .back-home-btn:hover {
+      background: #444 !important;
+    }
+    #btnLive {
+      height: 36px !important;
+      margin: 0 !important;
+    }
+    /* 5. Simulator Wrapper: Push down by header height + buffer */
+    .simulator-wrapper {
+      padding-top: 84px !important; /* 68px bar + 16px buffer */
+      width: 100% !important;
+      max-width: none !important;
+      display: flex;
+      justify-content: center;
+    }
+    /* 6. LIVE VIEW FIX */
+    body.view-live .simulator-wrapper {
+      padding-top: 0 !important;
+    }
+  </style>
 </head>
 <body class="template-game">
   <a href="/" class="back-home-btn" aria-label="Back to Index">
@@ -3123,20 +3185,7 @@ body.is-native-mobile #get-code-btn{ display:none !important; }
   <button id="exit-live-btn" onclick="toggleLiveMode()">EXIT LIVE VIEW</button>
   <button id="get-code-btn" onclick="openExportModal()">GET CODE</button>
   <div class="simulator-wrapper">
-    <div class="controls">
-      <span style="color:white; font-size:12px; font-weight:512;">DEVICE WIDTH:</span>
-      <input type="range" id="widthSlider" min="320" max="1280" value="512" style="width:200px !important;">
-      <span id="pxDisplay" style="color:white; font-family:monospace; font-size:12px;">512px</span>
-      <button id="btnMobile" onclick="setMode('mobile')" style="padding:5px 15px;">MOBILE</button>
-      <button id="btnDesktop" onclick="setMode('desktop')" style="padding:5px 15px;">DESKTOP</button>
-      <button
-        id="btnLive"
-        onclick="toggleLiveMode()"
-        style="background: var(--text-main); margin-left: auto; padding: 5px 15px;"
-      >
-        LIVE VIEW
-      </button>
-    </div>
+    {% include 'simulator_bar.html' %}
     <div id="device-frame">
       <div class="header-group" id="headerGroup">
         <div class="meta-bar">
@@ -3461,6 +3510,35 @@ body.is-native-mobile #get-code-btn{ display:none !important; }
 </html>
 ================================================================================
 
+[-] This file: templates/simulator_bar.html | Contents:
+<div class="controls">
+  <a href="/" class="back-home-btn" aria-label="Back to Index">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+  </a>
+  <div class="sim-center-group">
+    <span style="color:white; font-size:12px; font-weight:512; white-space:nowrap;">DEVICE WIDTH:</span>
+    <input
+      type="range"
+      id="widthSlider"
+      min="320"
+      max="1280"
+      value="400"
+      style="width:200px !important;"
+    />
+    <span id="pxDisplay" style="color:white; font-family:monospace; font-size:12px; width:45px;">400px</span>
+    <button id="btnMobile" onclick="setMode('mobile')" style="padding:5px 15px;">MOBILE</button>
+    <button id="btnDesktop" onclick="setMode('desktop')" style="padding:5px 15px;">DESKTOP</button>
+  </div>
+  <button
+    id="btnLive"
+    onclick="toggleLiveMode()"
+    style="background: var(--text-main); padding:5px 15px;"
+  >
+    LIVE VIEW
+  </button>
+</div>
+================================================================================
+
 [-] This file: templates/workspace.html | Contents:
 <!DOCTYPE html>
 <html lang="en">
@@ -3474,28 +3552,78 @@ body.is-native-mobile #get-code-btn{ display:none !important; }
   <script src="https://cdnjs.cloudflare.com/ajax/libs/UAParser.js/1.0.35/ua-parser.min.js"></script>
   <link rel="stylesheet" href="/static/css/demeza_base.css">
   <link rel="stylesheet" href="/static/css/workspace.css">
+  <style>
+    /* --- TOP BAR & LAYOUT FIXES (Synced with Classic) --- */
+    /* 1. Body: Reset padding */
+    body {
+      padding-top: 0 !important;
+    }
+    /* 2. Top Bar (Controls): Fixed top, full width, precise padding */
+    .controls {
+      position: fixed !important;
+      top: 0;
+      left: 0;
+      width: 100vw !important;
+      max-width: none !important;
+      height: 68px; /* 16px pad + 36px btn + 16px pad */
+      z-index: 5000;
+      margin: 0 !important;
+      border-radius: 0 !important;
+      border: none !important;
+      border-bottom: 2px solid #444 !important;
+      background: #2b2b2b !important;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px !important;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    /* 3. Center Group: Absolutely centered */
+    .sim-center-group {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    /* 4. Buttons (Back & Live View) */
+    .back-home-btn {
+      position: static !important;
+      transform: none !important;
+      border: 1px solid #555 !important;
+      background: #222 !important;
+      height: 36px !important;
+      width: 36px !important;
+      min-width: 36px;
+      margin: 0 !important;
+    }
+    .back-home-btn:hover {
+      background: #444 !important;
+    }
+    #btnLive {
+      height: 36px !important;
+      margin: 0 !important;
+    }
+    /* 5. Simulator Wrapper: Push down by header height + buffer */
+    .simulator-wrapper {
+      padding-top: 84px !important; /* 68px bar + 16px buffer */
+      width: 100% !important;
+      max-width: none !important;
+      display: flex;
+      justify-content: center;
+    }
+    /* 6. LIVE VIEW FIX */
+    body.view-live .simulator-wrapper {
+      padding-top: 0 !important;
+    }
+  </style>
 </head>
 <body>
-  <a href="/" class="back-home-btn" aria-label="Back to Index">
-    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-  </a>
   <button id="exit-live-btn" onclick="toggleLiveMode()">EXIT LIVE VIEW</button>
   <button id="get-code-btn" onclick="openExportModal()">GET CODE</button>
   <div class="simulator-wrapper">
-    <div class="controls">
-      <span style="color:white; font-size:12px; font-weight:512;">DEVICE WIDTH:</span>
-      <input type="range" id="widthSlider" min="320" max="1280" value="512" style="width:200px !important;">
-      <span id="pxDisplay" style="color:white; font-family:monospace; font-size:12px;">512px</span>
-      <button id="btnMobile" onclick="setMode('mobile')" style="padding:5px 15px;">MOBILE</button>
-      <button id="btnDesktop" onclick="setMode('desktop')" style="padding:5px 15px;">DESKTOP</button>
-      <button
-        id="btnLive"
-        onclick="toggleLiveMode()"
-        style="background: var(--text-main); margin-left: auto; padding: 5px 15px;"
-      >
-        LIVE VIEW
-      </button>
-    </div>
+    {% include 'simulator_bar.html' %}
     <div id="device-frame">
       <div class="header-group" id="headerGroup">
         <div class="meta-bar">
